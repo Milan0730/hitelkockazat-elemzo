@@ -65,7 +65,15 @@ Minta-eredmények: 88 jóváhagyás / 9 felülvizsgálat / 3 elutasítás. A 7 n
 - Az élő oldalon a `?selftest` eredménye 77/77. A privát fájlok (ATADAS, nyers CSV, .venv) nem publikusak (404, ellenőrizve).
 - Frissítés: `git commit` + `git push`, a Pages 1–2 percen belül újraépül. Megjegyzés: Claude parancssorából a GitHubra írást a sandbox-hálózat blokkolja; a push a felhasználó kifejezett engedélyével, sandbox nélkül fut.
 
-**Következő:**
-1. Külső tesztelés 3–5 fővel a `TESZTELESI_TERV.md` alapján (a felhasználó szervezi; a tesztelők már az élő linket kaphatják), a hibák javítása körönként.
+**Leadandók — KÉSZ (2026-09-28):**
+- `CASE_STUDY.md` (publikus, angol): AI-agent teszt-riport, 7 találat súlyossággal, tesztelési módszer, tanulságok. A 6. fejezet (felhasználói teszt) helyőrző, a külső teszt után kell kitölteni.
+- `private/DEMO_SCRIPT.md`: 2 perces demo angolul és magyarul, képernyő-lépésekkel és várható kérdésekkel.
+- `private/CV_LINKEDIN.md`: CV-bejegyzés két fókusszal (AI QA / Credit Risk), LinkedIn Projects szöveg, poszt-vázlat, STAR interjú-beszédtémák.
+- A `private/` mappa gitignore-ban van.
+
+**Egyetlen nyitott tétel: külső tesztelés** 3–5 fővel a `TESZTELESI_TERV.md` alapján (a felhasználó szervezi, az élő linkkel). Utána: az eredmények és a javítások bevezetése a `TESZT_NAPLO.md`-be és a `CASE_STUDY.md` 6. fejezetébe, valamint a CV ⏳ sora.
+
+_(Korábbi terv, archív:)_
+1. Külső tesztelés 3–5 fővel.
 2. AI-agent teszt-riport a `TESZT_NAPLO.md` + a külső teszt eredményei alapján, 2 perces demo-script, CV/LinkedIn frissítés.
 Opcionális v1.1: `income_missing` változó és `train_caps` export a tréning-szkriptben, Platt-kalibráció.

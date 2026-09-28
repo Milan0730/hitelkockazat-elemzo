@@ -29,6 +29,8 @@ A single-file web app that estimates a loan applicant's **probability of default
 
 This project is also a case study in **systematic AI-agent testing**: it was built with an AI coding agent, and every issue found was logged in a *problem → impact → fix* format.
 
+📄 **Read the full case study: [CASE_STUDY.md](CASE_STUDY.md)**
+
 **Automated regression suite** ([`selftest.js`](selftest.js)): 77 tests in 8 groups (model math, thresholds and band edges, input parsing, UI validation, user flows, portfolio, Excel export, basic accessibility).
 - Expected values come from an **independent oracle**: they were computed outside the app (PowerShell), not by the code under test.
 - A **mutation check** (2 injected bugs → 14 failing tests) confirms that the suite actually catches regressions.
@@ -76,6 +78,7 @@ This regenerates `model_export.json` and `sample_portfolio.json`. The app embeds
 | `serve.ps1` | Minimal local web server (PowerShell, no dependencies) |
 | `explore_and_train.py` | Data cleaning, model training and export |
 | `model_export.json`, `sample_portfolio.json` | Model parameters, segment default rates, 100-row sample |
+| `CASE_STUDY.md` | AI-agent testing case study (English) |
 | `TESZT_NAPLO.md` | Test & fix log (problem → impact → fix) |
 | `TESZTELESI_TERV.md` | Test plan (automated + user testing) |
 | `HALADAS.md` | Progress log |

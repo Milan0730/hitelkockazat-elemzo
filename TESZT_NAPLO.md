@@ -22,6 +22,16 @@ Formátum: probléma → hatás → javítás. Ez a 2. AI-agent teszt-riport nye
 - **Hatás**: böngészős tesztben egy 30 éves kérelmezőre az app ezt írta ki: „A <30 korcsoportban…”, ami ellentmondásos, és egy figyelmes felhasználó hibának látná.
 - **Javítás**: a szegmens-keresés továbbra is a helyes (jobbról zárt) logikát használja, de a UI a valós határokat mutatja: ≤30, 31–40, 41–50, 51–60, 61+.
 
+## 4. Bemenet-validáció (M2, ellenőrzött viselkedés)
+
+Böngészőben tesztelve, összeomlás nélkül:
+- negatív érték → „Nem lehet negatív.”
+- nem szám („abc”) → „Csak számot adj meg…”
+- üres mező → „Kötelező mező.”
+- tört érték darabszámnál („1,5”) → „Egész számot adj meg.”
+- magyar számformátum („0,35”, „5 400”, „35%”) → elfogadva
+- 0 jövedelem → számol, de figyelmeztet, hogy az adósságteher-arány nem értelmezhető
+
 ## 5. A DebtRatio hiányzó jövedelemnél abszolút összeg (M3, a DebtRatio-anomália gyökéroka)
 
 - **Probléma**: a minta-portfólió 100 sorából 20-nál a DebtRatio 10 feletti (1000%+ arány), és mind a 20 sor jövedelme pontosan 5 400 USD, azaz a pótolt medián. A teljes adaton ellenőrizve: ahol a jövedelem hiányzott (29 610 sor, ~20%), ott a DebtRatio mediánja **1 170**, 90%-a 10 feletti. Ahol megvolt, ott a medián **0,30**, és csak 1,75% haladja meg a 10-et. Hiányzó jövedelemnél tehát a forrásadat abszolút adósságösszeget tartalmaz arány helyett.
@@ -49,13 +59,3 @@ Formátum: probléma → hatás → javítás. Ez a 2. AI-agent teszt-riport nye
   - scaler (átlag, szórás), szegmensek, meta, minta-portfólió: **bitre azonos**
   - együtthatók: max. eltérés 1,1·10⁻¹⁵, intercept 4,4·10⁻¹⁶ (lebegőpontos zaj)
   - Test AUC: 0,8391 (azonos)
-
-## 4. Bemenet-validáció (M2, ellenőrzött viselkedés)
-
-Böngészőben tesztelve, összeomlás nélkül:
-- negatív érték → „Nem lehet negatív.”
-- nem szám („abc”) → „Csak számot adj meg…”
-- üres mező → „Kötelező mező.”
-- tört érték darabszámnál („1,5”) → „Egész számot adj meg.”
-- magyar számformátum („0,35”, „5 400”, „35%”) → elfogadva
-- 0 jövedelem → számol, de figyelmeztet, hogy az adósságteher-arány nem értelmezhető
