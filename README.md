@@ -2,7 +2,7 @@
 
 A single-file web app that estimates a loan applicant's **probability of default (PD)** with an interpretable logistic regression model trained on real public credit data. It returns a decision recommendation, an explanation of the drivers, and a comparison with how similar borrowers actually performed.
 
-**Live demo:** _coming soon (GitHub Pages)_ · **UI language:** Hungarian
+**Live demo:** https://milan0730.github.io/hitelkockazat-elemzo/ · **Run the test suite live:** [`?selftest`](https://milan0730.github.io/hitelkockazat-elemzo/?selftest) · **UI language:** Hungarian
 
 > ⚠️ **Educational / demo project.** Not a credit decision tool, not a loan offer, not financial advice.
 
