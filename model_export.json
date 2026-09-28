@@ -1,0 +1,196 @@
+{
+  "meta": {
+    "source_dataset": "Give Me Some Credit (Kaggle, 2011) - publikus, CC0-jellegű oktatási dataset",
+    "trained_rows": 119784,
+    "test_rows": 29946,
+    "excluded_bad_code_rows": 269,
+    "test_auc": 0.8391,
+    "overall_default_rate": 0.066,
+    "disclaimer": "Oktatási / demo célú, egyszerűsített modell. Nem éles hitelbírálati döntéshozatalra készült."
+  },
+  "features": [
+    "RevolvingUtilizationOfUnsecuredLines",
+    "age",
+    "NumberOfTime30-59DaysPastDueNotWorse",
+    "DebtRatio",
+    "MonthlyIncome",
+    "NumberOfTimes90DaysLate"
+  ],
+  "scaler_mean": [
+    0.3213360316984718,
+    52.32531055900621,
+    0.24736191811928138,
+    327.40061146741084,
+    6203.025838175382,
+    0.09117244373205102
+  ],
+  "scaler_scale": [
+    0.35650959450010483,
+    14.7478610016082,
+    0.6988452227878119,
+    957.8864129896265,
+    4138.515145537802,
+    0.48796120634708684
+  ],
+  "coefficients": [
+    0.70389035252138,
+    -0.2498934037838293,
+    0.49256462762594716,
+    -0.03853537924152439,
+    -0.054390235330220325,
+    0.5122086415160285
+  ],
+  "intercept": -0.6578688264541522,
+  "segments": [
+    {
+      "age_band": "<30",
+      "util_band": "0-10%",
+      "mean": 0.0343,
+      "count": 2824
+    },
+    {
+      "age_band": "<30",
+      "util_band": "10-30%",
+      "mean": 0.0435,
+      "count": 1655
+    },
+    {
+      "age_band": "<30",
+      "util_band": "30-60%",
+      "mean": 0.0876,
+      "count": 1643
+    },
+    {
+      "age_band": "<30",
+      "util_band": "60-100%",
+      "mean": 0.1714,
+      "count": 3973
+    },
+    {
+      "age_band": "<30",
+      "util_band": "100%+",
+      "mean": 0.3574,
+      "count": 512
+    },
+    {
+      "age_band": "30-39",
+      "util_band": "0-10%",
+      "mean": 0.0259,
+      "count": 7367
+    },
+    {
+      "age_band": "30-39",
+      "util_band": "10-30%",
+      "mean": 0.041,
+      "count": 4684
+    },
+    {
+      "age_band": "30-39",
+      "util_band": "30-60%",
+      "mean": 0.0678,
+      "count": 4171
+    },
+    {
+      "age_band": "30-39",
+      "util_band": "60-100%",
+      "mean": 0.1845,
+      "count": 7156
+    },
+    {
+      "age_band": "30-39",
+      "util_band": "100%+",
+      "mean": 0.4126,
+      "count": 921
+    },
+    {
+      "age_band": "40-49",
+      "util_band": "0-10%",
+      "mean": 0.0222,
+      "count": 12303
+    },
+    {
+      "age_band": "40-49",
+      "util_band": "10-30%",
+      "mean": 0.0337,
+      "count": 7188
+    },
+    {
+      "age_band": "40-49",
+      "util_band": "30-60%",
+      "mean": 0.0751,
+      "count": 6021
+    },
+    {
+      "age_band": "40-49",
+      "util_band": "60-100%",
+      "mean": 0.1821,
+      "count": 8592
+    },
+    {
+      "age_band": "40-49",
+      "util_band": "100%+",
+      "mean": 0.3768,
+      "count": 897
+    },
+    {
+      "age_band": "50-59",
+      "util_band": "0-10%",
+      "mean": 0.0196,
+      "count": 14718
+    },
+    {
+      "age_band": "50-59",
+      "util_band": "10-30%",
+      "mean": 0.0317,
+      "count": 7190
+    },
+    {
+      "age_band": "50-59",
+      "util_band": "30-60%",
+      "mean": 0.0653,
+      "count": 5540
+    },
+    {
+      "age_band": "50-59",
+      "util_band": "60-100%",
+      "mean": 0.1528,
+      "count": 6714
+    },
+    {
+      "age_band": "50-59",
+      "util_band": "100%+",
+      "mean": 0.3601,
+      "count": 611
+    },
+    {
+      "age_band": "60+",
+      "util_band": "0-10%",
+      "mean": 0.0117,
+      "count": 27192
+    },
+    {
+      "age_band": "60+",
+      "util_band": "10-30%",
+      "mean": 0.0207,
+      "count": 7761
+    },
+    {
+      "age_band": "60+",
+      "util_band": "30-60%",
+      "mean": 0.049,
+      "count": 4512
+    },
+    {
+      "age_band": "60+",
+      "util_band": "60-100%",
+      "mean": 0.1012,
+      "count": 5205
+    },
+    {
+      "age_band": "60+",
+      "util_band": "100%+",
+      "mean": 0.3053,
+      "count": 380
+    }
+  ]
+}

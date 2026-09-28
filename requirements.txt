@@ -1,0 +1,5 @@
+# Csak az offline modelltréninghez (explore_and_train.py) kell; a webapp nem használja.
+# Ellenőrzött verziók (2026-09): pandas 3.0.6, scikit-learn 1.9.1, numpy 2.5.3
+pandas>=2.0
+scikit-learn>=1.3
+numpy>=1.24

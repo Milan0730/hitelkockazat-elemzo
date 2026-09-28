@@ -1,0 +1,15 @@
+# Személyes / belső dokumentum — nem publikus
+ATADAS_CLAUDE_CODE.md
+
+# Nyers adat: Kaggle "Give Me Some Credit" — a licenc miatt nem terjesztjük, letöltés: ld. README
+cs-training.csv
+*.csv
+
+# Python környezet
+.venv/
+__pycache__/
+*.pyc
+
+# Helyi eszköz-konfiguráció, exportált fájlok
+.claude/
+*.xlsx

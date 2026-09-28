@@ -1,0 +1,1025 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hitelkockázat-elemző</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+<style>
+:root {
+  --bg: #f4f6fa; --panel: #ffffff; --panel-2: #eef1f6; --border: #dde2ea;
+  --text: #1a2230; --muted: #5d6878; --accent: #2f6fed; --accent-soft: rgba(47,111,237,.12);
+  --good: #1f9d63; --warn: #d98a00; --bad: #d64545;
+  --good-soft: rgba(31,157,99,.12); --warn-soft: rgba(217,138,0,.14); --bad-soft: rgba(214,69,69,.12);
+  --shadow: 0 1px 3px rgba(20,30,50,.06), 0 6px 20px rgba(20,30,50,.05);
+}
+:root[data-theme="dark"] {
+  --bg: #0f141c; --panel: #171e29; --panel-2: #1e2734; --border: #2a3444;
+  --text: #e6ebf2; --muted: #95a1b3; --accent: #5b8ff9; --accent-soft: rgba(91,143,249,.16);
+  --good: #3cc488; --warn: #f0a93b; --bad: #f06a6a;
+  --good-soft: rgba(60,196,136,.14); --warn-soft: rgba(240,169,59,.15); --bad-soft: rgba(240,106,106,.14);
+  --shadow: 0 1px 3px rgba(0,0,0,.3), 0 6px 20px rgba(0,0,0,.25);
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--text);
+  font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  transition: background .25s, color .25s;
+}
+.wrap { max-width: 1180px; margin: 0 auto; padding: 20px 16px 48px; }
+header { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+h1 { font-size: 22px; margin: 0; letter-spacing: -.01em; }
+.sub { color: var(--muted); font-size: 13px; margin-top: 2px; }
+.btn {
+  border: 1px solid var(--border); background: var(--panel); color: var(--text);
+  padding: 8px 14px; border-radius: 8px; cursor: pointer; font: inherit; font-size: 14px;
+  transition: background .15s, border-color .15s, transform .1s;
+}
+.btn:hover { border-color: var(--accent); }
+.btn:active { transform: translateY(1px); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+.btn.small { padding: 5px 10px; font-size: 13px; }
+.disclaimer {
+  background: var(--warn-soft); border: 1px solid var(--warn); color: var(--text);
+  border-radius: 10px; padding: 10px 14px; font-size: 13px; margin-bottom: 18px;
+}
+.grid { display: grid; grid-template-columns: 380px 1fr; gap: 18px; align-items: start; }
+@media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
+.panel { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 18px; box-shadow: var(--shadow); }
+.panel h2 { font-size: 16px; margin: 0 0 12px; }
+.presets { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.presets span { font-size: 13px; color: var(--muted); align-self: center; margin-right: 2px; }
+.field { margin-bottom: 12px; }
+.field label { display: block; font-weight: 600; font-size: 14px; margin-bottom: 3px; }
+.field .hint { color: var(--muted); font-size: 12px; margin-bottom: 5px; }
+.field input {
+  width: 100%; padding: 9px 11px; border-radius: 8px; border: 1px solid var(--border);
+  background: var(--panel-2); color: var(--text); font: inherit;
+}
+.field input:focus { outline: 2px solid var(--accent-soft); border-color: var(--accent); }
+.field.err input { border-color: var(--bad); }
+.field .msg { font-size: 12px; margin-top: 4px; min-height: 0; }
+.field.err .msg { color: var(--bad); }
+.field.warn .msg { color: var(--warn); }
+.actions { display: flex; gap: 8px; margin-top: 6px; }
+.placeholder { color: var(--muted); text-align: center; padding: 60px 20px; }
+.results { display: grid; gap: 18px; }
+.hidden { display: none !important; }
+
+.verdict { display: grid; grid-template-columns: auto 1fr; gap: 18px; align-items: center; }
+@media (max-width: 560px) { .verdict { grid-template-columns: 1fr; } }
+.pd-big { font-size: 46px; font-weight: 700; letter-spacing: -.02em; line-height: 1; }
+.pd-label { color: var(--muted); font-size: 13px; }
+.badge { display: inline-block; padding: 6px 12px; border-radius: 999px; font-weight: 700; font-size: 14px; margin-bottom: 6px; }
+.badge.good { background: var(--good-soft); color: var(--good); }
+.badge.warn { background: var(--warn-soft); color: var(--warn); }
+.badge.bad { background: var(--bad-soft); color: var(--bad); }
+.scale { position: relative; height: 12px; border-radius: 6px; margin: 22px 0 6px; display: flex; overflow: hidden; }
+.scale div { height: 100%; }
+.scale-wrap { position: relative; }
+.marker { position: absolute; top: 14px; width: 3px; height: 22px; background: var(--text); border-radius: 2px; transform: translateX(-50%); transition: left .5s cubic-bezier(.2,.8,.2,1); }
+.scale-ticks { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); }
+.fade-in { animation: fadeIn .35s ease-out; }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+
+.factors { list-style: none; padding: 0; margin: 0 0 10px; }
+.factors li { padding: 7px 0; border-bottom: 1px dashed var(--border); display: flex; gap: 10px; align-items: baseline; }
+.factors li:last-child { border-bottom: 0; }
+.arrow { font-weight: 700; width: 18px; flex: none; }
+.arrow.up { color: var(--bad); }
+.arrow.down { color: var(--good); }
+.chart-box { position: relative; height: 230px; }
+.note { color: var(--muted); font-size: 12px; margin-top: 8px; }
+
+.seg-compare { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 14px; }
+.stat { background: var(--panel-2); border-radius: 10px; padding: 10px 14px; flex: 1 1 140px; }
+.stat .v { font-size: 22px; font-weight: 700; }
+.stat .l { font-size: 12px; color: var(--muted); }
+.heat { width: 100%; border-collapse: separate; border-spacing: 3px; font-size: 13px; }
+.heat th { font-weight: 600; color: var(--muted); font-size: 12px; padding: 4px; }
+.heat td { text-align: center; padding: 8px 4px; border-radius: 6px; font-variant-numeric: tabular-nums; }
+.heat td.me { outline: 2px solid var(--text); outline-offset: -2px; font-weight: 700; }
+.heat-wrap { overflow-x: auto; }
+
+.tabs { display: flex; gap: 4px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 10px; padding: 4px; margin-bottom: 18px; width: fit-content; max-width: 100%; }
+.tab { border: 0; background: transparent; color: var(--muted); padding: 8px 16px; border-radius: 7px; cursor: pointer; font: inherit; font-weight: 600; font-size: 14px; transition: background .15s, color .15s; }
+.tab[aria-selected="true"] { background: var(--panel); color: var(--text); box-shadow: var(--shadow); }
+.panel-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+.panel-head h2 { margin: 0; }
+
+.kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 18px; }
+@media (max-width: 760px) { .kpis { grid-template-columns: repeat(2, 1fr); } }
+.pf-top { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
+@media (max-width: 900px) { .pf-top { grid-template-columns: 1fr; } }
+.grid > *, .pf-top > *, .kpis > * { min-width: 0; }
+.matrix-wrap { overflow-x: auto; }
+@media (max-width: 480px) {
+  .matrix th, .matrix td { padding: 7px 5px; font-size: 13px; }
+  .panel { padding: 14px; }
+  .stat .v { font-size: 19px; }
+}
+.matrix { width: 100%; border-collapse: collapse; font-size: 14px; }
+.matrix th, .matrix td { padding: 8px 10px; border-bottom: 1px solid var(--border); text-align: right; font-variant-numeric: tabular-nums; }
+.matrix th:first-child, .matrix td:first-child { text-align: left; }
+.matrix th { color: var(--muted); font-weight: 600; font-size: 12px; }
+
+.filters { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
+.filters select, .filters input[type=search] {
+  padding: 7px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--panel-2); color: var(--text); font: inherit; font-size: 14px;
+}
+.filters label.chk { display: flex; gap: 6px; align-items: center; font-size: 14px; color: var(--muted); cursor: pointer; }
+.filters .count { margin-left: auto; color: var(--muted); font-size: 13px; }
+.table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; }
+table.pf { width: 100%; border-collapse: collapse; font-size: 13.5px; white-space: nowrap; }
+table.pf th { position: sticky; top: 0; background: var(--panel-2); text-align: right; padding: 9px 10px; font-weight: 600; font-size: 12px; color: var(--muted); cursor: pointer; user-select: none; border-bottom: 1px solid var(--border); }
+table.pf th:hover { color: var(--text); }
+table.pf th[aria-sort="ascending"]::after { content: " ▲"; }
+table.pf th[aria-sort="descending"]::after { content: " ▼"; }
+table.pf th.nosort { cursor: default; }
+table.pf td { padding: 8px 10px; text-align: right; border-bottom: 1px solid var(--border); font-variant-numeric: tabular-nums; }
+table.pf th:first-child, table.pf td:first-child { text-align: left; }
+table.pf tbody tr:hover { background: var(--accent-soft); }
+table.pf tbody tr:last-child td { border-bottom: 0; }
+.pill { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+.pill.good { background: var(--good-soft); color: var(--good); }
+.pill.warn { background: var(--warn-soft); color: var(--warn); }
+.pill.bad { background: var(--bad-soft); color: var(--bad); }
+.pill.neutral { background: var(--panel-2); color: var(--muted); }
+.flag { color: var(--warn); cursor: help; font-weight: 700; }
+.empty-row td { text-align: center !important; color: var(--muted); padding: 30px !important; }
+
+details.method { margin-top: 18px; }
+details.method summary { cursor: pointer; font-weight: 600; }
+details.method p, details.method li { font-size: 13px; color: var(--muted); }
+footer { margin-top: 24px; color: var(--muted); font-size: 12px; text-align: center; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Hitelkockázat-elemző</h1>
+      <div class="sub">Nemteljesítési valószínűség (PD) becslése valós, nyilvános adaton tanított logisztikus regresszióval</div>
+    </div>
+    <button class="btn" id="themeBtn" type="button" aria-label="Téma váltása">🌙 Sötét mód</button>
+  </header>
+
+  <div class="disclaimer" id="disclaimer"></div>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab" role="tab" id="tabbtn-single" aria-controls="tab-single" aria-selected="true" type="button">Egyedi kérelem</button>
+    <button class="tab" role="tab" id="tabbtn-portfolio" aria-controls="tab-portfolio" aria-selected="false" type="button">Minta-portfólió</button>
+  </nav>
+
+  <section id="tab-single" role="tabpanel">
+  <div class="grid">
+    <form class="panel" id="form" novalidate>
+      <h2>Hitelkérelem adatai</h2>
+      <div class="presets">
+        <span>Példa:</span>
+        <button class="btn small" type="button" data-preset="low">Alacsony</button>
+        <button class="btn small" type="button" data-preset="mid">Közepes</button>
+        <button class="btn small" type="button" data-preset="high">Magas kockázat</button>
+      </div>
+      <div id="fields"></div>
+      <div class="actions">
+        <button class="btn primary" type="submit">Kiértékelés</button>
+        <button class="btn" type="button" id="resetBtn">Törlés</button>
+      </div>
+    </form>
+
+    <div>
+      <div class="panel placeholder" id="placeholder">
+        Töltsd ki az űrlapot, vagy válassz egy példa-profilt, majd kattints a <b>Kiértékelés</b> gombra.
+      </div>
+
+      <div class="results hidden" id="results">
+        <section class="panel fade-in" id="verdictPanel">
+          <div class="panel-head">
+            <h2>Döntési javaslat</h2>
+            <button class="btn small" type="button" id="singleExportBtn">⬇ Excel export</button>
+          </div>
+          <div class="verdict">
+            <div>
+              <div class="pd-big" id="pdValue">–</div>
+              <div class="pd-label">becsült PD (2 éven belüli súlyos késedelem)</div>
+            </div>
+            <div>
+              <span class="badge" id="decisionBadge">–</span>
+              <div id="decisionText"></div>
+            </div>
+          </div>
+          <div class="scale-wrap">
+            <div class="scale" id="scale"></div>
+            <div class="marker" id="marker"></div>
+          </div>
+          <div class="scale-ticks" id="scaleTicks"></div>
+        </section>
+
+        <section class="panel fade-in">
+          <h2>Mi befolyásolta az eredményt?</h2>
+          <ul class="factors" id="factorList"></ul>
+          <div class="chart-box"><canvas id="contribChart"></canvas></div>
+          <div class="note" id="contribNote"></div>
+        </section>
+
+        <section class="panel fade-in">
+          <h2>Historikus összevetés</h2>
+          <div class="seg-compare" id="segStats"></div>
+          <div id="segText" style="margin-bottom:10px"></div>
+          <div class="heat-wrap"><table class="heat" id="heat"></table></div>
+          <div class="note">Tényleges historikus nemteljesítési arány kor × hitelkeret-kihasználtság szegmensenként (minden cella legalább 30 hitelfelvevő). A kiemelt cella a megadott profil szegmense.</div>
+        </section>
+      </div>
+    </div>
+  </div>
+  </section>
+
+  <section id="tab-portfolio" role="tabpanel" class="hidden">
+    <div class="kpis" id="pfKpis"></div>
+    <div class="pf-top">
+      <div class="panel">
+        <h2>Döntési sávok és tényleges kimenet</h2>
+        <div class="chart-box"><canvas id="pfChart"></canvas></div>
+        <div class="note">Oszlop: hitelek száma döntési sávonként. Pont: a sávban ténylegesen nemteljesítők aránya.</div>
+      </div>
+      <div class="panel">
+        <h2>Modell-javaslat vs. valós kimenet</h2>
+        <div class="matrix-wrap"><table class="matrix" id="pfMatrix"></table></div>
+        <div class="note" id="pfMatrixNote"></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Hitelek</h2>
+        <button class="btn primary" type="button" id="pfExportBtn">⬇ Excel export</button>
+      </div>
+      <div class="filters">
+        <select id="pfDecision" aria-label="Szűrés döntésre">
+          <option value="">Minden döntés</option>
+          <option value="good">Jóváhagyás</option>
+          <option value="warn">Felülvizsgálat</option>
+          <option value="bad">Elutasítás</option>
+        </select>
+        <select id="pfOutcome" aria-label="Szűrés kimenetre">
+          <option value="">Minden kimenet</option>
+          <option value="1">Nemteljesített</option>
+          <option value="0">Teljesített</option>
+        </select>
+        <label class="chk"><input type="checkbox" id="pfFlagged"> Csak adatminőségi jelzéssel</label>
+        <span class="count" id="pfCount"></span>
+      </div>
+      <div class="table-wrap">
+        <table class="pf">
+          <thead><tr id="pfHead"></tr></thead>
+          <tbody id="pfBody"></tbody>
+        </table>
+      </div>
+      <div class="note">Kattints egy sorra, hogy részletesen elemezd az „Egyedi kérelem” fülön. <span class="flag">⚠</span> = a forrásadatban valószínűleg hiányzott a jövedelem (mediánnal, 5 400 USD-vel pótolva), ezért az adósságteher-arány itt abszolút összeg, nem arány.</div>
+    </div>
+  </section>
+
+  <details class="method panel">
+    <summary>Módszertan és adatforrás</summary>
+    <div id="methodBody"></div>
+  </details>
+
+  <footer id="footer"></footer>
+</div>
+
+<script>
+/* ---------- Beágyazott modell (model_export.json, 1:1 másolat) ---------- */
+const MODEL = {
+  "meta": {
+    "source_dataset": "Give Me Some Credit (Kaggle, 2011) - publikus, CC0-jellegű oktatási dataset",
+    "trained_rows": 119784, "test_rows": 29946, "excluded_bad_code_rows": 269,
+    "test_auc": 0.8391, "overall_default_rate": 0.066,
+    "disclaimer": "Oktatási / demo célú, egyszerűsített modell. Nem éles hitelbírálati döntéshozatalra készült."
+  },
+  "features": ["RevolvingUtilizationOfUnsecuredLines","age","NumberOfTime30-59DaysPastDueNotWorse","DebtRatio","MonthlyIncome","NumberOfTimes90DaysLate"],
+  "scaler_mean": [0.3213360316984718,52.32531055900621,0.24736191811928138,327.40061146741084,6203.025838175382,0.09117244373205102],
+  "scaler_scale": [0.35650959450010483,14.7478610016082,0.6988452227878119,957.8864129896265,4138.515145537802,0.48796120634708684],
+  "coefficients": [0.70389035252138,-0.2498934037838293,0.49256462762594716,-0.03853537924152439,-0.054390235330220325,0.5122086415160285],
+  "intercept": -0.6578688264541522,
+  "segments": [
+    {"age_band":"<30","util_band":"0-10%","mean":0.0343,"count":2824},{"age_band":"<30","util_band":"10-30%","mean":0.0435,"count":1655},
+    {"age_band":"<30","util_band":"30-60%","mean":0.0876,"count":1643},{"age_band":"<30","util_band":"60-100%","mean":0.1714,"count":3973},
+    {"age_band":"<30","util_band":"100%+","mean":0.3574,"count":512},
+    {"age_band":"30-39","util_band":"0-10%","mean":0.0259,"count":7367},{"age_band":"30-39","util_band":"10-30%","mean":0.041,"count":4684},
+    {"age_band":"30-39","util_band":"30-60%","mean":0.0678,"count":4171},{"age_band":"30-39","util_band":"60-100%","mean":0.1845,"count":7156},
+    {"age_band":"30-39","util_band":"100%+","mean":0.4126,"count":921},
+    {"age_band":"40-49","util_band":"0-10%","mean":0.0222,"count":12303},{"age_band":"40-49","util_band":"10-30%","mean":0.0337,"count":7188},
+    {"age_band":"40-49","util_band":"30-60%","mean":0.0751,"count":6021},{"age_band":"40-49","util_band":"60-100%","mean":0.1821,"count":8592},
+    {"age_band":"40-49","util_band":"100%+","mean":0.3768,"count":897},
+    {"age_band":"50-59","util_band":"0-10%","mean":0.0196,"count":14718},{"age_band":"50-59","util_band":"10-30%","mean":0.0317,"count":7190},
+    {"age_band":"50-59","util_band":"30-60%","mean":0.0653,"count":5540},{"age_band":"50-59","util_band":"60-100%","mean":0.1528,"count":6714},
+    {"age_band":"50-59","util_band":"100%+","mean":0.3601,"count":611},
+    {"age_band":"60+","util_band":"0-10%","mean":0.0117,"count":27192},{"age_band":"60+","util_band":"10-30%","mean":0.0207,"count":7761},
+    {"age_band":"60+","util_band":"30-60%","mean":0.049,"count":4512},{"age_band":"60+","util_band":"60-100%","mean":0.1012,"count":5205},
+    {"age_band":"60+","util_band":"100%+","mean":0.3053,"count":380}
+  ]
+};
+
+/* A tréning-szkript (explore_and_train.py) 99,5. percentilis felett limitálta ezeket
+   az oszlopokat; ugyanazt a limitet kell alkalmazni, különben a z-score torzul.
+   Értékek a cs-training.csv-ből, a szkript tisztítási lépéseit reprodukálva. */
+const TRAIN_CAPS = { RevolvingUtilizationOfUnsecuredLines: 1.3682, DebtRatio: 6188.36, MonthlyIncome: 31250 };
+
+/* A modell class_weight="balanced" beállítással tanult, így a nyers kimenet ~50%-os
+   bázisarányra van kalibrálva (átlagos nyers PD a teljes mintán: 34,9%, valós: 6,6%).
+   Prior-korrekció: logit += ln(p / (1 - p)), ahol p a valós historikus default-arány. */
+const PRIOR_OFFSET = Math.log(MODEL.meta.overall_default_rate / (1 - MODEL.meta.overall_default_rate));
+
+const THRESHOLDS = { approve: 0.10, reject: 0.30 };
+
+/* ---------- Űrlap-definíció ---------- */
+// toModel: a felhasználói egységből (pl. %) a modell egységébe váltás
+const FIELDS = [
+  { key: "age", label: "Életkor", hint: "év", unit: "év", min: 18, max: 110, int: true,
+    toModel: v => v, trainMax: 109 },
+  { key: "MonthlyIncome", label: "Havi nettó jövedelem", hint: "USD / hó (az adathalmaz amerikai hitelfelvevőkből áll)", unit: "USD", min: 0, max: 1e7,
+    toModel: v => v },
+  { key: "RevolvingUtilizationOfUnsecuredLines", label: "Hitelkeret-kihasználtság", hint: "Hitelkártya- és folyószámlahitel-egyenleg a keret %-ában (pl. 35)", unit: "%", min: 0, max: 100000,
+    toModel: v => v / 100 },
+  { key: "DebtRatio", label: "Adósságteher-arány", hint: "Havi adósságszolgálat + megélhetési kiadások a havi jövedelem %-ában", unit: "%", min: 0, max: 1e7,
+    toModel: v => v / 100 },
+  { key: "NumberOfTime30-59DaysPastDueNotWorse", label: "30–59 napos késések száma", hint: "Hányszor volt 30–59 napos késedelemben (elmúlt 2 év)", unit: "db", min: 0, max: 50, int: true,
+    toModel: v => v, trainMax: 13 },
+  { key: "NumberOfTimes90DaysLate", label: "90+ napos késések száma", hint: "Hányszor volt 90 napnál hosszabb késedelemben", unit: "db", min: 0, max: 50, int: true,
+    toModel: v => v, trainMax: 17 }
+];
+
+const LABEL_SHORT = {
+  "RevolvingUtilizationOfUnsecuredLines": "Keret-kihasználtság",
+  "age": "Életkor",
+  "NumberOfTime30-59DaysPastDueNotWorse": "30–59 napos késések",
+  "DebtRatio": "Adósságteher-arány",
+  "MonthlyIncome": "Havi jövedelem",
+  "NumberOfTimes90DaysLate": "90+ napos késések"
+};
+
+// A DebtRatio együtthatója a kiugró értékek miatt ~0 és iránya nem logikus
+// (ld. ATADAS_CLAUDE_CODE.md) -> a modellben marad, de nem elsődleges magyarázó tényező.
+const SECONDARY_FEATURES = new Set(["DebtRatio"]);
+
+const PRESETS = {
+  low:  { age: 58, MonthlyIncome: 7500, RevolvingUtilizationOfUnsecuredLines: 8,  DebtRatio: 25, "NumberOfTime30-59DaysPastDueNotWorse": 0, NumberOfTimes90DaysLate: 0 },
+  mid:  { age: 34, MonthlyIncome: 4200, RevolvingUtilizationOfUnsecuredLines: 72, DebtRatio: 45, "NumberOfTime30-59DaysPastDueNotWorse": 1, NumberOfTimes90DaysLate: 0 },
+  high: { age: 27, MonthlyIncome: 2600, RevolvingUtilizationOfUnsecuredLines: 105, DebtRatio: 60, "NumberOfTime30-59DaysPastDueNotWorse": 2, NumberOfTimes90DaysLate: 1 }
+};
+
+/* ---------- Segédfüggvények ---------- */
+const $ = id => document.getElementById(id);
+const pct = (x, d = 1) => (x * 100).toLocaleString("hu-HU", { minimumFractionDigits: d, maximumFractionDigits: d }) + "%";
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const cssVar = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+
+// Magyar számformátum elfogadása: "5 400", "0,35", "35%"
+function parseNum(raw) {
+  const s = String(raw).trim().replace(/[\s ]/g, "").replace(/%$/, "").replace(",", ".");
+  if (s === "") return { empty: true };
+  if (!/^-?\d*\.?\d+$/.test(s)) return { invalid: true };
+  return { value: Number(s) };
+}
+
+function ageBand(age) {
+  // pandas.cut(bins=[0,30,40,50,60,120]) jobbról zárt: 30 -> "<30", 40 -> "30-39" stb.
+  if (age <= 30) return "<30";
+  if (age <= 40) return "30-39";
+  if (age <= 50) return "40-49";
+  if (age <= 60) return "50-59";
+  return "60+";
+}
+// A model_export.json címkéi ("<30", "30-39"...) nem egyeznek a valós, jobbról zárt
+// sávhatárokkal (a 30 éves a "<30" sávban van), ezért a UI a tényleges határokat mutatja.
+const AGE_LABEL = { "<30": "≤30", "30-39": "31–40", "40-49": "41–50", "50-59": "51–60", "60+": "61+" };
+function utilBand(u) {
+  // pandas.cut(bins=[-0.01,0.1,0.3,0.6,1.0,100]) jobbról zárt
+  if (u <= 0.1) return "0-10%";
+  if (u <= 0.3) return "10-30%";
+  if (u <= 0.6) return "30-60%";
+  if (u <= 1.0) return "60-100%";
+  return "100%+";
+}
+
+/* ---------- Modell ---------- */
+function score(modelInputs) {
+  let logit = MODEL.intercept;
+  const contrib = [];
+  MODEL.features.forEach((f, i) => {
+    const z = (modelInputs[f] - MODEL.scaler_mean[i]) / MODEL.scaler_scale[i];
+    const c = MODEL.coefficients[i] * z;
+    logit += c;
+    contrib.push({ feature: f, value: c });
+  });
+  const pdRaw = 1 / (1 + Math.exp(-logit));
+  const pd = 1 / (1 + Math.exp(-(logit + PRIOR_OFFSET)));
+  if (!Number.isFinite(pd)) throw new Error("Nem véges PD-érték");
+  return { pd, pdRaw, contrib };
+}
+
+function decide(pd) {
+  if (pd < THRESHOLDS.approve) return { cls: "good", label: "Jóváhagyás javasolt", text: "A becsült kockázat a jóváhagyási küszöb alatt van." };
+  if (pd < THRESHOLDS.reject) return { cls: "warn", label: "Egyedi felülvizsgálat", text: "Közepes kockázat: a döntéshez további információ (pl. fedezet, jövedelemigazolás) szükséges." };
+  return { cls: "bad", label: "Elutasítás javasolt", text: "A becsült kockázat az elutasítási küszöb felett van." };
+}
+
+/* ---------- Űrlap felépítése és validáció ---------- */
+function buildForm() {
+  $("fields").innerHTML = FIELDS.map(f => `
+    <div class="field" id="f-${f.key}">
+      <label for="in-${f.key}">${esc(f.label)}</label>
+      <div class="hint">${esc(f.hint)}</div>
+      <input id="in-${f.key}" name="${f.key}" inputmode="decimal" autocomplete="off">
+      <div class="msg"></div>
+    </div>`).join("");
+}
+
+function setMsg(key, type, text) {
+  const el = $("f-" + key);
+  el.classList.remove("err", "warn");
+  if (type) el.classList.add(type);
+  el.querySelector(".msg").textContent = text || "";
+}
+
+function readForm() {
+  let ok = true;
+  const user = {}, model = {};
+  for (const f of FIELDS) {
+    const p = parseNum($("in-" + f.key).value);
+    if (p.empty) { setMsg(f.key, "err", "Kötelező mező."); ok = false; continue; }
+    if (p.invalid) { setMsg(f.key, "err", "Csak számot adj meg (pl. 35 vagy 0,35)."); ok = false; continue; }
+    let v = p.value;
+    if (v < 0) { setMsg(f.key, "err", "Nem lehet negatív."); ok = false; continue; }
+    if (f.int && !Number.isInteger(v)) { setMsg(f.key, "err", "Egész számot adj meg."); ok = false; continue; }
+    if (v < f.min || v > f.max) { setMsg(f.key, "err", `Érvényes tartomány: ${f.min.toLocaleString("hu-HU")}–${f.max.toLocaleString("hu-HU")} ${f.unit}.`); ok = false; continue; }
+
+    user[f.key] = v;
+    let m = f.toModel(v);
+    let warn = "";
+    const cap = TRAIN_CAPS[f.key];
+    if (cap !== undefined && m > cap) {
+      m = cap;
+      const shown = f.unit === "%" ? (cap * 100).toLocaleString("hu-HU", { maximumFractionDigits: 0 }) + "%" : cap.toLocaleString("hu-HU") + " " + f.unit;
+      warn = `A tanító adat tartományán kívül esik; a modell ${shown} értékkel számol.`;
+    } else if (f.trainMax !== undefined && m > f.trainMax) {
+      warn = `A tanító adatban legfeljebb ${f.trainMax} szerepelt; az eredmény extrapoláció.`;
+    }
+    if (f.key === "DebtRatio" && m > 10 && !warn) warn = "Szokatlanul magas (1000% feletti) arány. A forrásadatban ilyen érték jellemzően hiányzó jövedelmet és abszolút adósságösszeget jelez.";
+    if (f.key === "MonthlyIncome" && v === 0) warn = "0 jövedelem mellett az adósságteher-arány nem értelmezhető; az eredményt óvatosan kezeld.";
+    setMsg(f.key, warn ? "warn" : null, warn);
+    model[f.key] = m;
+  }
+  return ok ? { user, model } : null;
+}
+
+/* ---------- Megjelenítés ---------- */
+let chart = null;
+let lastResult = null;
+
+function render(input) {
+  const { pd, contrib } = score(input.model);
+  const d = decide(pd);
+  lastResult = { input, pd, contrib };
+
+  $("placeholder").classList.add("hidden");
+  $("results").classList.remove("hidden");
+
+  // Döntés
+  $("pdValue").textContent = pct(pd);
+  $("pdValue").style.color = cssVar("--" + d.cls);
+  const b = $("decisionBadge");
+  b.className = "badge " + d.cls;
+  b.textContent = d.label;
+  $("decisionText").textContent = d.text;
+  const SCALE_MAX = 0.5;
+  $("marker").style.left = Math.min(pd / SCALE_MAX, 1) * 100 + "%";
+
+  // Magyarázat: elsődleges tényezők (DebtRatio nélkül), hatás szerint rendezve
+  const primary = contrib.filter(c => !SECONDARY_FEATURES.has(c.feature))
+                         .sort((a, b) => Math.abs(b.value) - Math.abs(a.value));
+  $("factorList").innerHTML = primary.slice(0, 4).map(c => {
+    const up = c.value > 0;
+    const strength = Math.abs(c.value) > 0.5 ? "erősen" : Math.abs(c.value) > 0.15 ? "mérsékelten" : "enyhén";
+    return `<li><span class="arrow ${up ? "up" : "down"}">${up ? "▲" : "▼"}</span>
+      <span><b>${esc(LABEL_SHORT[c.feature])}</b> (${esc(formatUser(c.feature, input.user[c.feature]))}) —
+      ${strength} ${up ? "növeli" : "csökkenti"} a kockázatot az átlagos hitelfelvevőhöz képest.</span></li>`;
+  }).join("");
+  const dr = contrib.find(c => c.feature === "DebtRatio");
+  $("contribNote").textContent =
+    `A sávok a log-esély hozzájárulást mutatják az átlagos tanító-mintabeli profilhoz képest (pozitív = kockázatnövelő). ` +
+    `Az adósságteher-arány a modellben szerepel (hatása most ${dr.value >= 0 ? "+" : ""}${dr.value.toFixed(3)}), de adatminőségi okokból nem elsődleges magyarázó tényező.`;
+  drawChart(primary);
+
+  // Szegmens
+  const ab = ageBand(input.model.age), ub = utilBand(input.model.RevolvingUtilizationOfUnsecuredLines);
+  const seg = MODEL.segments.find(s => s.age_band === ab && s.util_band === ub);
+  Object.assign(lastResult, { decision: d, seg, ab, ub });
+  const overall = MODEL.meta.overall_default_rate;
+  $("segStats").innerHTML = `
+    <div class="stat"><div class="v">${pct(pd)}</div><div class="l">Modell becslés (ez a kérelem)</div></div>
+    <div class="stat"><div class="v">${seg ? pct(seg.mean) : "n/a"}</div><div class="l">Hasonló profilúak valós aránya</div></div>
+    <div class="stat"><div class="v">${pct(overall)}</div><div class="l">Teljes minta valós aránya</div></div>`;
+  $("segText").innerHTML = seg
+    ? `A <b>${esc(AGE_LABEL[ab])} éves</b> korcsoportban, <b>${esc(ub)}</b> keret-kihasználtság mellett <b>${seg.count.toLocaleString("hu-HU")}</b> hitelfelvevőből <b>${pct(seg.mean)}</b> esett súlyos (90+ napos) késedelembe 2 éven belül — ez a teljes minta átlagának ${(seg.mean / overall).toLocaleString("hu-HU", { maximumFractionDigits: 1 })}-szerese.`
+    : `Ehhez a szegmenshez nincs elég (≥30) historikus megfigyelés.`;
+  drawHeat(ab, ub);
+}
+
+function formatUser(key, v) {
+  const f = FIELDS.find(x => x.key === key);
+  if (f.unit === "USD") return v.toLocaleString("hu-HU") + " USD";
+  return v.toLocaleString("hu-HU") + (f.unit === "%" ? "%" : " " + f.unit);
+}
+
+function drawChart(items) {
+  if (typeof Chart === "undefined") {
+    $("contribChart").parentElement.innerHTML = '<div class="note">A grafikon nem tölthető be (Chart.js nem érhető el offline). A fenti lista a teljes magyarázatot tartalmazza.</div>';
+    return;
+  }
+  const good = cssVar("--good"), bad = cssVar("--bad"), muted = cssVar("--muted"), border = cssVar("--border");
+  const data = {
+    labels: items.map(c => LABEL_SHORT[c.feature]),
+    datasets: [{ data: items.map(c => +c.value.toFixed(3)), backgroundColor: items.map(c => c.value > 0 ? bad : good), borderRadius: 4 }]
+  };
+  if (chart) { chart.data = data; chart.options.scales.x.ticks.color = muted; chart.options.scales.y.ticks.color = muted; chart.options.scales.x.grid.color = border; chart.update(); return; }
+  chart = new Chart($("contribChart"), {
+    type: "bar", data,
+    options: {
+      indexAxis: "y", responsive: true, maintainAspectRatio: false,
+      animation: { duration: 500 },
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => `log-esély hozzájárulás: ${ctx.raw > 0 ? "+" : ""}${ctx.raw}` } } },
+      scales: {
+        x: { ticks: { color: muted }, grid: { color: border } },
+        y: { ticks: { color: muted }, grid: { display: false } }
+      }
+    }
+  });
+}
+
+function drawHeat(myAge, myUtil) {
+  const ages = ["<30", "30-39", "40-49", "50-59", "60+"];
+  const utils = ["0-10%", "10-30%", "30-60%", "60-100%", "100%+"];
+  const max = Math.max(...MODEL.segments.map(s => s.mean));
+  const dark = document.documentElement.dataset.theme === "dark";
+  let html = `<tr><th>Kor \\ Kihaszn.</th>${utils.map(u => `<th>${u}</th>`).join("")}</tr>`;
+  for (const a of ages) {
+    html += `<tr><th>${AGE_LABEL[a]}</th>`;
+    for (const u of utils) {
+      const s = MODEL.segments.find(x => x.age_band === a && x.util_band === u);
+      if (!s) { html += `<td>–</td>`; continue; }
+      const t = s.mean / max;
+      const bg = `rgba(${dark ? "240,106,106" : "214,69,69"},${(0.08 + t * 0.72).toFixed(2)})`;
+      const me = a === myAge && u === myUtil ? " me" : "";
+      html += `<td class="${me.trim()}" style="background:${bg}" title="${s.count.toLocaleString("hu-HU")} fő">${pct(s.mean)}</td>`;
+    }
+    html += `</tr>`;
+  }
+  $("heat").innerHTML = html;
+}
+
+function drawScale() {
+  const max = 0.5;
+  const zones = [
+    [0, THRESHOLDS.approve, "--good"],
+    [THRESHOLDS.approve, THRESHOLDS.reject, "--warn"],
+    [THRESHOLDS.reject, max, "--bad"]
+  ];
+  $("scale").innerHTML = zones.map(([a, b, c]) => `<div style="width:${(b - a) / max * 100}%;background:var(${c})"></div>`).join("");
+  $("scaleTicks").innerHTML = ["0%", "10%", "20%", "30%", "40%", "50%+"].map(t => `<span>${t}</span>`).join("");
+}
+
+/* ---------- Minta-portfólió ---------- */
+// sample_portfolio.json tömörítve (100 valós, tisztított sor, a tréning-szkript kimenete):
+// [util, age, late30_59, DebtRatio, MonthlyIncome, late90, SeriousDlqin2yrs]
+const PORTFOLIO_RAW = [
+  [0.004416483,74,0,0.012550988,3186,0,0],[0.203485804,48,0,0.155701846,24000,0,0],[0.024665022,52,0,0.000967773,10332,0,0],[0.264342416,45,0,0.491576496,7300,0,0],[0.120487853,71,0,0.305092665,6420,0,0],
+  [0.640035996,33,1,0.171994597,2220,0,0],[0.004957775,80,0,0.003747658,1600,0,0],[0.957264957,41,1,0.159694817,3800,0,1],[0.413435975,52,0,0.679334118,5946,0,0],[0.051564428,48,0,0.383894333,4693,0,0],
+  [0.014740195,67,0,1394,5400,0,0],[0.582834331,23,0,8,0,0,0],[0.111725885,43,0,0.75684854,17667,0,0],[0.9999999,81,0,0.009141986,10500,0,0],[0.061927198,82,0,0.021550766,4500,0,0],
+  [0.613576566,32,2,0.057191233,10630,0,0],[0.001958634,56,2,0.549690062,5000,0,0],[1.06448683,70,0,0.059512195,1024,1,1],[0.746467234,32,0,0.522575579,2546,0,0],[0.9999999,66,1,2862,5400,1,0],
+  [0.041664886,64,0,28,5400,0,0],[0.069678606,85,0,0.293141372,5000,0,0],[0.294260128,59,0,0.195167741,12250,0,0],[0.442967181,66,0,0.542234073,10500,0,0],[0.016634903,65,0,0.006400488,3280,0,0],
+  [0.407310995,51,0,1.264612596,6620,0,1],[0.026990267,72,0,0.140521551,7400,0,0],[0.474780648,40,0,2047,5400,0,0],[0.006764573,82,0,0.368712947,5228,0,0],[0.08595902,61,0,3798,5400,0,0],
+  [0.377238383,52,0,0.264315989,11088,0,1],[0.000492951,63,0,1408,5400,0,0],[0.914443422,59,0,2428,5400,0,0],[0.170399422,54,0,2.762490392,1300,0,0],[0.030793889,51,0,1296,5400,0,0],
+  [0.667359667,64,0,0.510844485,4333,0,0],[0.105170284,60,0,1732,5400,0,0],[0.824338124,51,0,0.511072133,9121,0,0],[0.005642116,64,0,274,5400,0,0],[0.381237525,47,0,0.116033755,3791,0,0],
+  [0.9999999,49,0,0.024958403,600,0,1],[0.09229909,47,0,482,5400,0,0],[0.00280939,81,0,400,5400,0,0],[0.07807727,60,0,0.566105156,3917,0,0],[0.918336427,40,0,0.444085525,6500,0,0],
+  [1.3682071539,44,1,0.226618511,18550,0,0],[0,36,0,0,1000,0,0],[0.1849963,53,0,0.844990548,1586,0,0],[0.090951373,66,0,0.187581242,10000,0,0],[0,62,0,0.38568038,7583,0,0],
+  [0.219480544,54,0,3342,5400,0,0],[0.071673176,59,0,0.245891376,19166,0,0],[0,72,0,0.515573384,4237,0,0],[0.283838876,37,0,0.51870894,3500,0,0],[0.465270254,43,0,0.283903676,7100,0,0],
+  [0.361416496,31,0,0.408337519,1990,0,0],[0.033168123,47,0,0.207709429,9883,0,0],[0.00583101,88,0,0.001945924,9763,0,0],[0.013108198,63,0,0.048162653,12000,0,0],[0.845158399,50,0,0.267676046,7000,0,0],
+  [0.330766398,65,1,0.36424547,6566,0,0],[0.018161051,47,0,0.438057836,2800,0,0],[0.002620709,69,0,0.032473098,10500,0,0],[0.100980827,55,0,3484,5400,0,0],[0.647697643,60,0,0.229250819,13120,0,0],
+  [0.16337034,39,0,0.395017794,5900,0,0],[0,48,0,5043,5400,0,0],[0.004365653,44,1,0.752588361,2800,0,0],[0.25889775,33,0,0.537441339,4900,0,0],[0.233764867,29,0,1909,5400,0,0],
+  [0.889912407,76,1,0.437845098,6700,0,0],[0.024125691,57,0,0.004273973,9124,0,0],[0.022070903,57,0,0.101911945,5700,0,0],[0.111348144,76,0,820,5400,0,0],[0.168962548,52,0,0.302201193,9721,0,0],
+  [0.01995445,70,0,0.044355572,5500,0,0],[0.529105966,64,0,0.841408024,5283,0,0],[0.141371726,26,1,0.262993468,3520,0,0],[0.33758071,41,0,0.690654673,2000,0,0],[0.008143465,61,1,0.115809206,4800,0,0],
+  [0.128983227,49,0,0.6755345,8231,0,0],[0.045179522,50,2,0.343305909,4010,0,1],[0.423404865,45,0,0.801399533,3000,0,0],[0.096404709,47,0,0.01749514,3600,0,0],[0.338594133,40,0,2572,5400,0,0],
+  [0.183509599,47,0,0.727376281,7900,0,0],[0.267731967,63,1,0.743892739,8800,0,0],[0.099862228,58,1,0.342831434,6667,0,0],[0.299029839,30,0,0.252399651,4583,0,0],[0.015651796,47,0,0.289869123,4125,0,0],
+  [0.397757562,69,0,4977,5400,2,0],[0,62,0,0,5400,0,0],[0.750499002,22,0,0.009159034,1200,0,0],[0.440998474,58,0,0.020281789,31250,0,0],[0,56,0,0.001392273,5745,0,0],
+  [0.923131866,49,0,0.301224898,12000,0,0],[0,51,0,1.724191867,1917,0,0],[0.089841064,66,0,0.415570934,5779,0,0],[0.219536198,40,0,0.06572247,6283,0,0],[0.9999999,30,0,200,5400,1,1]
+];
+const INCOME_MEDIAN = 5400; // a tréning-szkript ezzel pótolta a hiányzó jövedelmet
+
+// Ahol a forrásban hiányzott a jövedelem, ott a DebtRatio abszolút adósságösszeg, nem arány
+// (teljes adaton: medián 1170 vs. 0,30). Pótolt jövedelem + irreálisan magas arány = jelzés.
+const FLAG_TEXT = "A forrásadatban valószínűleg hiányzott a jövedelem (mediánnal pótolva), ezért az adósságteher-arány itt abszolút összeg, nem arány.";
+
+const PORTFOLIO = PORTFOLIO_RAW.map((r, i) => {
+  const model = {
+    RevolvingUtilizationOfUnsecuredLines: r[0], age: r[1], "NumberOfTime30-59DaysPastDueNotWorse": r[2],
+    DebtRatio: r[3], MonthlyIncome: r[4], NumberOfTimes90DaysLate: r[5]
+  };
+  const { pd } = score(model);
+  const d = decide(pd);
+  return { id: i + 1, model, actual: r[6], pd, decision: d.cls, decisionLabel: d.label,
+           flagged: r[4] === INCOME_MEDIAN && r[3] > 10 };
+});
+
+const DECISION_ORDER = ["good", "warn", "bad"];
+const DECISION_NAME = { good: "Jóváhagyás", warn: "Felülvizsgálat", bad: "Elutasítás" };
+const L3059 = "NumberOfTime30-59DaysPastDueNotWorse", L90 = "NumberOfTimes90DaysLate";
+const idStr = r => "#" + String(r.id).padStart(3, "0");
+
+const PF_COLS = [
+  { key: "id", label: "Ügyfél", val: r => r.id, html: r => idStr(r) },
+  { key: "age", label: "Kor", val: r => r.model.age, html: r => r.model.age },
+  { key: "income", label: "Jövedelem (USD)", val: r => r.model.MonthlyIncome,
+    html: r => r.model.MonthlyIncome.toLocaleString("hu-HU") + (r.flagged ? ` <span class="flag" title="${esc(FLAG_TEXT)}">⚠</span>` : "") },
+  { key: "util", label: "Keret-kihaszn.", val: r => r.model.RevolvingUtilizationOfUnsecuredLines, html: r => pct(r.model.RevolvingUtilizationOfUnsecuredLines, 0) },
+  { key: "debt", label: "Adósságteher", val: r => r.model.DebtRatio,
+    html: r => r.flagged ? `<span class="flag" title="${esc(FLAG_TEXT)}">${r.model.DebtRatio.toLocaleString("hu-HU")} ⚠</span>` : pct(r.model.DebtRatio, 0) },
+  { key: "l3059", label: "30–59 n. késés", val: r => r.model[L3059], html: r => r.model[L3059] },
+  { key: "l90", label: "90+ n. késés", val: r => r.model[L90], html: r => r.model[L90] },
+  { key: "pd", label: "Becsült PD", val: r => r.pd, html: r => `<b>${pct(r.pd)}</b>` },
+  { key: "decision", label: "Javaslat", val: r => DECISION_ORDER.indexOf(r.decision) * 10 + r.pd, html: r => `<span class="pill ${r.decision}">${DECISION_NAME[r.decision]}</span>` },
+  { key: "actual", label: "Valós kimenet", val: r => r.actual,
+    html: r => r.actual ? `<span class="pill bad">Nemteljesített</span>` : `<span class="pill neutral">Teljesített</span>` }
+];
+
+const pfState = { sortKey: "pd", dir: -1, decision: "", outcome: "", flagged: false };
+let pfChart = null;
+
+function pfFiltered() {
+  const col = PF_COLS.find(c => c.key === pfState.sortKey);
+  return PORTFOLIO
+    .filter(r => !pfState.decision || r.decision === pfState.decision)
+    .filter(r => pfState.outcome === "" || String(r.actual) === pfState.outcome)
+    .filter(r => !pfState.flagged || r.flagged)
+    .sort((a, b) => (col.val(a) - col.val(b)) * pfState.dir || a.id - b.id);
+}
+
+function pfSummary(rows) {
+  const by = {};
+  for (const k of DECISION_ORDER) {
+    const g = rows.filter(r => r.decision === k);
+    const def = g.filter(r => r.actual === 1).length;
+    by[k] = { n: g.length, def, ok: g.length - def, rate: g.length ? def / g.length : null };
+  }
+  const n = rows.length, defaults = rows.filter(r => r.actual === 1).length;
+  return { n, defaults, avgPd: rows.reduce((s, r) => s + r.pd, 0) / n, actualRate: defaults / n, by,
+           flagged: rows.filter(r => r.flagged).length };
+}
+
+function renderPortfolio() {
+  const s = pfSummary(PORTFOLIO);
+  $("pfKpis").innerHTML = `
+    <div class="stat"><div class="v">${s.n}</div><div class="l">Hitel a mintában</div></div>
+    <div class="stat"><div class="v">${pct(s.avgPd)}</div><div class="l">Átlagos becsült PD</div></div>
+    <div class="stat"><div class="v">${pct(s.actualRate)}</div><div class="l">Tényleges nemteljesítési arány (${s.defaults} db)</div></div>
+    <div class="stat"><div class="v">${s.by.good.n} / ${s.by.warn.n} / ${s.by.bad.n}</div><div class="l">Jóváhagyás / felülvizsg. / elutasítás</div></div>`;
+
+  $("pfMatrix").innerHTML = `<tr><th>Javaslat</th><th>Hitelek</th><th>Nemteljesített</th><th>Teljesített</th><th>Valós arány</th></tr>` +
+    DECISION_ORDER.map(k => `<tr><td><span class="pill ${k}">${DECISION_NAME[k]}</span></td><td>${s.by[k].n}</td><td>${s.by[k].def}</td><td>${s.by[k].ok}</td><td>${s.by[k].rate === null ? "–" : pct(s.by[k].rate)}</td></tr>`).join("");
+  const caught = s.by.warn.def + s.by.bad.def;
+  $("pfMatrixNote").textContent =
+    `A ${s.defaults} ténylegesen nemteljesítő hitelből ${caught} került felülvizsgálatra vagy elutasításra, ${s.by.good.def} kapott volna jóváhagyást. ` +
+    `Kis minta (${s.n} hitel), az arányok csak tájékoztató jellegűek; a modell teljesítményét a ${MODEL.meta.test_rows.toLocaleString("hu-HU")} soros teszthalmazon mért AUC (${MODEL.meta.test_auc.toLocaleString("hu-HU")}) jellemzi.`;
+
+  drawPfChart(s);
+  renderPfTable();
+}
+
+function renderPfTable() {
+  $("pfHead").innerHTML = PF_COLS.map(c => {
+    const sort = c.key === pfState.sortKey ? (pfState.dir === 1 ? "ascending" : "descending") : "none";
+    return `<th data-key="${c.key}" aria-sort="${sort}" tabindex="0">${c.label}</th>`;
+  }).join("");
+  const rows = pfFiltered();
+  $("pfBody").innerHTML = rows.length
+    ? rows.map(r => `<tr data-id="${r.id}" style="cursor:pointer" title="Részletes elemzés">${PF_COLS.map(c => `<td>${c.html(r)}</td>`).join("")}</tr>`).join("")
+    : `<tr class="empty-row"><td colspan="${PF_COLS.length}">Nincs a szűrésnek megfelelő hitel.</td></tr>`;
+  $("pfCount").textContent = `${rows.length} / ${PORTFOLIO.length} hitel`;
+}
+
+function drawPfChart(s) {
+  if (typeof Chart === "undefined") {
+    $("pfChart").parentElement.innerHTML = '<div class="note">A grafikon nem tölthető be (Chart.js nem érhető el offline). A mellette lévő táblázat ugyanezeket az adatokat mutatja.</div>';
+    return;
+  }
+  const muted = cssVar("--muted"), border = cssVar("--border"), text = cssVar("--text");
+  if (pfChart) pfChart.destroy();
+  pfChart = new Chart($("pfChart"), {
+    data: {
+      labels: DECISION_ORDER.map(k => DECISION_NAME[k]),
+      datasets: [
+        { type: "bar", label: "Hitelek száma", data: DECISION_ORDER.map(k => s.by[k].n),
+          backgroundColor: DECISION_ORDER.map(k => cssVar("--" + k)), borderRadius: 6, yAxisID: "y", order: 2 },
+        { type: "line", label: "Valós nemteljesítési arány", data: DECISION_ORDER.map(k => s.by[k].rate === null ? null : +(s.by[k].rate * 100).toFixed(1)),
+          borderColor: text, backgroundColor: text, pointRadius: 5, showLine: false, yAxisID: "y1", order: 1 }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false, animation: { duration: 500 },
+      plugins: {
+        legend: { labels: { color: muted, boxWidth: 12 } },
+        tooltip: { callbacks: { label: ctx => ctx.dataset.yAxisID === "y1" ? ` ${ctx.dataset.label}: ${String(ctx.raw).replace(".", ",")}%` : ` ${ctx.dataset.label}: ${ctx.raw}` } }
+      },
+      scales: {
+        x: { ticks: { color: muted }, grid: { display: false } },
+        y: { beginAtZero: true, ticks: { color: muted, precision: 0 }, grid: { color: border }, title: { display: true, text: "db", color: muted } },
+        y1: { beginAtZero: true, position: "right", ticks: { color: muted, callback: v => v + "%" }, grid: { display: false } }
+      }
+    }
+  });
+}
+
+function openInSingle(id) {
+  const r = PORTFOLIO.find(x => x.id === id);
+  if (!r) return;
+  const toField = { age: r.model.age, MonthlyIncome: r.model.MonthlyIncome,
+    RevolvingUtilizationOfUnsecuredLines: Math.round(r.model.RevolvingUtilizationOfUnsecuredLines * 10000) / 100,
+    DebtRatio: Math.round(r.model.DebtRatio * 10000) / 100,
+    [L3059]: r.model[L3059], [L90]: r.model[L90] };
+  for (const f of FIELDS) $("in-" + f.key).value = String(toField[f.key]).replace(".", ",");
+  showTab("single");
+  $("form").requestSubmit();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+/* ---------- Excel export (xlsx-js-style) ---------- */
+const THIN = { style: "thin", color: { rgb: "DDE2EA" } };
+const BORDER = { top: THIN, bottom: THIN, left: THIN, right: THIN };
+const XS = {
+  title: { font: { bold: true, sz: 14, color: { rgb: "1A2230" } } },
+  sub: { font: { italic: true, color: { rgb: "5D6878" } } },
+  section: { font: { bold: true, sz: 12, color: { rgb: "2F6FED" } } },
+  header: { font: { bold: true, color: { rgb: "FFFFFF" } }, fill: { fgColor: { rgb: "2F6FED" } },
+            alignment: { horizontal: "center", vertical: "center", wrapText: true }, border: BORDER },
+  cell: { border: BORDER },
+  label: { font: { bold: true }, border: BORDER },
+  good: { font: { bold: true, color: { rgb: "146B43" } }, fill: { fgColor: { rgb: "D9F2E6" } }, border: BORDER },
+  warn: { font: { bold: true, color: { rgb: "8A5A00" } }, fill: { fgColor: { rgb: "FFF1D6" } }, border: BORDER },
+  bad: { font: { bold: true, color: { rgb: "A12F2F" } }, fill: { fgColor: { rgb: "FBDADA" } }, border: BORDER },
+  flag: { font: { color: { rgb: "8A5A00" } }, fill: { fgColor: { rgb: "FFF8E8" } }, border: BORDER },
+  disclaimer: { font: { bold: true, color: { rgb: "8A5A00" } }, fill: { fgColor: { rgb: "FFF1D6" } }, alignment: { wrapText: true, vertical: "top" } },
+  wrap: { alignment: { wrapText: true, vertical: "top" } }
+};
+
+// Cella: primitív érték, vagy { v, s (stílus-kulcs vagy objektum), z (számformátum) }
+function makeSheet(rows, widths) {
+  const ws = {};
+  let maxC = 0;
+  rows.forEach((row, r) => (row || []).forEach((cell, c) => {
+    if (cell === undefined || cell === null || cell === "") return;
+    const o = typeof cell === "object" ? cell : { v: cell };
+    const out = { v: o.v, t: typeof o.v === "number" ? "n" : "s" };
+    if (o.z) out.z = o.z;
+    if (o.s) out.s = typeof o.s === "string" ? XS[o.s] : o.s;
+    ws[XLSX.utils.encode_cell({ r, c })] = out;
+    maxC = Math.max(maxC, c);
+  }));
+  ws["!ref"] = XLSX.utils.encode_range({ s: { r: 0, c: 0 }, e: { r: Math.max(rows.length - 1, 0), c: maxC } });
+  if (widths) ws["!cols"] = widths.map(w => ({ wch: w }));
+  return ws;
+}
+
+function methodologyRows() {
+  const m = MODEL.meta;
+  return [
+    [{ v: "Módszertan és adatforrás", s: "title" }],
+    [],
+    [{ v: "FIGYELEM: " + m.disclaimer + " Nem minősül hitelajánlatnak vagy pénzügyi tanácsadásnak.", s: "disclaimer" }],
+    [],
+    [{ v: "Adatforrás", s: "label" }, { v: m.source_dataset, s: "wrap" }],
+    [{ v: "Minta", s: "label" }, { v: `${(m.trained_rows + m.test_rows).toLocaleString("hu-HU")} sor tisztítás után (${m.excluded_bad_code_rows} sor kizárva 96/98-as hibakódok miatt)`, s: "wrap" }],
+    [{ v: "Modell", s: "label" }, { v: "Logisztikus regresszió, 6 standardizált változó", s: "wrap" }],
+    [{ v: "Teszt-AUC", s: "label" }, { v: m.test_auc, z: "0.000" }],
+    [{ v: "Kalibráció", s: "label" }, { v: `Prior-korrekció a valós ${pct(m.overall_default_rate)}-os historikus nemteljesítési arányra (a modell kiegyensúlyozott osztálysúlyokkal tanult).`, s: "wrap" }],
+    [{ v: "Döntési küszöbök", s: "label" }, { v: `PD < ${pct(THRESHOLDS.approve, 0)}: jóváhagyás; ${pct(THRESHOLDS.approve, 0)}–${pct(THRESHOLDS.reject, 0)}: felülvizsgálat; ≥ ${pct(THRESHOLDS.reject, 0)}: elutasítás (demo-küszöbök)`, s: "wrap" }],
+    [{ v: "PD definíció", s: "label" }, { v: "2 éven belüli súlyos (90+ napos) késedelem valószínűsége", s: "wrap" }],
+    [{ v: "Ismert korlát", s: "label" }, { v: "Az adósságteher-arány hiányzó jövedelem esetén abszolút összeget tartalmaz a forrásadatban; ezért nem elsődleges magyarázó tényező.", s: "wrap" }],
+    [{ v: "Export ideje", s: "label" }, new Date().toLocaleString("hu-HU")]
+  ];
+}
+
+function xlsxReady() {
+  if (typeof XLSX === "undefined" || !XLSX.utils) {
+    alert("Az Excel-export könyvtár nem töltődött be (internetkapcsolat szükséges).");
+    return false;
+  }
+  return true;
+}
+const today = () => new Date().toISOString().slice(0, 10);
+
+function exportPortfolio() {
+  if (!xlsxReady()) return;
+  const rows = pfFiltered();
+  const filt = [pfState.decision && DECISION_NAME[pfState.decision], pfState.outcome && (pfState.outcome === "1" ? "Nemteljesített" : "Teljesített"), pfState.flagged && "Adatminőségi jelzéssel"].filter(Boolean);
+  const head = ["Ügyfél", "Kor", "Havi jövedelem (USD)", "Keret-kihasználtság", "Adósságteher-arány", "30–59 napos késés", "90+ napos késés", "Becsült PD", "Javaslat", "Valós kimenet", "Adatminőség"];
+  const data = rows.map(r => [
+    { v: idStr(r), s: "cell" },
+    { v: r.model.age, s: "cell" },
+    { v: r.model.MonthlyIncome, z: "#,##0", s: r.flagged ? "flag" : "cell" },
+    { v: r.model.RevolvingUtilizationOfUnsecuredLines, z: "0.0%", s: "cell" },
+    r.flagged ? { v: r.model.DebtRatio, z: "#,##0", s: "flag" } : { v: r.model.DebtRatio, z: "0.0%", s: "cell" },
+    { v: r.model[L3059], s: "cell" },
+    { v: r.model[L90], s: "cell" },
+    { v: r.pd, z: "0.0%", s: "cell" },
+    { v: DECISION_NAME[r.decision], s: r.decision },
+    { v: r.actual ? "Nemteljesített" : "Teljesített", s: r.actual ? "bad" : "cell" },
+    { v: r.flagged ? "Hiányzó jövedelem (pótolt); adósságteher abszolút összeg" : "", s: r.flagged ? "flag" : "cell" }
+  ]);
+  const ws1 = makeSheet([
+    [{ v: "Minta-portfólió – hitelkockázati kiértékelés", s: "title" }],
+    [{ v: `Export: ${new Date().toLocaleString("hu-HU")} · ${rows.length} hitel · Szűrés: ${filt.length ? filt.join(", ") : "nincs"} · Demo / oktatási célú`, s: "sub" }],
+    [],
+    head.map(h => ({ v: h, s: "header" })),
+    ...data
+  ], [9, 6, 14, 13, 14, 10, 10, 11, 15, 15, 44]);
+  if (rows.length) ws1["!autofilter"] = { ref: XLSX.utils.encode_range({ s: { r: 3, c: 0 }, e: { r: 3 + rows.length, c: head.length - 1 } }) };
+
+  const s = pfSummary(PORTFOLIO);
+  const ws2 = makeSheet([
+    [{ v: "Portfólió-összesítő (teljes minta, szűrés nélkül)", s: "title" }],
+    [],
+    [{ v: "Hitelek száma", s: "label" }, { v: s.n, s: "cell" }],
+    [{ v: "Átlagos becsült PD", s: "label" }, { v: s.avgPd, z: "0.0%", s: "cell" }],
+    [{ v: "Tényleges nemteljesítési arány", s: "label" }, { v: s.actualRate, z: "0.0%", s: "cell" }],
+    [{ v: "Adatminőségi jelzéssel", s: "label" }, { v: s.flagged, s: "cell" }],
+    [],
+    [{ v: "Modell-javaslat vs. valós kimenet", s: "section" }],
+    ["Javaslat", "Hitelek", "Nemteljesített", "Teljesített", "Valós arány"].map(h => ({ v: h, s: "header" })),
+    ...DECISION_ORDER.map(k => [
+      { v: DECISION_NAME[k], s: k }, { v: s.by[k].n, s: "cell" }, { v: s.by[k].def, s: "cell" }, { v: s.by[k].ok, s: "cell" },
+      s.by[k].rate === null ? { v: "–", s: "cell" } : { v: s.by[k].rate, z: "0.0%", s: "cell" }
+    ]),
+    [],
+    [{ v: "Kis minta: az arányok tájékoztató jellegűek. A modell teljesítményét a teszthalmazon mért AUC jellemzi.", s: "sub" }]
+  ], [32, 12, 14, 12, 12]);
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws1, "Portfólió");
+  XLSX.utils.book_append_sheet(wb, ws2, "Összesítő");
+  XLSX.utils.book_append_sheet(wb, makeSheet(methodologyRows(), [20, 90]), "Módszertan");
+  XLSX.writeFile(wb, `hitelkockazat_portfolio_${today()}.xlsx`);
+}
+
+function exportSingle() {
+  if (!xlsxReady() || !lastResult) return;
+  const { input, pd, contrib, decision, seg, ab, ub } = lastResult;
+  const inputRows = FIELDS.map(f => {
+    const userV = input.user[f.key], modelV = input.model[f.key];
+    const isPct = f.unit === "%";
+    return [
+      { v: f.label, s: "label" },
+      { v: isPct ? userV / 100 : userV, z: isPct ? "0.0%" : "#,##0", s: "cell" },
+      { v: modelV, z: isPct ? "0.0%" : "#,##0", s: Math.abs((isPct ? userV / 100 : userV) - modelV) > 1e-9 ? "flag" : "cell" }
+    ];
+  });
+  const factors = [...contrib].sort((a, b) => Math.abs(b.value) - Math.abs(a.value)).map(c => [
+    { v: LABEL_SHORT[c.feature] + (SECONDARY_FEATURES.has(c.feature) ? " (nem elsődleges)" : ""), s: "cell" },
+    { v: +c.value.toFixed(4), z: "+0.000;-0.000;0.000", s: "cell" },
+    { v: c.value > 0 ? "növeli a kockázatot" : "csökkenti a kockázatot", s: c.value > 0 ? "bad" : "good" }
+  ]);
+  const ws = makeSheet([
+    [{ v: "Hitelkérelem – kockázati kiértékelés", s: "title" }],
+    [{ v: `Export: ${new Date().toLocaleString("hu-HU")} · Demo / oktatási célú, nem hitelbírálati döntés`, s: "sub" }],
+    [],
+    [{ v: "Eredmény", s: "section" }],
+    [{ v: "Becsült PD", s: "label" }, { v: pd, z: "0.0%", s: decision.cls }],
+    [{ v: "Döntési javaslat", s: "label" }, { v: decision.label, s: decision.cls }],
+    [{ v: "Indoklás", s: "label" }, { v: decision.text, s: "wrap" }],
+    [],
+    [{ v: "Megadott adatok", s: "section" }],
+    ["Változó", "Megadott érték", "Modellben használt érték"].map(h => ({ v: h, s: "header" })),
+    ...inputRows,
+    [{ v: "Sárga háttér: a tanítási tartományon kívüli érték, a modell a tanításkori limittel számolt.", s: "sub" }],
+    [],
+    [{ v: "Tényezők hatása (log-esély, az átlagos hitelfelvevőhöz képest)", s: "section" }],
+    ["Tényező", "Hatás", "Irány"].map(h => ({ v: h, s: "header" })),
+    ...factors,
+    [],
+    [{ v: "Historikus összevetés", s: "section" }],
+    [{ v: "Szegmens", s: "label" }, { v: `${AGE_LABEL[ab]} év, ${ub} keret-kihasználtság`, s: "cell" }],
+    [{ v: "Szegmens valós aránya", s: "label" }, seg ? { v: seg.mean, z: "0.0%", s: "cell" } : { v: "n/a", s: "cell" }],
+    [{ v: "Szegmens mérete", s: "label" }, seg ? { v: seg.count, z: "#,##0", s: "cell" } : { v: "n/a", s: "cell" }],
+    [{ v: "Teljes minta valós aránya", s: "label" }, { v: MODEL.meta.overall_default_rate, z: "0.0%", s: "cell" }]
+  ], [42, 22, 24]);
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Kiértékelés");
+  XLSX.utils.book_append_sheet(wb, makeSheet(methodologyRows(), [20, 90]), "Módszertan");
+  XLSX.writeFile(wb, `hitelkerelem_kiertekeles_${today()}.xlsx`);
+}
+
+/* ---------- Fülek ---------- */
+function showTab(name) {
+  for (const t of ["single", "portfolio"]) {
+    $("tab-" + t).classList.toggle("hidden", t !== name);
+    $("tabbtn-" + t).setAttribute("aria-selected", String(t === name));
+  }
+  // A Chart.js rejtett canvasra 0 méretben rajzolna, ezért megjelenéskor rajzolunk
+  if (name === "portfolio") renderPortfolio();
+  try { localStorage.setItem("hk-tab", name); } catch (e) {}
+}
+
+/* ---------- Téma ---------- */
+function applyTheme(t) {
+  document.documentElement.dataset.theme = t;
+  $("themeBtn").textContent = t === "dark" ? "☀️ Világos mód" : "🌙 Sötét mód";
+  try { localStorage.setItem("hk-theme", t); } catch (e) {}
+  if (lastResult) render(lastResult.input);
+  if (!$("tab-portfolio").classList.contains("hidden")) renderPortfolio();
+}
+
+/* ---------- Indítás ---------- */
+function init() {
+  buildForm();
+  drawScale();
+  $("disclaimer").innerHTML = `<b>Demo / oktatási célú alkalmazás.</b> ${esc(MODEL.meta.disclaimer)} Nem minősül hitelajánlatnak vagy pénzügyi tanácsadásnak.`;
+  $("footer").textContent = `Adatforrás: ${MODEL.meta.source_dataset} · Test AUC: ${MODEL.meta.test_auc.toLocaleString("hu-HU")}`;
+  $("methodBody").innerHTML = `
+    <ul>
+      <li><b>Adat:</b> ${esc(MODEL.meta.source_dataset)}; ${(MODEL.meta.trained_rows + MODEL.meta.test_rows).toLocaleString("hu-HU")} sor tisztítás után (${MODEL.meta.excluded_bad_code_rows} sor kizárva 96/98-as hibakódok miatt).</li>
+      <li><b>Modell:</b> logisztikus regresszió 6 változóval, standardizált bemenetekkel; teszt-AUC ${MODEL.meta.test_auc.toLocaleString("hu-HU")} (${MODEL.meta.test_rows.toLocaleString("hu-HU")} soros teszthalmazon).</li>
+      <li><b>Kalibráció:</b> a modell kiegyensúlyozott osztálysúlyokkal tanult, ezért a nyers kimenet a valós kockázat többszörösét mutatná. A megjelenített PD prior-korrigált a valós ${pct(MODEL.meta.overall_default_rate)}-os historikus arányra.</li>
+      <li><b>Döntési küszöbök:</b> PD &lt; ${pct(THRESHOLDS.approve, 0)} jóváhagyás, ${pct(THRESHOLDS.approve, 0)}–${pct(THRESHOLDS.reject, 0)} felülvizsgálat, ≥ ${pct(THRESHOLDS.reject, 0)} elutasítás (demo-küszöbök, nem üzleti kalibráció).</li>
+      <li><b>Bemeneti limitek:</b> a tanításnál használt 99,5. percentilises limiteket az app is alkalmazza; a tartományon kívüli értékekre figyelmeztetés jelenik meg.</li>
+      <li><b>Ismert korlát:</b> az adósságteher-arány együtthatója a kiugró értékek miatt nem értelmezhető irányú, ezért nem elsődleges magyarázó tényező.</li>
+    </ul>`;
+
+  let theme = "light";
+  try { theme = localStorage.getItem("hk-theme") || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"); } catch (e) {}
+  applyTheme(theme);
+  $("themeBtn").addEventListener("click", () => applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark"));
+
+  $("form").addEventListener("submit", e => {
+    e.preventDefault();
+    try {
+      const input = readForm();
+      if (input) render(input);
+    } catch (err) {
+      console.error(err);
+      alert("Váratlan hiba a számítás közben. Ellenőrizd a megadott értékeket.");
+    }
+  });
+  document.querySelectorAll("[data-preset]").forEach(btn => btn.addEventListener("click", () => {
+    const p = PRESETS[btn.dataset.preset];
+    for (const f of FIELDS) $("in-" + f.key).value = String(p[f.key]).replace(".", ",");
+    $("form").requestSubmit();
+  }));
+  $("resetBtn").addEventListener("click", () => {
+    for (const f of FIELDS) { $("in-" + f.key).value = ""; setMsg(f.key, null, ""); }
+    $("results").classList.add("hidden");
+    $("placeholder").classList.remove("hidden");
+    lastResult = null;
+  });
+
+  // Excel export
+  $("singleExportBtn").addEventListener("click", exportSingle);
+  $("pfExportBtn").addEventListener("click", exportPortfolio);
+
+  // Fülek
+  $("tabbtn-single").addEventListener("click", () => showTab("single"));
+  $("tabbtn-portfolio").addEventListener("click", () => showTab("portfolio"));
+
+  // Portfólió: szűrők, rendezés, sor megnyitása
+  $("pfDecision").addEventListener("change", e => { pfState.decision = e.target.value; renderPfTable(); });
+  $("pfOutcome").addEventListener("change", e => { pfState.outcome = e.target.value; renderPfTable(); });
+  $("pfFlagged").addEventListener("change", e => { pfState.flagged = e.target.checked; renderPfTable(); });
+  const sortBy = key => {
+    if (pfState.sortKey === key) pfState.dir *= -1;
+    else { pfState.sortKey = key; pfState.dir = key === "id" ? 1 : -1; }
+    renderPfTable();
+    // a fejléc újrarajzolódik, a billentyűzetes fókuszt visszaadjuk
+    const th = document.querySelector(`#pfHead th[data-key="${key}"]`);
+    if (th) th.focus();
+  };
+  $("pfHead").addEventListener("click", e => { const th = e.target.closest("th[data-key]"); if (th) sortBy(th.dataset.key); });
+  $("pfHead").addEventListener("keydown", e => {
+    const th = e.target.closest("th[data-key]");
+    if (th && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); sortBy(th.dataset.key); }
+  });
+  $("pfBody").addEventListener("click", e => { const tr = e.target.closest("tr[data-id]"); if (tr) openInSingle(Number(tr.dataset.id)); });
+
+  let tab = "single";
+  try { tab = localStorage.getItem("hk-tab") === "portfolio" ? "portfolio" : "single"; } catch (e) {}
+  showTab(tab);
+}
+init();
+
+// Automatizált regressziós tesztek: csak index.html?selftest esetén töltődnek be
+if (/[?&]selftest\b/.test(location.search)) {
+  const s = document.createElement("script");
+  s.src = "selftest.js";
+  document.body.appendChild(s);
+}
+</script>
+</body>
+</html>
