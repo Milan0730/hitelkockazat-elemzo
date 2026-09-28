@@ -51,6 +51,24 @@ Böngészőben tesztelve, összeomlás nélkül:
 - A portfólió-export az aktuális szűrést és rendezést követi, a szűrés a fejlécben szerepel.
 - Konzisztencia: a portfólió #100-as sorát megnyitva az egyedi elemzés ugyanazt a PD-t adja (31,1%), mint a táblázat.
 
+## 9. Angol nyelvű felület: tervezett kockázatok és azok tesztelése (M4)
+
+Új funkció: HU/EN nyelvváltó gomb és `?lang=en` link. Nem hibajavítás, hanem egy olyan változtatás, amely nagyjából 150 felületi szöveget érint, ezért előre azonosított kockázatokkal és célzott tesztekkel ment.
+
+- **Kockázat 1, számformátum**: angolul a `5,400` ötezer-négyszázat jelent, magyarul az `5,4` öt egész négy tizedet. Ha az app mindkét nyelven ugyanúgy értelmezi a vesszőt, egy angol felhasználó 5400 USD helyett 5,4 USD jövedelemmel kapna PD-t, figyelmeztetés nélkül.
+  - **Döntés**: nyelvfüggő értelmezés. Angolul a vessző csak szabályos ezres tagolásként fogadható el (`1,234.5`), minden más vesszős bevitel **hibaüzenetet kap, nem tippelünk** (`0,35` → „Please enter a number”).
+  - **Tesztek**: `5,400` → 5400, `1,234.5` → 1234.5, `0,35` → érvénytelen (EN); a magyar viselkedés változatlan.
+- **Kockázat 2, érték-elcsúszás váltáskor**: a mezőben lévő „72,5” angolra váltás után 725-nek vagy érvénytelennek értelmeződne.
+  - **Javítás**: váltáskor a mezők értékei az új nyelv formátumára íródnak át (`72,5` → `72.5`).
+  - **Teszt**: a váltás előtti és utáni PD azonos.
+- **Kockázat 3, lefordítatlan szöveg**: egy kihagyott kulcs csendben a magyar szövegre esik vissza.
+  - **Tesztek**: (a) minden kulcs megvan mindkét nyelven, azonos típussal (tömböknél azonos hosszal); (b) angol módban a látható felületen, valamint a `title` és `aria-label` attribútumokban nem lehet magyar ékezetes szó.
+  - **Mutációs próba**:
+    - egy kulcs törlése → az (a) teszt bukik;
+    - két szöveg magyarra cserélése → a (b) teszt mindkét fülön bukik, és pontosan megnevezi a szavakat.
+  - **Tanulság**: a törölt „Keret-kihaszn.” ékezet nélküli, ezért azt a (b) szkennelés **nem** vette volna észre. A két teszt kiegészíti egymást, egyik sem elég egyedül.
+- **Eredmény**: 96/96 teszt (19 új, 9. csoport). Mobilon 375 px mellett sincs túlcsúszás angol szövegekkel, konzolhiba nincs.
+
 ## 8. Nem reprodukálható tréning-szkript, majd reprodukció-ellenőrzés (M4)
 
 - **Probléma**: az `explore_and_train.py` a felhős sandbox abszolút Linux-útvonalait tartalmazta (`/root/.claude/uploads/...`), így a saját gépen nem futott volna. A „reprodukálható szkript” állítás ellenőrizetlen volt.

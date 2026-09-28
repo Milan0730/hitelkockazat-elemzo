@@ -12,10 +12,10 @@ I built a credit risk web app with an AI coding agent (Claude) as the implemente
 | | |
 |---|---|
 | Defects found and fixed | **7** (1 critical, 3 high, 2 medium, 1 low) |
-| Automated regression tests | **77**, in 8 groups, run against an **independent oracle** |
+| Automated regression tests | **96**, in 9 groups, run against an **independent oracle** |
 | Test-suite effectiveness | **2/2 injected bugs caught**, 14 tests failed on mutation |
 | Model reproducibility | re-trained on a different stack, results **bit-identical** (≤ 1.1·10⁻¹⁵) |
-| Live suite | [`?selftest`](https://milan0730.github.io/hitelkockazat-elemzo/?selftest): 77/77 on the deployed site |
+| Live suite | [`?selftest`](https://milan0730.github.io/hitelkockazat-elemzo/?selftest): 96/96 on the deployed site |
 
 ## 1. Context
 
@@ -30,7 +30,7 @@ Three layers, each designed to catch what the others miss:
 
 | Layer | What it catches | How |
 |---|---|---|
-| **A. Automated regression** | calculation errors, regressions after changes | 77 browser tests; expected values computed **outside the app** (PowerShell), so the code is never checked against itself; boundary values at every threshold; the suite's own quality verified with **mutation testing** |
+| **A. Automated regression** | calculation errors, regressions after changes | 96 browser tests; expected values computed **outside the app** (PowerShell), so the code is never checked against itself; boundary values at every threshold; the suite's own quality verified with **mutation testing** |
 | **B. Exploratory / agent testing** | wrong assumptions, data issues, UX defects | questioning outputs against ground truth, reproducing pipeline steps from raw data, device and edge-case sweeps |
 | **C. Moderated user testing** | comprehension and usability | 3–5 non-technical testers, 7 task-based scenarios, success criteria and a questionnaire ([test plan](TESZTELESI_TERV.md)) |
 
@@ -103,7 +103,7 @@ Three layers, each designed to catch what the others miss:
 
 ## 4. Automated Suite
 
-The 77 tests are grouped as follows:
+The 96 tests are grouped as follows:
 1. Model math against the oracle
 2. Threshold and band boundaries
 3. Input parsing (Hungarian number formats)
@@ -112,6 +112,7 @@ The 77 tests are grouped as follows:
 6. Portfolio aggregates, filters, sorting and keyboard access
 7. Excel export: the download is intercepted, and the workbook is read back and inspected
 8. Basic accessibility
+9. Language switching (Hungarian / English): translation-key completeness, locale-aware number parsing, values converted on switch, and a scan of the visible UI and attributes for untranslated text
 
 **Testing the tests:** I injected two realistic bugs, a skipped calibration and an off-by-one at the 10% threshold. **14 tests failed**, and both bugs were caught. A suite that stays green under mutation would have given false confidence.
 
@@ -143,7 +144,7 @@ _Findings from user testing will be added here in the same problem → impact �
 - Calibration is imperfect in the highest-risk band (F1 residual).
 - `DebtRatio` is flagged in the UI but not yet fixed in the model (F2).
 - The dataset is US data from 2011. The model is a teaching tool and has not been validated for any real lending use.
-- The UI is Hungarian only.
+- The UI is bilingual (Hungarian / English). Only the internal test log (`TESZT_NAPLO.md`) and test plan are in Hungarian.
 
 ---
 

@@ -153,57 +153,59 @@ details.method { margin-top: 18px; }
 details.method summary { cursor: pointer; font-weight: 600; }
 details.method p, details.method li { font-size: 13px; color: var(--muted); }
 footer { margin-top: 24px; color: var(--muted); font-size: 12px; text-align: center; }
+header .head-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header>
     <div>
-      <h1>Hitelkockázat-elemző</h1>
-      <div class="sub">Nemteljesítési valószínűség (PD) becslése valós, nyilvános adaton tanított logisztikus regresszióval</div>
+      <h1 data-i18n="app.title">Hitelkockázat-elemző</h1>
+      <div class="sub" data-i18n="app.sub"></div>
     </div>
-    <button class="btn" id="themeBtn" type="button" aria-label="Téma váltása">🌙 Sötét mód</button>
+    <div class="head-actions">
+      <button class="btn" id="langBtn" type="button"></button>
+      <button class="btn" id="themeBtn" type="button"></button>
+    </div>
   </header>
 
-  <div class="disclaimer" id="disclaimer"></div>
+  <div class="disclaimer" id="disclaimer" data-i18n-html="disclaimer"></div>
 
   <nav class="tabs" role="tablist">
-    <button class="tab" role="tab" id="tabbtn-single" aria-controls="tab-single" aria-selected="true" type="button">Egyedi kérelem</button>
-    <button class="tab" role="tab" id="tabbtn-portfolio" aria-controls="tab-portfolio" aria-selected="false" type="button">Minta-portfólió</button>
+    <button class="tab" role="tab" id="tabbtn-single" aria-controls="tab-single" aria-selected="true" type="button" data-i18n="tab.single"></button>
+    <button class="tab" role="tab" id="tabbtn-portfolio" aria-controls="tab-portfolio" aria-selected="false" type="button" data-i18n="tab.portfolio"></button>
   </nav>
 
   <section id="tab-single" role="tabpanel">
   <div class="grid">
     <form class="panel" id="form" novalidate>
-      <h2>Hitelkérelem adatai</h2>
+      <h2 data-i18n="form.title"></h2>
       <div class="presets">
-        <span>Példa:</span>
-        <button class="btn small" type="button" data-preset="low">Alacsony</button>
-        <button class="btn small" type="button" data-preset="mid">Közepes</button>
-        <button class="btn small" type="button" data-preset="high">Magas kockázat</button>
+        <span data-i18n="preset.label"></span>
+        <button class="btn small" type="button" data-preset="low" data-i18n="preset.low"></button>
+        <button class="btn small" type="button" data-preset="mid" data-i18n="preset.mid"></button>
+        <button class="btn small" type="button" data-preset="high" data-i18n="preset.high"></button>
       </div>
       <div id="fields"></div>
       <div class="actions">
-        <button class="btn primary" type="submit">Kiértékelés</button>
-        <button class="btn" type="button" id="resetBtn">Törlés</button>
+        <button class="btn primary" type="submit" data-i18n="btn.evaluate"></button>
+        <button class="btn" type="button" id="resetBtn" data-i18n="btn.reset"></button>
       </div>
     </form>
 
     <div>
-      <div class="panel placeholder" id="placeholder">
-        Töltsd ki az űrlapot, vagy válassz egy példa-profilt, majd kattints a <b>Kiértékelés</b> gombra.
-      </div>
+      <div class="panel placeholder" id="placeholder" data-i18n-html="placeholder"></div>
 
       <div class="results hidden" id="results">
         <section class="panel fade-in" id="verdictPanel">
           <div class="panel-head">
-            <h2>Döntési javaslat</h2>
-            <button class="btn small" type="button" id="singleExportBtn">⬇ Excel export</button>
+            <h2 data-i18n="verdict.title"></h2>
+            <button class="btn small" type="button" id="singleExportBtn" data-i18n="btn.export"></button>
           </div>
           <div class="verdict">
             <div>
               <div class="pd-big" id="pdValue">–</div>
-              <div class="pd-label">becsült PD (2 éven belüli súlyos késedelem)</div>
+              <div class="pd-label" data-i18n="pd.label"></div>
             </div>
             <div>
               <span class="badge" id="decisionBadge">–</span>
@@ -218,18 +220,18 @@ footer { margin-top: 24px; color: var(--muted); font-size: 12px; text-align: cen
         </section>
 
         <section class="panel fade-in">
-          <h2>Mi befolyásolta az eredményt?</h2>
+          <h2 data-i18n="factors.title"></h2>
           <ul class="factors" id="factorList"></ul>
           <div class="chart-box"><canvas id="contribChart"></canvas></div>
           <div class="note" id="contribNote"></div>
         </section>
 
         <section class="panel fade-in">
-          <h2>Historikus összevetés</h2>
+          <h2 data-i18n="hist.title"></h2>
           <div class="seg-compare" id="segStats"></div>
           <div id="segText" style="margin-bottom:10px"></div>
           <div class="heat-wrap"><table class="heat" id="heat"></table></div>
-          <div class="note">Tényleges historikus nemteljesítési arány kor × hitelkeret-kihasználtság szegmensenként (minden cella legalább 30 hitelfelvevő). A kiemelt cella a megadott profil szegmense.</div>
+          <div class="note" data-i18n="heat.note"></div>
         </section>
       </div>
     </div>
@@ -240,34 +242,34 @@ footer { margin-top: 24px; color: var(--muted); font-size: 12px; text-align: cen
     <div class="kpis" id="pfKpis"></div>
     <div class="pf-top">
       <div class="panel">
-        <h2>Döntési sávok és tényleges kimenet</h2>
+        <h2 data-i18n="pf.chart.title"></h2>
         <div class="chart-box"><canvas id="pfChart"></canvas></div>
-        <div class="note">Oszlop: hitelek száma döntési sávonként. Pont: a sávban ténylegesen nemteljesítők aránya.</div>
+        <div class="note" data-i18n="pf.chart.note"></div>
       </div>
       <div class="panel">
-        <h2>Modell-javaslat vs. valós kimenet</h2>
+        <h2 data-i18n="pf.matrix.title"></h2>
         <div class="matrix-wrap"><table class="matrix" id="pfMatrix"></table></div>
         <div class="note" id="pfMatrixNote"></div>
       </div>
     </div>
     <div class="panel">
       <div class="panel-head">
-        <h2>Hitelek</h2>
-        <button class="btn primary" type="button" id="pfExportBtn">⬇ Excel export</button>
+        <h2 data-i18n="pf.loans.title"></h2>
+        <button class="btn primary" type="button" id="pfExportBtn" data-i18n="btn.export"></button>
       </div>
       <div class="filters">
-        <select id="pfDecision" aria-label="Szűrés döntésre">
-          <option value="">Minden döntés</option>
-          <option value="good">Jóváhagyás</option>
-          <option value="warn">Felülvizsgálat</option>
-          <option value="bad">Elutasítás</option>
+        <select id="pfDecision" data-i18n-aria="pf.filter.decisionAria">
+          <option value="" data-i18n="pf.filter.allDecisions"></option>
+          <option value="good" data-i18n="dec.short.good"></option>
+          <option value="warn" data-i18n="dec.short.warn"></option>
+          <option value="bad" data-i18n="dec.short.bad"></option>
         </select>
-        <select id="pfOutcome" aria-label="Szűrés kimenetre">
-          <option value="">Minden kimenet</option>
-          <option value="1">Nemteljesített</option>
-          <option value="0">Teljesített</option>
+        <select id="pfOutcome" data-i18n-aria="pf.filter.outcomeAria">
+          <option value="" data-i18n="pf.filter.allOutcomes"></option>
+          <option value="1" data-i18n="pf.pill.def"></option>
+          <option value="0" data-i18n="pf.pill.ok"></option>
         </select>
-        <label class="chk"><input type="checkbox" id="pfFlagged"> Csak adatminőségi jelzéssel</label>
+        <label class="chk"><input type="checkbox" id="pfFlagged"> <span data-i18n="pf.filter.flagged"></span></label>
         <span class="count" id="pfCount"></span>
       </div>
       <div class="table-wrap">
@@ -276,12 +278,12 @@ footer { margin-top: 24px; color: var(--muted); font-size: 12px; text-align: cen
           <tbody id="pfBody"></tbody>
         </table>
       </div>
-      <div class="note">Kattints egy sorra, hogy részletesen elemezd az „Egyedi kérelem” fülön. <span class="flag">⚠</span> = a forrásadatban valószínűleg hiányzott a jövedelem (mediánnal, 5 400 USD-vel pótolva), ezért az adósságteher-arány itt abszolút összeg, nem arány.</div>
+      <div class="note" data-i18n-html="pf.note"></div>
     </div>
   </section>
 
   <details class="method panel">
-    <summary>Módszertan és adatforrás</summary>
+    <summary data-i18n="method.summary"></summary>
     <div id="methodBody"></div>
   </details>
 
@@ -333,34 +335,275 @@ const PRIOR_OFFSET = Math.log(MODEL.meta.overall_default_rate / (1 - MODEL.meta.
 
 const THRESHOLDS = { approve: 0.10, reject: 0.30 };
 
-/* ---------- Űrlap-definíció ---------- */
-// toModel: a felhasználói egységből (pl. %) a modell egységébe váltás
-const FIELDS = [
-  { key: "age", label: "Életkor", hint: "év", unit: "év", min: 18, max: 110, int: true,
-    toModel: v => v, trainMax: 109 },
-  { key: "MonthlyIncome", label: "Havi nettó jövedelem", hint: "USD / hó (az adathalmaz amerikai hitelfelvevőkből áll)", unit: "USD", min: 0, max: 1e7,
-    toModel: v => v },
-  { key: "RevolvingUtilizationOfUnsecuredLines", label: "Hitelkeret-kihasználtság", hint: "Hitelkártya- és folyószámlahitel-egyenleg a keret %-ában (pl. 35)", unit: "%", min: 0, max: 100000,
-    toModel: v => v / 100 },
-  { key: "DebtRatio", label: "Adósságteher-arány", hint: "Havi adósságszolgálat + megélhetési kiadások a havi jövedelem %-ában", unit: "%", min: 0, max: 1e7,
-    toModel: v => v / 100 },
-  { key: "NumberOfTime30-59DaysPastDueNotWorse", label: "30–59 napos késések száma", hint: "Hányszor volt 30–59 napos késedelemben (elmúlt 2 év)", unit: "db", min: 0, max: 50, int: true,
-    toModel: v => v, trainMax: 13 },
-  { key: "NumberOfTimes90DaysLate", label: "90+ napos késések száma", hint: "Hányszor volt 90 napnál hosszabb késedelemben", unit: "db", min: 0, max: 50, int: true,
-    toModel: v => v, trainMax: 17 }
-];
+/* ---------- Többnyelvűség (HU / EN) ----------
+   Minden felületi szöveg itt van; a t() hiányzó kulcsnál a magyarra esik vissza.
+   A {név} helyőrzőket a t() második paramétere tölti ki. A *.html kulcsok megbízható,
+   beépített HTML-t tartalmaznak; a behelyettesített értékeket a hívó escape-eli. */
+const STR = {
+  hu: {
+    "app.title": "Hitelkockázat-elemző",
+    "app.sub": "Nemteljesítési valószínűség (PD) becslése valós, nyilvános adaton tanított logisztikus regresszióval",
+    "theme.toDark": "🌙 Sötét mód", "theme.toLight": "☀️ Világos mód", "theme.aria": "Téma váltása",
+    "lang.btn": "EN", "lang.aria": "Switch to English",
+    "disclaimer": "<b>Demo / oktatási célú alkalmazás.</b> Oktatási / demo célú, egyszerűsített modell. Nem éles hitelbírálati döntéshozatalra készült. Nem minősül hitelajánlatnak vagy pénzügyi tanácsadásnak.",
+    "meta.source": MODEL.meta.source_dataset,
+    "meta.disclaimer": MODEL.meta.disclaimer,
+    "tab.single": "Egyedi kérelem", "tab.portfolio": "Minta-portfólió",
+    "form.title": "Hitelkérelem adatai",
+    "preset.label": "Példa:", "preset.low": "Alacsony", "preset.mid": "Közepes", "preset.high": "Magas kockázat",
+    "btn.evaluate": "Kiértékelés", "btn.reset": "Törlés", "btn.export": "⬇ Excel export",
+    "placeholder": "Töltsd ki az űrlapot, vagy válassz egy példa-profilt, majd kattints a <b>Kiértékelés</b> gombra.",
+    "verdict.title": "Döntési javaslat",
+    "pd.label": "becsült PD (2 éven belüli súlyos késedelem)",
+    "factors.title": "Mi befolyásolta az eredményt?",
+    "hist.title": "Historikus összevetés",
+    "heat.note": "Tényleges historikus nemteljesítési arány kor × hitelkeret-kihasználtság szegmensenként (minden cella legalább 30 hitelfelvevő). A kiemelt cella a megadott profil szegmense.",
+    "method.summary": "Módszertan és adatforrás",
+    "footer": "Adatforrás: {source} · Test AUC: {auc}",
 
-const LABEL_SHORT = {
-  "RevolvingUtilizationOfUnsecuredLines": "Keret-kihasználtság",
-  "age": "Életkor",
-  "NumberOfTime30-59DaysPastDueNotWorse": "30–59 napos késések",
-  "DebtRatio": "Adósságteher-arány",
-  "MonthlyIncome": "Havi jövedelem",
-  "NumberOfTimes90DaysLate": "90+ napos késések"
+    "f.age.label": "Életkor", "f.age.hint": "év",
+    "f.MonthlyIncome.label": "Havi nettó jövedelem", "f.MonthlyIncome.hint": "USD / hó (az adathalmaz amerikai hitelfelvevőkből áll)",
+    "f.RevolvingUtilizationOfUnsecuredLines.label": "Hitelkeret-kihasználtság", "f.RevolvingUtilizationOfUnsecuredLines.hint": "Hitelkártya- és folyószámlahitel-egyenleg a keret %-ában (pl. 35)",
+    "f.DebtRatio.label": "Adósságteher-arány", "f.DebtRatio.hint": "Havi adósságszolgálat + megélhetési kiadások a havi jövedelem %-ában",
+    "f.NumberOfTime30-59DaysPastDueNotWorse.label": "30–59 napos késések száma", "f.NumberOfTime30-59DaysPastDueNotWorse.hint": "Hányszor volt 30–59 napos késedelemben (elmúlt 2 év)",
+    "f.NumberOfTimes90DaysLate.label": "90+ napos késések száma", "f.NumberOfTimes90DaysLate.hint": "Hányszor volt 90 napnál hosszabb késedelemben",
+    "unit.years": "év", "unit.usd": "USD", "unit.pct": "%", "unit.count": "db",
+
+    "s.RevolvingUtilizationOfUnsecuredLines": "Keret-kihasználtság", "s.age": "Életkor",
+    "s.NumberOfTime30-59DaysPastDueNotWorse": "30–59 napos késések", "s.DebtRatio": "Adósságteher-arány",
+    "s.MonthlyIncome": "Havi jövedelem", "s.NumberOfTimes90DaysLate": "90+ napos késések",
+
+    "err.required": "Kötelező mező.",
+    "err.notNumber": "Csak számot adj meg (pl. 35 vagy 0,35).",
+    "err.negative": "Nem lehet negatív.",
+    "err.integer": "Egész számot adj meg.",
+    "err.range": "Érvényes tartomány: {min}–{max}{unit}.",
+    "err.unexpected": "Váratlan hiba a számítás közben. Ellenőrizd a megadott értékeket.",
+    "warn.cap": "A tanító adat tartományán kívül esik; a modell {shown} értékkel számol.",
+    "warn.extrap": "A tanító adatban legfeljebb {max} szerepelt; az eredmény extrapoláció.",
+    "warn.debtHigh": "Szokatlanul magas (1000% feletti) arány. A forrásadatban ilyen érték jellemzően hiányzó jövedelmet és abszolút adósságösszeget jelez.",
+    "warn.zeroIncome": "0 jövedelem mellett az adósságteher-arány nem értelmezhető; az eredményt óvatosan kezeld.",
+
+    "dec.good.label": "Jóváhagyás javasolt", "dec.good.text": "A becsült kockázat a jóváhagyási küszöb alatt van.",
+    "dec.warn.label": "Egyedi felülvizsgálat", "dec.warn.text": "Közepes kockázat: a döntéshez további információ (pl. fedezet, jövedelemigazolás) szükséges.",
+    "dec.bad.label": "Elutasítás javasolt", "dec.bad.text": "A becsült kockázat az elutasítási küszöb felett van.",
+    "dec.short.good": "Jóváhagyás", "dec.short.warn": "Felülvizsgálat", "dec.short.bad": "Elutasítás",
+
+    "factor.html": "<b>{label}</b> ({value}) — {strength} {dir} a kockázatot az átlagos hitelfelvevőhöz képest.",
+    "factor.strong": "erősen", "factor.moderate": "mérsékelten", "factor.slight": "enyhén",
+    "factor.up": "növeli", "factor.down": "csökkenti",
+    "contrib.note": "A sávok a log-esély hozzájárulást mutatják az átlagos tanító-mintabeli profilhoz képest (pozitív = kockázatnövelő). Az adósságteher-arány a modellben szerepel (hatása most {dr}), de adatminőségi okokból nem elsődleges magyarázó tényező.",
+    "chart.tooltip": "log-esély hozzájárulás",
+    "chart.na.single": "A grafikon nem tölthető be (Chart.js nem érhető el offline). A fenti lista a teljes magyarázatot tartalmazza.",
+    "chart.na.pf": "A grafikon nem tölthető be (Chart.js nem érhető el offline). A mellette lévő táblázat ugyanezeket az adatokat mutatja.",
+
+    "seg.model": "Modell becslés (ez a kérelem)", "seg.similar": "Hasonló profilúak valós aránya", "seg.overall": "Teljes minta valós aránya",
+    "seg.html": "A <b>{age} éves</b> korcsoportban, <b>{util}</b> keret-kihasználtság mellett <b>{count}</b> hitelfelvevőből <b>{rate}</b> esett súlyos (90+ napos) késedelembe 2 éven belül — ez a teljes minta átlagának {mult}-szerese.",
+    "seg.none": "Ehhez a szegmenshez nincs elég (≥30) historikus megfigyelés.",
+    "heat.corner": "Kor \\ Kihaszn.", "heat.cellTitle": "{n} fő",
+
+    "pf.chart.title": "Döntési sávok és tényleges kimenet",
+    "pf.chart.note": "Oszlop: hitelek száma döntési sávonként. Pont: a sávban ténylegesen nemteljesítők aránya.",
+    "pf.matrix.title": "Modell-javaslat vs. valós kimenet",
+    "pf.loans.title": "Hitelek",
+    "pf.filter.decisionAria": "Szűrés döntésre", "pf.filter.allDecisions": "Minden döntés",
+    "pf.filter.outcomeAria": "Szűrés kimenetre", "pf.filter.allOutcomes": "Minden kimenet",
+    "pf.filter.flagged": "Csak adatminőségi jelzéssel",
+    "pf.note": "Kattints egy sorra, hogy részletesen elemezd az „Egyedi kérelem” fülön. <span class=\"flag\">⚠</span> = a forrásadatban valószínűleg hiányzott a jövedelem (mediánnal, 5 400 USD-vel pótolva), ezért az adósságteher-arány itt abszolút összeg, nem arány.",
+    "pf.kpi.n": "Hitel a mintában", "pf.kpi.avgPd": "Átlagos becsült PD",
+    "pf.kpi.actual": "Tényleges nemteljesítési arány ({n} db)", "pf.kpi.split": "Jóváhagyás / felülvizsg. / elutasítás",
+    "pf.m.decision": "Javaslat", "pf.m.loans": "Hitelek", "pf.m.def": "Nemteljesített", "pf.m.ok": "Teljesített", "pf.m.rate": "Valós arány",
+    "pf.m.note": "A {defaults} ténylegesen nemteljesítő hitelből {caught} került felülvizsgálatra vagy elutasításra, {missed} kapott volna jóváhagyást. Kis minta ({n} hitel), az arányok csak tájékoztató jellegűek; a modell teljesítményét a {testRows} soros teszthalmazon mért AUC ({auc}) jellemzi.",
+    "pf.col.id": "Ügyfél", "pf.col.age": "Kor", "pf.col.income": "Jövedelem (USD)", "pf.col.util": "Keret-kihaszn.",
+    "pf.col.debt": "Adósságteher", "pf.col.l3059": "30–59 n. késés", "pf.col.l90": "90+ n. késés", "pf.col.pd": "Becsült PD",
+    "pf.col.decision": "Javaslat", "pf.col.actual": "Valós kimenet",
+    "pf.pill.def": "Nemteljesített", "pf.pill.ok": "Teljesített",
+    "pf.row.title": "Részletes elemzés", "pf.empty": "Nincs a szűrésnek megfelelő hitel.", "pf.count": "{n} / {total} hitel",
+    "pf.ds.count": "Hitelek száma", "pf.ds.rate": "Valós nemteljesítési arány", "pf.axis.count": "db",
+    "flag.tooltip": "A forrásadatban valószínűleg hiányzott a jövedelem (mediánnal pótolva), ezért az adósságteher-arány itt abszolút összeg, nem arány.",
+
+    "method.html": "<ul><li><b>Adat:</b> {source}; {rows} sor tisztítás után ({bad} sor kizárva 96/98-as hibakódok miatt).</li><li><b>Modell:</b> logisztikus regresszió 6 változóval, standardizált bemenetekkel; teszt-AUC {auc} ({testRows} soros teszthalmazon).</li><li><b>Kalibráció:</b> a modell kiegyensúlyozott osztálysúlyokkal tanult, ezért a nyers kimenet a valós kockázat többszörösét mutatná. A megjelenített PD prior-korrigált a valós {rate}-os historikus arányra.</li><li><b>Döntési küszöbök:</b> PD &lt; {a} jóváhagyás, {a}–{r} felülvizsgálat, ≥ {r} elutasítás (demo-küszöbök, nem üzleti kalibráció).</li><li><b>Bemeneti limitek:</b> a tanításnál használt 99,5. percentilises limiteket az app is alkalmazza; a tartományon kívüli értékekre figyelmeztetés jelenik meg.</li><li><b>Ismert korlát:</b> az adósságteher-arány hiányzó jövedelem esetén abszolút összeget tartalmaz a forrásadatban, ezért nem elsődleges magyarázó tényező.</li></ul>",
+
+    "x.noLib": "Az Excel-export könyvtár nem töltődött be (internetkapcsolat szükséges).",
+    "x.sheet.pf": "Portfólió", "x.sheet.sum": "Összesítő", "x.sheet.meth": "Módszertan", "x.sheet.single": "Kiértékelés",
+    "x.file.pf": "hitelkockazat_portfolio", "x.file.single": "hitelkerelem_kiertekeles",
+    "x.meth.title": "Módszertan és adatforrás",
+    "x.meth.warn": "FIGYELEM: {disc} Nem minősül hitelajánlatnak vagy pénzügyi tanácsadásnak.",
+    "x.meth.source": "Adatforrás", "x.meth.sample": "Minta",
+    "x.meth.sampleV": "{rows} sor tisztítás után ({bad} sor kizárva 96/98-as hibakódok miatt)",
+    "x.meth.model": "Modell", "x.meth.modelV": "Logisztikus regresszió, 6 standardizált változó",
+    "x.meth.auc": "Teszt-AUC", "x.meth.calib": "Kalibráció",
+    "x.meth.calibV": "Prior-korrekció a valós {rate}-os historikus nemteljesítési arányra (a modell kiegyensúlyozott osztálysúlyokkal tanult).",
+    "x.meth.thr": "Döntési küszöbök", "x.meth.thrV": "PD < {a}: jóváhagyás; {a}–{r}: felülvizsgálat; ≥ {r}: elutasítás (demo-küszöbök)",
+    "x.meth.pd": "PD definíció", "x.meth.pdV": "2 éven belüli súlyos (90+ napos) késedelem valószínűsége",
+    "x.meth.limit": "Ismert korlát", "x.meth.limitV": "Az adósságteher-arány hiányzó jövedelem esetén abszolút összeget tartalmaz a forrásadatban; ezért nem elsődleges magyarázó tényező.",
+    "x.meth.time": "Export ideje",
+    "x.pf.title": "Minta-portfólió – hitelkockázati kiértékelés",
+    "x.pf.sub": "Export: {date} · {n} hitel · Szűrés: {filters} · Demo / oktatási célú",
+    "x.pf.noFilter": "nincs", "x.pf.fFlag": "Adatminőségi jelzéssel",
+    "x.pf.h": ["Ügyfél", "Kor", "Havi jövedelem (USD)", "Keret-kihasználtság", "Adósságteher-arány", "30–59 napos késés", "90+ napos késés", "Becsült PD", "Javaslat", "Valós kimenet", "Adatminőség"],
+    "x.pf.flagText": "Hiányzó jövedelem (pótolt); adósságteher abszolút összeg",
+    "x.sum.title": "Portfólió-összesítő (teljes minta, szűrés nélkül)",
+    "x.sum.n": "Hitelek száma", "x.sum.avg": "Átlagos becsült PD", "x.sum.actual": "Tényleges nemteljesítési arány", "x.sum.flagged": "Adatminőségi jelzéssel",
+    "x.sum.section": "Modell-javaslat vs. valós kimenet",
+    "x.sum.note": "Kis minta: az arányok tájékoztató jellegűek. A modell teljesítményét a teszthalmazon mért AUC jellemzi.",
+    "x.s.title": "Hitelkérelem – kockázati kiértékelés",
+    "x.s.sub": "Export: {date} · Demo / oktatási célú, nem hitelbírálati döntés",
+    "x.s.result": "Eredmény", "x.s.pd": "Becsült PD", "x.s.dec": "Döntési javaslat", "x.s.reason": "Indoklás",
+    "x.s.inputs": "Megadott adatok", "x.s.inH": ["Változó", "Megadott érték", "Modellben használt érték"],
+    "x.s.inNote": "Sárga háttér: a tanítási tartományon kívüli érték, a modell a tanításkori limittel számolt.",
+    "x.s.factors": "Tényezők hatása (log-esély, az átlagos hitelfelvevőhöz képest)",
+    "x.s.fH": ["Tényező", "Hatás", "Irány"], "x.s.secondary": " (nem elsődleges)",
+    "x.s.up": "növeli a kockázatot", "x.s.down": "csökkenti a kockázatot",
+    "x.s.hist": "Historikus összevetés", "x.s.seg": "Szegmens", "x.s.segV": "{age} év, {util} keret-kihasználtság",
+    "x.s.segRate": "Szegmens valós aránya", "x.s.segN": "Szegmens mérete", "x.s.overall": "Teljes minta valós aránya"
+  },
+  en: {
+    "app.title": "Credit Risk Analyzer",
+    "app.sub": "Probability of default (PD) estimated by a logistic regression trained on real public credit data",
+    "theme.toDark": "🌙 Dark mode", "theme.toLight": "☀️ Light mode", "theme.aria": "Toggle theme",
+    "lang.btn": "HU", "lang.aria": "Váltás magyar nyelvre",
+    "disclaimer": "<b>Demo / educational application.</b> A simplified model built for learning purposes, not for real credit decisions. It is not a loan offer or financial advice.",
+    "meta.source": "Give Me Some Credit (Kaggle, 2011) – public educational dataset",
+    "meta.disclaimer": "Educational / demo model, simplified. Not intended for real credit decisions.",
+    "tab.single": "Single application", "tab.portfolio": "Sample portfolio",
+    "form.title": "Application details",
+    "preset.label": "Example:", "preset.low": "Low", "preset.mid": "Medium", "preset.high": "High risk",
+    "btn.evaluate": "Evaluate", "btn.reset": "Clear", "btn.export": "⬇ Excel export",
+    "placeholder": "Fill in the form or pick an example profile, then click <b>Evaluate</b>.",
+    "verdict.title": "Recommendation",
+    "pd.label": "estimated PD (serious delinquency within 2 years)",
+    "factors.title": "What drove the result?",
+    "hist.title": "Historical comparison",
+    "heat.note": "Actual historical default rate by age × credit utilization segment (every cell has at least 30 borrowers). The highlighted cell is this applicant's segment.",
+    "method.summary": "Methodology and data source",
+    "footer": "Data source: {source} · Test AUC: {auc}",
+
+    "f.age.label": "Age", "f.age.hint": "years",
+    "f.MonthlyIncome.label": "Monthly net income", "f.MonthlyIncome.hint": "USD per month (the dataset covers US borrowers)",
+    "f.RevolvingUtilizationOfUnsecuredLines.label": "Credit utilization", "f.RevolvingUtilizationOfUnsecuredLines.hint": "Credit card and overdraft balance as % of the limit (e.g. 35)",
+    "f.DebtRatio.label": "Debt-to-income ratio", "f.DebtRatio.hint": "Monthly debt payments + living costs as % of monthly income",
+    "f.NumberOfTime30-59DaysPastDueNotWorse.label": "Times 30–59 days late", "f.NumberOfTime30-59DaysPastDueNotWorse.hint": "How many times 30–59 days past due (last 2 years)",
+    "f.NumberOfTimes90DaysLate.label": "Times 90+ days late", "f.NumberOfTimes90DaysLate.hint": "How many times more than 90 days past due",
+    "unit.years": "years", "unit.usd": "USD", "unit.pct": "%", "unit.count": "",
+
+    "s.RevolvingUtilizationOfUnsecuredLines": "Credit utilization", "s.age": "Age",
+    "s.NumberOfTime30-59DaysPastDueNotWorse": "30–59 days late", "s.DebtRatio": "Debt-to-income ratio",
+    "s.MonthlyIncome": "Monthly income", "s.NumberOfTimes90DaysLate": "90+ days late",
+
+    "err.required": "This field is required.",
+    "err.notNumber": "Please enter a number (e.g. 35 or 0.35).",
+    "err.negative": "Cannot be negative.",
+    "err.integer": "Please enter a whole number.",
+    "err.range": "Valid range: {min}–{max}{unit}.",
+    "err.unexpected": "Unexpected error during the calculation. Please check your inputs.",
+    "warn.cap": "Outside the training data range; the model uses {shown} instead.",
+    "warn.extrap": "The training data contained at most {max}; the result is an extrapolation.",
+    "warn.debtHigh": "Unusually high ratio (above 1000%). In the source data, values like this usually indicate missing income and an absolute debt amount.",
+    "warn.zeroIncome": "With zero income the debt ratio is not meaningful; treat the result with caution.",
+
+    "dec.good.label": "Approve", "dec.good.text": "The estimated risk is below the approval threshold.",
+    "dec.warn.label": "Manual review", "dec.warn.text": "Medium risk: more information (e.g. collateral, proof of income) is needed to decide.",
+    "dec.bad.label": "Decline", "dec.bad.text": "The estimated risk is above the decline threshold.",
+    "dec.short.good": "Approve", "dec.short.warn": "Review", "dec.short.bad": "Decline",
+
+    "factor.html": "<b>{label}</b> ({value}) — {strength} {dir} risk compared with the average borrower.",
+    "factor.strong": "strongly", "factor.moderate": "moderately", "factor.slight": "slightly",
+    "factor.up": "increases", "factor.down": "reduces",
+    "contrib.note": "Bars show each factor's log-odds contribution relative to the average borrower in the training data (positive = increases risk). The debt-to-income ratio is part of the model (current effect {dr}), but for data-quality reasons it is not used as a primary explanation.",
+    "chart.tooltip": "log-odds contribution",
+    "chart.na.single": "The chart could not be loaded (Chart.js is unavailable offline). The list above contains the full explanation.",
+    "chart.na.pf": "The chart could not be loaded (Chart.js is unavailable offline). The table next to it shows the same data.",
+
+    "seg.model": "Model estimate (this application)", "seg.similar": "Actual rate, similar profiles", "seg.overall": "Actual rate, full sample",
+    "seg.html": "Among <b>{count}</b> borrowers aged <b>{age}</b> with <b>{util}</b> credit utilization, <b>{rate}</b> became seriously delinquent (90+ days) within 2 years — {mult}× the full-sample average.",
+    "seg.none": "Not enough (≥30) historical observations for this segment.",
+    "heat.corner": "Age \\ Util.", "heat.cellTitle": "{n} borrowers",
+
+    "pf.chart.title": "Decision bands and actual outcomes",
+    "pf.chart.note": "Bars: number of loans per decision band. Dots: share of loans in the band that actually defaulted.",
+    "pf.matrix.title": "Model recommendation vs. actual outcome",
+    "pf.loans.title": "Loans",
+    "pf.filter.decisionAria": "Filter by recommendation", "pf.filter.allDecisions": "All recommendations",
+    "pf.filter.outcomeAria": "Filter by outcome", "pf.filter.allOutcomes": "All outcomes",
+    "pf.filter.flagged": "Data-quality flags only",
+    "pf.note": "Click a row to analyze it in detail on the “Single application” tab. <span class=\"flag\">⚠</span> = income was probably missing in the source data (imputed with the median, 5,400 USD), so the debt ratio here is an absolute amount, not a ratio.",
+    "pf.kpi.n": "Loans in sample", "pf.kpi.avgPd": "Average estimated PD",
+    "pf.kpi.actual": "Actual default rate ({n} loans)", "pf.kpi.split": "Approve / review / decline",
+    "pf.m.decision": "Recommendation", "pf.m.loans": "Loans", "pf.m.def": "Defaulted", "pf.m.ok": "Repaid", "pf.m.rate": "Actual rate",
+    "pf.m.note": "Of the {defaults} loans that actually defaulted, {caught} were sent to review or declined and {missed} would have been approved. Small sample ({n} loans), so the rates are indicative only; model performance is measured by the AUC ({auc}) on the {testRows}-row test set.",
+    "pf.col.id": "Client", "pf.col.age": "Age", "pf.col.income": "Income (USD)", "pf.col.util": "Utilization",
+    "pf.col.debt": "Debt ratio", "pf.col.l3059": "30–59d late", "pf.col.l90": "90+d late", "pf.col.pd": "Est. PD",
+    "pf.col.decision": "Recommendation", "pf.col.actual": "Actual outcome",
+    "pf.pill.def": "Defaulted", "pf.pill.ok": "Repaid",
+    "pf.row.title": "Analyze in detail", "pf.empty": "No loans match the filters.", "pf.count": "{n} / {total} loans",
+    "pf.ds.count": "Number of loans", "pf.ds.rate": "Actual default rate", "pf.axis.count": "loans",
+    "flag.tooltip": "Income was probably missing in the source data (imputed with the median), so the debt ratio here is an absolute amount, not a ratio.",
+
+    "method.html": "<ul><li><b>Data:</b> {source}; {rows} rows after cleaning ({bad} rows excluded due to 96/98 error codes).</li><li><b>Model:</b> logistic regression with 6 standardized features; test AUC {auc} (on a {testRows}-row test set).</li><li><b>Calibration:</b> the model was trained with balanced class weights, so its raw output would overstate risk several times. The displayed PD is prior-corrected to the actual {rate} historical default rate.</li><li><b>Decision thresholds:</b> PD &lt; {a} approve, {a}–{r} manual review, ≥ {r} decline (demo thresholds, not a business calibration).</li><li><b>Input caps:</b> the app applies the 99.5th-percentile caps used in training and warns when an input is outside that range.</li><li><b>Known limitation:</b> where income is missing, the source data stores an absolute amount in the debt ratio, so it is not used as a primary explanation.</li></ul>",
+
+    "x.noLib": "The Excel export library did not load (an internet connection is required).",
+    "x.sheet.pf": "Portfolio", "x.sheet.sum": "Summary", "x.sheet.meth": "Methodology", "x.sheet.single": "Assessment",
+    "x.file.pf": "credit_risk_portfolio", "x.file.single": "credit_application_assessment",
+    "x.meth.title": "Methodology and data source",
+    "x.meth.warn": "NOTE: {disc} Not a loan offer or financial advice.",
+    "x.meth.source": "Data source", "x.meth.sample": "Sample",
+    "x.meth.sampleV": "{rows} rows after cleaning ({bad} rows excluded due to 96/98 error codes)",
+    "x.meth.model": "Model", "x.meth.modelV": "Logistic regression, 6 standardized features",
+    "x.meth.auc": "Test AUC", "x.meth.calib": "Calibration",
+    "x.meth.calibV": "Prior correction to the actual {rate} historical default rate (the model was trained with balanced class weights).",
+    "x.meth.thr": "Decision thresholds", "x.meth.thrV": "PD < {a}: approve; {a}–{r}: manual review; ≥ {r}: decline (demo thresholds)",
+    "x.meth.pd": "PD definition", "x.meth.pdV": "Probability of serious (90+ days) delinquency within 2 years",
+    "x.meth.limit": "Known limitation", "x.meth.limitV": "Where income is missing, the source data stores an absolute amount in the debt ratio; it is therefore not used as a primary explanation.",
+    "x.meth.time": "Exported at",
+    "x.pf.title": "Sample portfolio – credit risk assessment",
+    "x.pf.sub": "Exported: {date} · {n} loans · Filters: {filters} · Demo / educational use",
+    "x.pf.noFilter": "none", "x.pf.fFlag": "With data-quality flag",
+    "x.pf.h": ["Client", "Age", "Monthly income (USD)", "Credit utilization", "Debt-to-income ratio", "30–59 days late", "90+ days late", "Estimated PD", "Recommendation", "Actual outcome", "Data quality"],
+    "x.pf.flagText": "Missing income (imputed); debt ratio is an absolute amount",
+    "x.sum.title": "Portfolio summary (full sample, unfiltered)",
+    "x.sum.n": "Number of loans", "x.sum.avg": "Average estimated PD", "x.sum.actual": "Actual default rate", "x.sum.flagged": "With data-quality flag",
+    "x.sum.section": "Model recommendation vs. actual outcome",
+    "x.sum.note": "Small sample: rates are indicative only. Model performance is measured by the test-set AUC.",
+    "x.s.title": "Credit application – risk assessment",
+    "x.s.sub": "Exported: {date} · Demo / educational use, not a credit decision",
+    "x.s.result": "Result", "x.s.pd": "Estimated PD", "x.s.dec": "Recommendation", "x.s.reason": "Rationale",
+    "x.s.inputs": "Inputs", "x.s.inH": ["Variable", "Entered value", "Value used by the model"],
+    "x.s.inNote": "Yellow background: value outside the training range; the model used the training-time cap.",
+    "x.s.factors": "Factor effects (log-odds, relative to the average borrower)",
+    "x.s.fH": ["Factor", "Effect", "Direction"], "x.s.secondary": " (secondary)",
+    "x.s.up": "increases risk", "x.s.down": "reduces risk",
+    "x.s.hist": "Historical comparison", "x.s.seg": "Segment", "x.s.segV": "age {age}, {util} utilization",
+    "x.s.segRate": "Segment actual rate", "x.s.segN": "Segment size", "x.s.overall": "Full-sample actual rate"
+  }
 };
+const LANGS = ["hu", "en"];
+const LOCALE = { hu: "hu-HU", en: "en-US" };
+let LANG = "hu";
+
+function t(key, vars) {
+  let s = STR[LANG][key];
+  if (s === undefined) { s = STR.hu[key]; console.warn("Hiányzó fordítás:", LANG, key); }
+  if (s === undefined) return key;
+  if (typeof s !== "string" || !vars) return s;
+  return s.replace(/\{(\w+)\}/g, (m, k) => (k in vars ? vars[k] : m));
+}
+const nf = (v, opts) => v.toLocaleString(LOCALE[LANG], opts);
+
+/* ---------- Űrlap-definíció ---------- */
+// toModel: a felhasználói egységből (pl. %) a modell egységébe váltás; a címkék a STR-ben vannak
+const FIELDS = [
+  { key: "age", unit: "years", min: 18, max: 110, int: true, toModel: v => v, trainMax: 109 },
+  { key: "MonthlyIncome", unit: "usd", min: 0, max: 1e7, toModel: v => v },
+  { key: "RevolvingUtilizationOfUnsecuredLines", unit: "pct", min: 0, max: 100000, toModel: v => v / 100 },
+  { key: "DebtRatio", unit: "pct", min: 0, max: 1e7, toModel: v => v / 100 },
+  { key: "NumberOfTime30-59DaysPastDueNotWorse", unit: "count", min: 0, max: 50, int: true, toModel: v => v, trainMax: 13 },
+  { key: "NumberOfTimes90DaysLate", unit: "count", min: 0, max: 50, int: true, toModel: v => v, trainMax: 17 }
+];
+const unitSuffix = u => { const s = t("unit." + u); return s === "%" ? "%" : s ? " " + s : ""; };
 
 // A DebtRatio együtthatója a kiugró értékek miatt ~0 és iránya nem logikus
-// (ld. ATADAS_CLAUDE_CODE.md) -> a modellben marad, de nem elsődleges magyarázó tényező.
+// (ld. TESZT_NAPLO.md 5.) -> a modellben marad, de nem elsődleges magyarázó tényező.
 const SECONDARY_FEATURES = new Set(["DebtRatio"]);
 
 const PRESETS = {
@@ -371,17 +614,27 @@ const PRESETS = {
 
 /* ---------- Segédfüggvények ---------- */
 const $ = id => document.getElementById(id);
-const pct = (x, d = 1) => (x * 100).toLocaleString("hu-HU", { minimumFractionDigits: d, maximumFractionDigits: d }) + "%";
+const pct = (x, d = 1) => nf(x * 100, { minimumFractionDigits: d, maximumFractionDigits: d }) + "%";
 const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const cssVar = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 
-// Magyar számformátum elfogadása: "5 400", "0,35", "35%"
-function parseNum(raw) {
-  const s = String(raw).trim().replace(/[\s ]/g, "").replace(/%$/, "").replace(",", ".");
+// Számbevitel a nyelv konvenciója szerint.
+//  hu: "5 400", "0,35", "35%"  (vessző = tizedesjel)
+//  en: "5,400", "0.35", "35%"  (vessző = ezres tagolás; egyéb vessző érvénytelen, nem tippelünk)
+function parseNum(raw, lang = LANG) {
+  let s = String(raw).trim().replace(/[\s ]/g, "").replace(/%$/, "");
   if (s === "") return { empty: true };
+  if (lang === "en") {
+    if (/^-?\d{1,3}(,\d{3})+(\.\d+)?$/.test(s)) s = s.replace(/,/g, "");
+    else if (s.includes(",")) return { invalid: true };
+  } else {
+    s = s.replace(",", ".");
+  }
   if (!/^-?\d*\.?\d+$/.test(s)) return { invalid: true };
   return { value: Number(s) };
 }
+// Szám beírása mezőbe az adott nyelv formátumában (ezres tagolás nélkül)
+const fmtInput = (v, lang = LANG) => lang === "hu" ? String(v).replace(".", ",") : String(v);
 
 function ageBand(age) {
   // pandas.cut(bins=[0,30,40,50,60,120]) jobbról zárt: 30 -> "<30", 40 -> "30-39" stb.
@@ -419,21 +672,28 @@ function score(modelInputs) {
   return { pd, pdRaw, contrib };
 }
 
+// A döntés nyelvfüggetlen (cls); a szövegek megjelenítéskor, az aktuális nyelven készülnek
 function decide(pd) {
-  if (pd < THRESHOLDS.approve) return { cls: "good", label: "Jóváhagyás javasolt", text: "A becsült kockázat a jóváhagyási küszöb alatt van." };
-  if (pd < THRESHOLDS.reject) return { cls: "warn", label: "Egyedi felülvizsgálat", text: "Közepes kockázat: a döntéshez további információ (pl. fedezet, jövedelemigazolás) szükséges." };
-  return { cls: "bad", label: "Elutasítás javasolt", text: "A becsült kockázat az elutasítási küszöb felett van." };
+  const cls = pd < THRESHOLDS.approve ? "good" : pd < THRESHOLDS.reject ? "warn" : "bad";
+  return { cls, get label() { return t(`dec.${cls}.label`); }, get text() { return t(`dec.${cls}.text`); } };
 }
 
 /* ---------- Űrlap felépítése és validáció ---------- */
 function buildForm() {
   $("fields").innerHTML = FIELDS.map(f => `
     <div class="field" id="f-${f.key}">
-      <label for="in-${f.key}">${esc(f.label)}</label>
-      <div class="hint">${esc(f.hint)}</div>
+      <label for="in-${f.key}"></label>
+      <div class="hint"></div>
       <input id="in-${f.key}" name="${f.key}" inputmode="decimal" autocomplete="off">
       <div class="msg"></div>
     </div>`).join("");
+}
+function updateFormTexts() {
+  for (const f of FIELDS) {
+    const el = $("f-" + f.key);
+    el.querySelector("label").textContent = t(`f.${f.key}.label`);
+    el.querySelector(".hint").textContent = t(`f.${f.key}.hint`);
+  }
 }
 
 function setMsg(key, type, text) {
@@ -448,12 +708,12 @@ function readForm() {
   const user = {}, model = {};
   for (const f of FIELDS) {
     const p = parseNum($("in-" + f.key).value);
-    if (p.empty) { setMsg(f.key, "err", "Kötelező mező."); ok = false; continue; }
-    if (p.invalid) { setMsg(f.key, "err", "Csak számot adj meg (pl. 35 vagy 0,35)."); ok = false; continue; }
+    if (p.empty) { setMsg(f.key, "err", t("err.required")); ok = false; continue; }
+    if (p.invalid) { setMsg(f.key, "err", t("err.notNumber")); ok = false; continue; }
     let v = p.value;
-    if (v < 0) { setMsg(f.key, "err", "Nem lehet negatív."); ok = false; continue; }
-    if (f.int && !Number.isInteger(v)) { setMsg(f.key, "err", "Egész számot adj meg."); ok = false; continue; }
-    if (v < f.min || v > f.max) { setMsg(f.key, "err", `Érvényes tartomány: ${f.min.toLocaleString("hu-HU")}–${f.max.toLocaleString("hu-HU")} ${f.unit}.`); ok = false; continue; }
+    if (v < 0) { setMsg(f.key, "err", t("err.negative")); ok = false; continue; }
+    if (f.int && !Number.isInteger(v)) { setMsg(f.key, "err", t("err.integer")); ok = false; continue; }
+    if (v < f.min || v > f.max) { setMsg(f.key, "err", t("err.range", { min: nf(f.min), max: nf(f.max), unit: unitSuffix(f.unit) })); ok = false; continue; }
 
     user[f.key] = v;
     let m = f.toModel(v);
@@ -461,13 +721,13 @@ function readForm() {
     const cap = TRAIN_CAPS[f.key];
     if (cap !== undefined && m > cap) {
       m = cap;
-      const shown = f.unit === "%" ? (cap * 100).toLocaleString("hu-HU", { maximumFractionDigits: 0 }) + "%" : cap.toLocaleString("hu-HU") + " " + f.unit;
-      warn = `A tanító adat tartományán kívül esik; a modell ${shown} értékkel számol.`;
+      const shown = f.unit === "pct" ? nf(cap * 100, { maximumFractionDigits: 0 }) + "%" : nf(cap) + unitSuffix(f.unit);
+      warn = t("warn.cap", { shown });
     } else if (f.trainMax !== undefined && m > f.trainMax) {
-      warn = `A tanító adatban legfeljebb ${f.trainMax} szerepelt; az eredmény extrapoláció.`;
+      warn = t("warn.extrap", { max: f.trainMax });
     }
-    if (f.key === "DebtRatio" && m > 10 && !warn) warn = "Szokatlanul magas (1000% feletti) arány. A forrásadatban ilyen érték jellemzően hiányzó jövedelmet és abszolút adósságösszeget jelez.";
-    if (f.key === "MonthlyIncome" && v === 0) warn = "0 jövedelem mellett az adósságteher-arány nem értelmezhető; az eredményt óvatosan kezeld.";
+    if (f.key === "DebtRatio" && m > 10 && !warn) warn = t("warn.debtHigh");
+    if (f.key === "MonthlyIncome" && v === 0) warn = t("warn.zeroIncome");
     setMsg(f.key, warn ? "warn" : null, warn);
     model[f.key] = m;
   }
@@ -501,15 +761,13 @@ function render(input) {
                          .sort((a, b) => Math.abs(b.value) - Math.abs(a.value));
   $("factorList").innerHTML = primary.slice(0, 4).map(c => {
     const up = c.value > 0;
-    const strength = Math.abs(c.value) > 0.5 ? "erősen" : Math.abs(c.value) > 0.15 ? "mérsékelten" : "enyhén";
+    const strength = Math.abs(c.value) > 0.5 ? "strong" : Math.abs(c.value) > 0.15 ? "moderate" : "slight";
     return `<li><span class="arrow ${up ? "up" : "down"}">${up ? "▲" : "▼"}</span>
-      <span><b>${esc(LABEL_SHORT[c.feature])}</b> (${esc(formatUser(c.feature, input.user[c.feature]))}) —
-      ${strength} ${up ? "növeli" : "csökkenti"} a kockázatot az átlagos hitelfelvevőhöz képest.</span></li>`;
+      <span>${t("factor.html", { label: esc(t("s." + c.feature)), value: esc(formatUser(c.feature, input.user[c.feature])),
+        strength: t("factor." + strength), dir: t(up ? "factor.up" : "factor.down") })}</span></li>`;
   }).join("");
   const dr = contrib.find(c => c.feature === "DebtRatio");
-  $("contribNote").textContent =
-    `A sávok a log-esély hozzájárulást mutatják az átlagos tanító-mintabeli profilhoz képest (pozitív = kockázatnövelő). ` +
-    `Az adósságteher-arány a modellben szerepel (hatása most ${dr.value >= 0 ? "+" : ""}${dr.value.toFixed(3)}), de adatminőségi okokból nem elsődleges magyarázó tényező.`;
+  $("contribNote").textContent = t("contrib.note", { dr: (dr.value >= 0 ? "+" : "") + nf(dr.value, { minimumFractionDigits: 3, maximumFractionDigits: 3 }) });
   drawChart(primary);
 
   // Szegmens
@@ -518,29 +776,30 @@ function render(input) {
   Object.assign(lastResult, { decision: d, seg, ab, ub });
   const overall = MODEL.meta.overall_default_rate;
   $("segStats").innerHTML = `
-    <div class="stat"><div class="v">${pct(pd)}</div><div class="l">Modell becslés (ez a kérelem)</div></div>
-    <div class="stat"><div class="v">${seg ? pct(seg.mean) : "n/a"}</div><div class="l">Hasonló profilúak valós aránya</div></div>
-    <div class="stat"><div class="v">${pct(overall)}</div><div class="l">Teljes minta valós aránya</div></div>`;
+    <div class="stat"><div class="v">${pct(pd)}</div><div class="l">${esc(t("seg.model"))}</div></div>
+    <div class="stat"><div class="v">${seg ? pct(seg.mean) : "n/a"}</div><div class="l">${esc(t("seg.similar"))}</div></div>
+    <div class="stat"><div class="v">${pct(overall)}</div><div class="l">${esc(t("seg.overall"))}</div></div>`;
   $("segText").innerHTML = seg
-    ? `A <b>${esc(AGE_LABEL[ab])} éves</b> korcsoportban, <b>${esc(ub)}</b> keret-kihasználtság mellett <b>${seg.count.toLocaleString("hu-HU")}</b> hitelfelvevőből <b>${pct(seg.mean)}</b> esett súlyos (90+ napos) késedelembe 2 éven belül — ez a teljes minta átlagának ${(seg.mean / overall).toLocaleString("hu-HU", { maximumFractionDigits: 1 })}-szerese.`
-    : `Ehhez a szegmenshez nincs elég (≥30) historikus megfigyelés.`;
+    ? t("seg.html", { age: esc(AGE_LABEL[ab]), util: esc(ub), count: nf(seg.count), rate: pct(seg.mean),
+                      mult: nf(seg.mean / overall, { maximumFractionDigits: 1 }) })
+    : esc(t("seg.none"));
   drawHeat(ab, ub);
 }
 
 function formatUser(key, v) {
   const f = FIELDS.find(x => x.key === key);
-  if (f.unit === "USD") return v.toLocaleString("hu-HU") + " USD";
-  return v.toLocaleString("hu-HU") + (f.unit === "%" ? "%" : " " + f.unit);
+  if (f.unit === "pct") return nf(v) + "%";
+  return nf(v) + unitSuffix(f.unit);
 }
 
 function drawChart(items) {
   if (typeof Chart === "undefined") {
-    $("contribChart").parentElement.innerHTML = '<div class="note">A grafikon nem tölthető be (Chart.js nem érhető el offline). A fenti lista a teljes magyarázatot tartalmazza.</div>';
+    $("contribChart").parentElement.innerHTML = `<div class="note">${esc(t("chart.na.single"))}</div>`;
     return;
   }
   const good = cssVar("--good"), bad = cssVar("--bad"), muted = cssVar("--muted"), border = cssVar("--border");
   const data = {
-    labels: items.map(c => LABEL_SHORT[c.feature]),
+    labels: items.map(c => t("s." + c.feature)),
     datasets: [{ data: items.map(c => +c.value.toFixed(3)), backgroundColor: items.map(c => c.value > 0 ? bad : good), borderRadius: 4 }]
   };
   if (chart) { chart.data = data; chart.options.scales.x.ticks.color = muted; chart.options.scales.y.ticks.color = muted; chart.options.scales.x.grid.color = border; chart.update(); return; }
@@ -549,7 +808,7 @@ function drawChart(items) {
     options: {
       indexAxis: "y", responsive: true, maintainAspectRatio: false,
       animation: { duration: 500 },
-      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => `log-esély hozzájárulás: ${ctx.raw > 0 ? "+" : ""}${ctx.raw}` } } },
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => `${t("chart.tooltip")}: ${ctx.raw > 0 ? "+" : ""}${nf(ctx.raw)}` } } },
       scales: {
         x: { ticks: { color: muted }, grid: { color: border } },
         y: { ticks: { color: muted }, grid: { display: false } }
@@ -563,16 +822,16 @@ function drawHeat(myAge, myUtil) {
   const utils = ["0-10%", "10-30%", "30-60%", "60-100%", "100%+"];
   const max = Math.max(...MODEL.segments.map(s => s.mean));
   const dark = document.documentElement.dataset.theme === "dark";
-  let html = `<tr><th>Kor \\ Kihaszn.</th>${utils.map(u => `<th>${u}</th>`).join("")}</tr>`;
+  let html = `<tr><th>${esc(t("heat.corner"))}</th>${utils.map(u => `<th>${u}</th>`).join("")}</tr>`;
   for (const a of ages) {
     html += `<tr><th>${AGE_LABEL[a]}</th>`;
     for (const u of utils) {
       const s = MODEL.segments.find(x => x.age_band === a && x.util_band === u);
       if (!s) { html += `<td>–</td>`; continue; }
-      const t = s.mean / max;
-      const bg = `rgba(${dark ? "240,106,106" : "214,69,69"},${(0.08 + t * 0.72).toFixed(2)})`;
+      const tt = s.mean / max;
+      const bg = `rgba(${dark ? "240,106,106" : "214,69,69"},${(0.08 + tt * 0.72).toFixed(2)})`;
       const me = a === myAge && u === myUtil ? " me" : "";
-      html += `<td class="${me.trim()}" style="background:${bg}" title="${s.count.toLocaleString("hu-HU")} fő">${pct(s.mean)}</td>`;
+      html += `<td class="${me.trim()}" style="background:${bg}" title="${esc(t("heat.cellTitle", { n: nf(s.count) }))}">${pct(s.mean)}</td>`;
     }
     html += `</tr>`;
   }
@@ -587,7 +846,7 @@ function drawScale() {
     [THRESHOLDS.reject, max, "--bad"]
   ];
   $("scale").innerHTML = zones.map(([a, b, c]) => `<div style="width:${(b - a) / max * 100}%;background:var(${c})"></div>`).join("");
-  $("scaleTicks").innerHTML = ["0%", "10%", "20%", "30%", "40%", "50%+"].map(t => `<span>${t}</span>`).join("");
+  $("scaleTicks").innerHTML = ["0%", "10%", "20%", "30%", "40%", "50%+"].map(x => `<span>${x}</span>`).join("");
 }
 
 /* ---------- Minta-portfólió ---------- */
@@ -619,38 +878,34 @@ const INCOME_MEDIAN = 5400; // a tréning-szkript ezzel pótolta a hiányzó jö
 
 // Ahol a forrásban hiányzott a jövedelem, ott a DebtRatio abszolút adósságösszeg, nem arány
 // (teljes adaton: medián 1170 vs. 0,30). Pótolt jövedelem + irreálisan magas arány = jelzés.
-const FLAG_TEXT = "A forrásadatban valószínűleg hiányzott a jövedelem (mediánnal pótolva), ezért az adósságteher-arány itt abszolút összeg, nem arány.";
-
 const PORTFOLIO = PORTFOLIO_RAW.map((r, i) => {
   const model = {
     RevolvingUtilizationOfUnsecuredLines: r[0], age: r[1], "NumberOfTime30-59DaysPastDueNotWorse": r[2],
     DebtRatio: r[3], MonthlyIncome: r[4], NumberOfTimes90DaysLate: r[5]
   };
   const { pd } = score(model);
-  const d = decide(pd);
-  return { id: i + 1, model, actual: r[6], pd, decision: d.cls, decisionLabel: d.label,
+  return { id: i + 1, model, actual: r[6], pd, decision: decide(pd).cls,
            flagged: r[4] === INCOME_MEDIAN && r[3] > 10 };
 });
 
 const DECISION_ORDER = ["good", "warn", "bad"];
-const DECISION_NAME = { good: "Jóváhagyás", warn: "Felülvizsgálat", bad: "Elutasítás" };
+const decName = k => t("dec.short." + k);
 const L3059 = "NumberOfTime30-59DaysPastDueNotWorse", L90 = "NumberOfTimes90DaysLate";
 const idStr = r => "#" + String(r.id).padStart(3, "0");
+const flagSpan = inner => `<span class="flag" title="${esc(t("flag.tooltip"))}">${inner}</span>`;
 
 const PF_COLS = [
-  { key: "id", label: "Ügyfél", val: r => r.id, html: r => idStr(r) },
-  { key: "age", label: "Kor", val: r => r.model.age, html: r => r.model.age },
-  { key: "income", label: "Jövedelem (USD)", val: r => r.model.MonthlyIncome,
-    html: r => r.model.MonthlyIncome.toLocaleString("hu-HU") + (r.flagged ? ` <span class="flag" title="${esc(FLAG_TEXT)}">⚠</span>` : "") },
-  { key: "util", label: "Keret-kihaszn.", val: r => r.model.RevolvingUtilizationOfUnsecuredLines, html: r => pct(r.model.RevolvingUtilizationOfUnsecuredLines, 0) },
-  { key: "debt", label: "Adósságteher", val: r => r.model.DebtRatio,
-    html: r => r.flagged ? `<span class="flag" title="${esc(FLAG_TEXT)}">${r.model.DebtRatio.toLocaleString("hu-HU")} ⚠</span>` : pct(r.model.DebtRatio, 0) },
-  { key: "l3059", label: "30–59 n. késés", val: r => r.model[L3059], html: r => r.model[L3059] },
-  { key: "l90", label: "90+ n. késés", val: r => r.model[L90], html: r => r.model[L90] },
-  { key: "pd", label: "Becsült PD", val: r => r.pd, html: r => `<b>${pct(r.pd)}</b>` },
-  { key: "decision", label: "Javaslat", val: r => DECISION_ORDER.indexOf(r.decision) * 10 + r.pd, html: r => `<span class="pill ${r.decision}">${DECISION_NAME[r.decision]}</span>` },
-  { key: "actual", label: "Valós kimenet", val: r => r.actual,
-    html: r => r.actual ? `<span class="pill bad">Nemteljesített</span>` : `<span class="pill neutral">Teljesített</span>` }
+  { key: "id", val: r => r.id, html: r => idStr(r) },
+  { key: "age", val: r => r.model.age, html: r => r.model.age },
+  { key: "income", val: r => r.model.MonthlyIncome, html: r => nf(r.model.MonthlyIncome) + (r.flagged ? " " + flagSpan("⚠") : "") },
+  { key: "util", val: r => r.model.RevolvingUtilizationOfUnsecuredLines, html: r => pct(r.model.RevolvingUtilizationOfUnsecuredLines, 0) },
+  { key: "debt", val: r => r.model.DebtRatio, html: r => r.flagged ? flagSpan(nf(r.model.DebtRatio) + " ⚠") : pct(r.model.DebtRatio, 0) },
+  { key: "l3059", val: r => r.model[L3059], html: r => r.model[L3059] },
+  { key: "l90", val: r => r.model[L90], html: r => r.model[L90] },
+  { key: "pd", val: r => r.pd, html: r => `<b>${pct(r.pd)}</b>` },
+  { key: "decision", val: r => DECISION_ORDER.indexOf(r.decision) * 10 + r.pd, html: r => `<span class="pill ${r.decision}">${esc(decName(r.decision))}</span>` },
+  { key: "actual", val: r => r.actual,
+    html: r => r.actual ? `<span class="pill bad">${esc(t("pf.pill.def"))}</span>` : `<span class="pill neutral">${esc(t("pf.pill.ok"))}</span>` }
 ];
 
 const pfState = { sortKey: "pd", dir: -1, decision: "", outcome: "", flagged: false };
@@ -680,17 +935,17 @@ function pfSummary(rows) {
 function renderPortfolio() {
   const s = pfSummary(PORTFOLIO);
   $("pfKpis").innerHTML = `
-    <div class="stat"><div class="v">${s.n}</div><div class="l">Hitel a mintában</div></div>
-    <div class="stat"><div class="v">${pct(s.avgPd)}</div><div class="l">Átlagos becsült PD</div></div>
-    <div class="stat"><div class="v">${pct(s.actualRate)}</div><div class="l">Tényleges nemteljesítési arány (${s.defaults} db)</div></div>
-    <div class="stat"><div class="v">${s.by.good.n} / ${s.by.warn.n} / ${s.by.bad.n}</div><div class="l">Jóváhagyás / felülvizsg. / elutasítás</div></div>`;
+    <div class="stat"><div class="v">${s.n}</div><div class="l">${esc(t("pf.kpi.n"))}</div></div>
+    <div class="stat"><div class="v">${pct(s.avgPd)}</div><div class="l">${esc(t("pf.kpi.avgPd"))}</div></div>
+    <div class="stat"><div class="v">${pct(s.actualRate)}</div><div class="l">${esc(t("pf.kpi.actual", { n: s.defaults }))}</div></div>
+    <div class="stat"><div class="v">${s.by.good.n} / ${s.by.warn.n} / ${s.by.bad.n}</div><div class="l">${esc(t("pf.kpi.split"))}</div></div>`;
 
-  $("pfMatrix").innerHTML = `<tr><th>Javaslat</th><th>Hitelek</th><th>Nemteljesített</th><th>Teljesített</th><th>Valós arány</th></tr>` +
-    DECISION_ORDER.map(k => `<tr><td><span class="pill ${k}">${DECISION_NAME[k]}</span></td><td>${s.by[k].n}</td><td>${s.by[k].def}</td><td>${s.by[k].ok}</td><td>${s.by[k].rate === null ? "–" : pct(s.by[k].rate)}</td></tr>`).join("");
-  const caught = s.by.warn.def + s.by.bad.def;
-  $("pfMatrixNote").textContent =
-    `A ${s.defaults} ténylegesen nemteljesítő hitelből ${caught} került felülvizsgálatra vagy elutasításra, ${s.by.good.def} kapott volna jóváhagyást. ` +
-    `Kis minta (${s.n} hitel), az arányok csak tájékoztató jellegűek; a modell teljesítményét a ${MODEL.meta.test_rows.toLocaleString("hu-HU")} soros teszthalmazon mért AUC (${MODEL.meta.test_auc.toLocaleString("hu-HU")}) jellemzi.`;
+  $("pfMatrix").innerHTML = `<tr>${["decision", "loans", "def", "ok", "rate"].map(k => `<th>${esc(t("pf.m." + k))}</th>`).join("")}</tr>` +
+    DECISION_ORDER.map(k => `<tr><td><span class="pill ${k}">${esc(decName(k))}</span></td><td>${s.by[k].n}</td><td>${s.by[k].def}</td><td>${s.by[k].ok}</td><td>${s.by[k].rate === null ? "–" : pct(s.by[k].rate)}</td></tr>`).join("");
+  $("pfMatrixNote").textContent = t("pf.m.note", {
+    defaults: s.defaults, caught: s.by.warn.def + s.by.bad.def, missed: s.by.good.def, n: s.n,
+    testRows: nf(MODEL.meta.test_rows), auc: nf(MODEL.meta.test_auc)
+  });
 
   drawPfChart(s);
   renderPfTable();
@@ -699,29 +954,29 @@ function renderPortfolio() {
 function renderPfTable() {
   $("pfHead").innerHTML = PF_COLS.map(c => {
     const sort = c.key === pfState.sortKey ? (pfState.dir === 1 ? "ascending" : "descending") : "none";
-    return `<th data-key="${c.key}" aria-sort="${sort}" tabindex="0">${c.label}</th>`;
+    return `<th data-key="${c.key}" aria-sort="${sort}" tabindex="0">${esc(t("pf.col." + c.key))}</th>`;
   }).join("");
   const rows = pfFiltered();
   $("pfBody").innerHTML = rows.length
-    ? rows.map(r => `<tr data-id="${r.id}" style="cursor:pointer" title="Részletes elemzés">${PF_COLS.map(c => `<td>${c.html(r)}</td>`).join("")}</tr>`).join("")
-    : `<tr class="empty-row"><td colspan="${PF_COLS.length}">Nincs a szűrésnek megfelelő hitel.</td></tr>`;
-  $("pfCount").textContent = `${rows.length} / ${PORTFOLIO.length} hitel`;
+    ? rows.map(r => `<tr data-id="${r.id}" style="cursor:pointer" title="${esc(t("pf.row.title"))}">${PF_COLS.map(c => `<td>${c.html(r)}</td>`).join("")}</tr>`).join("")
+    : `<tr class="empty-row"><td colspan="${PF_COLS.length}">${esc(t("pf.empty"))}</td></tr>`;
+  $("pfCount").textContent = t("pf.count", { n: rows.length, total: PORTFOLIO.length });
 }
 
 function drawPfChart(s) {
   if (typeof Chart === "undefined") {
-    $("pfChart").parentElement.innerHTML = '<div class="note">A grafikon nem tölthető be (Chart.js nem érhető el offline). A mellette lévő táblázat ugyanezeket az adatokat mutatja.</div>';
+    $("pfChart").parentElement.innerHTML = `<div class="note">${esc(t("chart.na.pf"))}</div>`;
     return;
   }
   const muted = cssVar("--muted"), border = cssVar("--border"), text = cssVar("--text");
   if (pfChart) pfChart.destroy();
   pfChart = new Chart($("pfChart"), {
     data: {
-      labels: DECISION_ORDER.map(k => DECISION_NAME[k]),
+      labels: DECISION_ORDER.map(decName),
       datasets: [
-        { type: "bar", label: "Hitelek száma", data: DECISION_ORDER.map(k => s.by[k].n),
+        { type: "bar", label: t("pf.ds.count"), data: DECISION_ORDER.map(k => s.by[k].n),
           backgroundColor: DECISION_ORDER.map(k => cssVar("--" + k)), borderRadius: 6, yAxisID: "y", order: 2 },
-        { type: "line", label: "Valós nemteljesítési arány", data: DECISION_ORDER.map(k => s.by[k].rate === null ? null : +(s.by[k].rate * 100).toFixed(1)),
+        { type: "line", label: t("pf.ds.rate"), data: DECISION_ORDER.map(k => s.by[k].rate === null ? null : +(s.by[k].rate * 100).toFixed(1)),
           borderColor: text, backgroundColor: text, pointRadius: 5, showLine: false, yAxisID: "y1", order: 1 }
       ]
     },
@@ -729,11 +984,11 @@ function drawPfChart(s) {
       responsive: true, maintainAspectRatio: false, animation: { duration: 500 },
       plugins: {
         legend: { labels: { color: muted, boxWidth: 12 } },
-        tooltip: { callbacks: { label: ctx => ctx.dataset.yAxisID === "y1" ? ` ${ctx.dataset.label}: ${String(ctx.raw).replace(".", ",")}%` : ` ${ctx.dataset.label}: ${ctx.raw}` } }
+        tooltip: { callbacks: { label: ctx => ctx.dataset.yAxisID === "y1" ? ` ${ctx.dataset.label}: ${nf(ctx.raw)}%` : ` ${ctx.dataset.label}: ${ctx.raw}` } }
       },
       scales: {
         x: { ticks: { color: muted }, grid: { display: false } },
-        y: { beginAtZero: true, ticks: { color: muted, precision: 0 }, grid: { color: border }, title: { display: true, text: "db", color: muted } },
+        y: { beginAtZero: true, ticks: { color: muted, precision: 0 }, grid: { color: border }, title: { display: true, text: t("pf.axis.count"), color: muted } },
         y1: { beginAtZero: true, position: "right", ticks: { color: muted, callback: v => v + "%" }, grid: { display: false } }
       }
     }
@@ -747,7 +1002,7 @@ function openInSingle(id) {
     RevolvingUtilizationOfUnsecuredLines: Math.round(r.model.RevolvingUtilizationOfUnsecuredLines * 10000) / 100,
     DebtRatio: Math.round(r.model.DebtRatio * 10000) / 100,
     [L3059]: r.model[L3059], [L90]: r.model[L90] };
-  for (const f of FIELDS) $("in-" + f.key).value = String(toField[f.key]).replace(".", ",");
+  for (const f of FIELDS) $("in-" + f.key).value = fmtInput(toField[f.key]);
   showTab("single");
   $("form").requestSubmit();
   window.scrollTo({ top: 0, behavior: "smooth" });
@@ -790,28 +1045,32 @@ function makeSheet(rows, widths) {
   return ws;
 }
 
+const nowStr = () => new Date().toLocaleString(LOCALE[LANG]);
+
 function methodologyRows() {
   const m = MODEL.meta;
+  const thr = { a: pct(THRESHOLDS.approve, 0), r: pct(THRESHOLDS.reject, 0) };
+  const L = k => ({ v: t(k), s: "label" }), W = (k, vars) => ({ v: t(k, vars), s: "wrap" });
   return [
-    [{ v: "Módszertan és adatforrás", s: "title" }],
+    [{ v: t("x.meth.title"), s: "title" }],
     [],
-    [{ v: "FIGYELEM: " + m.disclaimer + " Nem minősül hitelajánlatnak vagy pénzügyi tanácsadásnak.", s: "disclaimer" }],
+    [{ v: t("x.meth.warn", { disc: t("meta.disclaimer") }), s: "disclaimer" }],
     [],
-    [{ v: "Adatforrás", s: "label" }, { v: m.source_dataset, s: "wrap" }],
-    [{ v: "Minta", s: "label" }, { v: `${(m.trained_rows + m.test_rows).toLocaleString("hu-HU")} sor tisztítás után (${m.excluded_bad_code_rows} sor kizárva 96/98-as hibakódok miatt)`, s: "wrap" }],
-    [{ v: "Modell", s: "label" }, { v: "Logisztikus regresszió, 6 standardizált változó", s: "wrap" }],
-    [{ v: "Teszt-AUC", s: "label" }, { v: m.test_auc, z: "0.000" }],
-    [{ v: "Kalibráció", s: "label" }, { v: `Prior-korrekció a valós ${pct(m.overall_default_rate)}-os historikus nemteljesítési arányra (a modell kiegyensúlyozott osztálysúlyokkal tanult).`, s: "wrap" }],
-    [{ v: "Döntési küszöbök", s: "label" }, { v: `PD < ${pct(THRESHOLDS.approve, 0)}: jóváhagyás; ${pct(THRESHOLDS.approve, 0)}–${pct(THRESHOLDS.reject, 0)}: felülvizsgálat; ≥ ${pct(THRESHOLDS.reject, 0)}: elutasítás (demo-küszöbök)`, s: "wrap" }],
-    [{ v: "PD definíció", s: "label" }, { v: "2 éven belüli súlyos (90+ napos) késedelem valószínűsége", s: "wrap" }],
-    [{ v: "Ismert korlát", s: "label" }, { v: "Az adósságteher-arány hiányzó jövedelem esetén abszolút összeget tartalmaz a forrásadatban; ezért nem elsődleges magyarázó tényező.", s: "wrap" }],
-    [{ v: "Export ideje", s: "label" }, new Date().toLocaleString("hu-HU")]
+    [L("x.meth.source"), { v: t("meta.source"), s: "wrap" }],
+    [L("x.meth.sample"), W("x.meth.sampleV", { rows: nf(m.trained_rows + m.test_rows), bad: m.excluded_bad_code_rows })],
+    [L("x.meth.model"), W("x.meth.modelV")],
+    [L("x.meth.auc"), { v: m.test_auc, z: "0.000" }],
+    [L("x.meth.calib"), W("x.meth.calibV", { rate: pct(m.overall_default_rate) })],
+    [L("x.meth.thr"), W("x.meth.thrV", thr)],
+    [L("x.meth.pd"), W("x.meth.pdV")],
+    [L("x.meth.limit"), W("x.meth.limitV")],
+    [L("x.meth.time"), nowStr()]
   ];
 }
 
 function xlsxReady() {
   if (typeof XLSX === "undefined" || !XLSX.utils) {
-    alert("Az Excel-export könyvtár nem töltődött be (internetkapcsolat szükséges).");
+    alert(t("x.noLib"));
     return false;
   }
   return true;
@@ -821,8 +1080,10 @@ const today = () => new Date().toISOString().slice(0, 10);
 function exportPortfolio() {
   if (!xlsxReady()) return;
   const rows = pfFiltered();
-  const filt = [pfState.decision && DECISION_NAME[pfState.decision], pfState.outcome && (pfState.outcome === "1" ? "Nemteljesített" : "Teljesített"), pfState.flagged && "Adatminőségi jelzéssel"].filter(Boolean);
-  const head = ["Ügyfél", "Kor", "Havi jövedelem (USD)", "Keret-kihasználtság", "Adósságteher-arány", "30–59 napos késés", "90+ napos késés", "Becsült PD", "Javaslat", "Valós kimenet", "Adatminőség"];
+  const filt = [pfState.decision && decName(pfState.decision),
+                pfState.outcome && t(pfState.outcome === "1" ? "pf.pill.def" : "pf.pill.ok"),
+                pfState.flagged && t("x.pf.fFlag")].filter(Boolean);
+  const head = t("x.pf.h");
   const data = rows.map(r => [
     { v: idStr(r), s: "cell" },
     { v: r.model.age, s: "cell" },
@@ -832,13 +1093,13 @@ function exportPortfolio() {
     { v: r.model[L3059], s: "cell" },
     { v: r.model[L90], s: "cell" },
     { v: r.pd, z: "0.0%", s: "cell" },
-    { v: DECISION_NAME[r.decision], s: r.decision },
-    { v: r.actual ? "Nemteljesített" : "Teljesített", s: r.actual ? "bad" : "cell" },
-    { v: r.flagged ? "Hiányzó jövedelem (pótolt); adósságteher abszolút összeg" : "", s: r.flagged ? "flag" : "cell" }
+    { v: decName(r.decision), s: r.decision },
+    { v: t(r.actual ? "pf.pill.def" : "pf.pill.ok"), s: r.actual ? "bad" : "cell" },
+    { v: r.flagged ? t("x.pf.flagText") : "", s: r.flagged ? "flag" : "cell" }
   ]);
   const ws1 = makeSheet([
-    [{ v: "Minta-portfólió – hitelkockázati kiértékelés", s: "title" }],
-    [{ v: `Export: ${new Date().toLocaleString("hu-HU")} · ${rows.length} hitel · Szűrés: ${filt.length ? filt.join(", ") : "nincs"} · Demo / oktatási célú`, s: "sub" }],
+    [{ v: t("x.pf.title"), s: "title" }],
+    [{ v: t("x.pf.sub", { date: nowStr(), n: rows.length, filters: filt.length ? filt.join(", ") : t("x.pf.noFilter") }), s: "sub" }],
     [],
     head.map(h => ({ v: h, s: "header" })),
     ...data
@@ -846,29 +1107,30 @@ function exportPortfolio() {
   if (rows.length) ws1["!autofilter"] = { ref: XLSX.utils.encode_range({ s: { r: 3, c: 0 }, e: { r: 3 + rows.length, c: head.length - 1 } }) };
 
   const s = pfSummary(PORTFOLIO);
+  const L = k => ({ v: t(k), s: "label" });
   const ws2 = makeSheet([
-    [{ v: "Portfólió-összesítő (teljes minta, szűrés nélkül)", s: "title" }],
+    [{ v: t("x.sum.title"), s: "title" }],
     [],
-    [{ v: "Hitelek száma", s: "label" }, { v: s.n, s: "cell" }],
-    [{ v: "Átlagos becsült PD", s: "label" }, { v: s.avgPd, z: "0.0%", s: "cell" }],
-    [{ v: "Tényleges nemteljesítési arány", s: "label" }, { v: s.actualRate, z: "0.0%", s: "cell" }],
-    [{ v: "Adatminőségi jelzéssel", s: "label" }, { v: s.flagged, s: "cell" }],
+    [L("x.sum.n"), { v: s.n, s: "cell" }],
+    [L("x.sum.avg"), { v: s.avgPd, z: "0.0%", s: "cell" }],
+    [L("x.sum.actual"), { v: s.actualRate, z: "0.0%", s: "cell" }],
+    [L("x.sum.flagged"), { v: s.flagged, s: "cell" }],
     [],
-    [{ v: "Modell-javaslat vs. valós kimenet", s: "section" }],
-    ["Javaslat", "Hitelek", "Nemteljesített", "Teljesített", "Valós arány"].map(h => ({ v: h, s: "header" })),
+    [{ v: t("x.sum.section"), s: "section" }],
+    ["decision", "loans", "def", "ok", "rate"].map(k => ({ v: t("pf.m." + k), s: "header" })),
     ...DECISION_ORDER.map(k => [
-      { v: DECISION_NAME[k], s: k }, { v: s.by[k].n, s: "cell" }, { v: s.by[k].def, s: "cell" }, { v: s.by[k].ok, s: "cell" },
+      { v: decName(k), s: k }, { v: s.by[k].n, s: "cell" }, { v: s.by[k].def, s: "cell" }, { v: s.by[k].ok, s: "cell" },
       s.by[k].rate === null ? { v: "–", s: "cell" } : { v: s.by[k].rate, z: "0.0%", s: "cell" }
     ]),
     [],
-    [{ v: "Kis minta: az arányok tájékoztató jellegűek. A modell teljesítményét a teszthalmazon mért AUC jellemzi.", s: "sub" }]
-  ], [32, 12, 14, 12, 12]);
+    [{ v: t("x.sum.note"), s: "sub" }]
+  ], [32, 14, 14, 12, 12]);
 
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws1, "Portfólió");
-  XLSX.utils.book_append_sheet(wb, ws2, "Összesítő");
-  XLSX.utils.book_append_sheet(wb, makeSheet(methodologyRows(), [20, 90]), "Módszertan");
-  XLSX.writeFile(wb, `hitelkockazat_portfolio_${today()}.xlsx`);
+  XLSX.utils.book_append_sheet(wb, ws1, t("x.sheet.pf"));
+  XLSX.utils.book_append_sheet(wb, ws2, t("x.sheet.sum"));
+  XLSX.utils.book_append_sheet(wb, makeSheet(methodologyRows(), [20, 90]), t("x.sheet.meth"));
+  XLSX.writeFile(wb, `${t("x.file.pf")}_${today()}.xlsx`);
 }
 
 function exportSingle() {
@@ -876,53 +1138,55 @@ function exportSingle() {
   const { input, pd, contrib, decision, seg, ab, ub } = lastResult;
   const inputRows = FIELDS.map(f => {
     const userV = input.user[f.key], modelV = input.model[f.key];
-    const isPct = f.unit === "%";
+    const isPct = f.unit === "pct";
     return [
-      { v: f.label, s: "label" },
+      { v: t(`f.${f.key}.label`), s: "label" },
       { v: isPct ? userV / 100 : userV, z: isPct ? "0.0%" : "#,##0", s: "cell" },
       { v: modelV, z: isPct ? "0.0%" : "#,##0", s: Math.abs((isPct ? userV / 100 : userV) - modelV) > 1e-9 ? "flag" : "cell" }
     ];
   });
   const factors = [...contrib].sort((a, b) => Math.abs(b.value) - Math.abs(a.value)).map(c => [
-    { v: LABEL_SHORT[c.feature] + (SECONDARY_FEATURES.has(c.feature) ? " (nem elsődleges)" : ""), s: "cell" },
+    { v: t("s." + c.feature) + (SECONDARY_FEATURES.has(c.feature) ? t("x.s.secondary") : ""), s: "cell" },
     { v: +c.value.toFixed(4), z: "+0.000;-0.000;0.000", s: "cell" },
-    { v: c.value > 0 ? "növeli a kockázatot" : "csökkenti a kockázatot", s: c.value > 0 ? "bad" : "good" }
+    { v: t(c.value > 0 ? "x.s.up" : "x.s.down"), s: c.value > 0 ? "bad" : "good" }
   ]);
+  const L = k => ({ v: t(k), s: "label" });
+  const H = k => t(k).map(h => ({ v: h, s: "header" }));
   const ws = makeSheet([
-    [{ v: "Hitelkérelem – kockázati kiértékelés", s: "title" }],
-    [{ v: `Export: ${new Date().toLocaleString("hu-HU")} · Demo / oktatási célú, nem hitelbírálati döntés`, s: "sub" }],
+    [{ v: t("x.s.title"), s: "title" }],
+    [{ v: t("x.s.sub", { date: nowStr() }), s: "sub" }],
     [],
-    [{ v: "Eredmény", s: "section" }],
-    [{ v: "Becsült PD", s: "label" }, { v: pd, z: "0.0%", s: decision.cls }],
-    [{ v: "Döntési javaslat", s: "label" }, { v: decision.label, s: decision.cls }],
-    [{ v: "Indoklás", s: "label" }, { v: decision.text, s: "wrap" }],
+    [{ v: t("x.s.result"), s: "section" }],
+    [L("x.s.pd"), { v: pd, z: "0.0%", s: decision.cls }],
+    [L("x.s.dec"), { v: decision.label, s: decision.cls }],
+    [L("x.s.reason"), { v: decision.text, s: "wrap" }],
     [],
-    [{ v: "Megadott adatok", s: "section" }],
-    ["Változó", "Megadott érték", "Modellben használt érték"].map(h => ({ v: h, s: "header" })),
+    [{ v: t("x.s.inputs"), s: "section" }],
+    H("x.s.inH"),
     ...inputRows,
-    [{ v: "Sárga háttér: a tanítási tartományon kívüli érték, a modell a tanításkori limittel számolt.", s: "sub" }],
+    [{ v: t("x.s.inNote"), s: "sub" }],
     [],
-    [{ v: "Tényezők hatása (log-esély, az átlagos hitelfelvevőhöz képest)", s: "section" }],
-    ["Tényező", "Hatás", "Irány"].map(h => ({ v: h, s: "header" })),
+    [{ v: t("x.s.factors"), s: "section" }],
+    H("x.s.fH"),
     ...factors,
     [],
-    [{ v: "Historikus összevetés", s: "section" }],
-    [{ v: "Szegmens", s: "label" }, { v: `${AGE_LABEL[ab]} év, ${ub} keret-kihasználtság`, s: "cell" }],
-    [{ v: "Szegmens valós aránya", s: "label" }, seg ? { v: seg.mean, z: "0.0%", s: "cell" } : { v: "n/a", s: "cell" }],
-    [{ v: "Szegmens mérete", s: "label" }, seg ? { v: seg.count, z: "#,##0", s: "cell" } : { v: "n/a", s: "cell" }],
-    [{ v: "Teljes minta valós aránya", s: "label" }, { v: MODEL.meta.overall_default_rate, z: "0.0%", s: "cell" }]
+    [{ v: t("x.s.hist"), s: "section" }],
+    [L("x.s.seg"), { v: t("x.s.segV", { age: AGE_LABEL[ab], util: ub }), s: "cell" }],
+    [L("x.s.segRate"), seg ? { v: seg.mean, z: "0.0%", s: "cell" } : { v: "n/a", s: "cell" }],
+    [L("x.s.segN"), seg ? { v: seg.count, z: "#,##0", s: "cell" } : { v: "n/a", s: "cell" }],
+    [L("x.s.overall"), { v: MODEL.meta.overall_default_rate, z: "0.0%", s: "cell" }]
   ], [42, 22, 24]);
   const wb = XLSX.utils.book_new();
-  XLSX.utils.book_append_sheet(wb, ws, "Kiértékelés");
-  XLSX.utils.book_append_sheet(wb, makeSheet(methodologyRows(), [20, 90]), "Módszertan");
-  XLSX.writeFile(wb, `hitelkerelem_kiertekeles_${today()}.xlsx`);
+  XLSX.utils.book_append_sheet(wb, ws, t("x.sheet.single"));
+  XLSX.utils.book_append_sheet(wb, makeSheet(methodologyRows(), [20, 90]), t("x.sheet.meth"));
+  XLSX.writeFile(wb, `${t("x.file.single")}_${today()}.xlsx`);
 }
 
 /* ---------- Fülek ---------- */
 function showTab(name) {
-  for (const t of ["single", "portfolio"]) {
-    $("tab-" + t).classList.toggle("hidden", t !== name);
-    $("tabbtn-" + t).setAttribute("aria-selected", String(t === name));
+  for (const x of ["single", "portfolio"]) {
+    $("tab-" + x).classList.toggle("hidden", x !== name);
+    $("tabbtn-" + x).setAttribute("aria-selected", String(x === name));
   }
   // A Chart.js rejtett canvasra 0 méretben rajzolna, ezért megjelenéskor rajzolunk
   if (name === "portfolio") renderPortfolio();
@@ -930,34 +1194,84 @@ function showTab(name) {
 }
 
 /* ---------- Téma ---------- */
-function applyTheme(t) {
-  document.documentElement.dataset.theme = t;
-  $("themeBtn").textContent = t === "dark" ? "☀️ Világos mód" : "🌙 Sötét mód";
-  try { localStorage.setItem("hk-theme", t); } catch (e) {}
+function updateThemeBtn() {
+  const dark = document.documentElement.dataset.theme === "dark";
+  $("themeBtn").textContent = t(dark ? "theme.toLight" : "theme.toDark");
+  $("themeBtn").setAttribute("aria-label", t("theme.aria"));
+}
+function applyTheme(th) {
+  document.documentElement.dataset.theme = th;
+  updateThemeBtn();
+  try { localStorage.setItem("hk-theme", th); } catch (e) {}
   if (lastResult) render(lastResult.input);
   if (!$("tab-portfolio").classList.contains("hidden")) renderPortfolio();
+}
+
+/* ---------- Nyelv ---------- */
+function applyStaticTexts() {
+  document.documentElement.lang = LANG;
+  document.title = t("app.title");
+  document.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = t(el.dataset.i18n); });
+  document.querySelectorAll("[data-i18n-html]").forEach(el => { el.innerHTML = t(el.dataset.i18nHtml); });
+  document.querySelectorAll("[data-i18n-aria]").forEach(el => { el.setAttribute("aria-label", t(el.dataset.i18nAria)); });
+  $("langBtn").textContent = t("lang.btn");
+  $("langBtn").setAttribute("aria-label", t("lang.aria"));
+  $("langBtn").setAttribute("lang", LANG === "hu" ? "en" : "hu");
+  updateThemeBtn();
+  updateFormTexts();
+  const m = MODEL.meta;
+  $("footer").textContent = t("footer", { source: t("meta.source"), auc: nf(m.test_auc) });
+  $("methodBody").innerHTML = t("method.html", {
+    source: esc(t("meta.source")), rows: nf(m.trained_rows + m.test_rows), bad: m.excluded_bad_code_rows,
+    auc: nf(m.test_auc), testRows: nf(m.test_rows), rate: pct(m.overall_default_rate),
+    a: pct(THRESHOLDS.approve, 0), r: pct(THRESHOLDS.reject, 0)
+  });
+}
+
+function setLang(lang, persist = true) {
+  if (!LANGS.includes(lang)) lang = "hu";
+  const prev = LANG;
+  // A mezőkben lévő számokat átírjuk az új nyelv formátumára (pl. "0,35" -> "0.35"),
+  // hogy a váltás után is ugyanazt az értéket jelentsék.
+  if (prev !== lang) {
+    for (const f of FIELDS) {
+      const el = $("in-" + f.key);
+      const p = parseNum(el.value, prev);
+      if (p.value !== undefined) el.value = fmtInput(p.value, lang);
+    }
+  }
+  LANG = lang;
+  applyStaticTexts();
+  const hadMsgs = [...document.querySelectorAll("#fields .msg")].some(el => el.textContent);
+  if (lastResult || hadMsgs) { const input = readForm(); if (input && lastResult) render(input); }
+  if (!$("tab-portfolio").classList.contains("hidden")) renderPortfolio();
+  if (persist) {
+    try { localStorage.setItem("hk-lang", lang); } catch (e) {}
+    // ha az URL-ben van ?lang=, az is kövesse a váltást (a megosztott link a látott nyelven nyíljon)
+    const url = new URL(location.href);
+    if (url.searchParams.has("lang")) { url.searchParams.set("lang", lang); history.replaceState(null, "", url); }
+  }
+}
+
+function initialLang() {
+  const q = new URLSearchParams(location.search).get("lang");
+  if (LANGS.includes(q)) return q;
+  try { const s = localStorage.getItem("hk-lang"); if (LANGS.includes(s)) return s; } catch (e) {}
+  return /^hu\b/i.test(navigator.language || "") ? "hu" : "en";
 }
 
 /* ---------- Indítás ---------- */
 function init() {
   buildForm();
   drawScale();
-  $("disclaimer").innerHTML = `<b>Demo / oktatási célú alkalmazás.</b> ${esc(MODEL.meta.disclaimer)} Nem minősül hitelajánlatnak vagy pénzügyi tanácsadásnak.`;
-  $("footer").textContent = `Adatforrás: ${MODEL.meta.source_dataset} · Test AUC: ${MODEL.meta.test_auc.toLocaleString("hu-HU")}`;
-  $("methodBody").innerHTML = `
-    <ul>
-      <li><b>Adat:</b> ${esc(MODEL.meta.source_dataset)}; ${(MODEL.meta.trained_rows + MODEL.meta.test_rows).toLocaleString("hu-HU")} sor tisztítás után (${MODEL.meta.excluded_bad_code_rows} sor kizárva 96/98-as hibakódok miatt).</li>
-      <li><b>Modell:</b> logisztikus regresszió 6 változóval, standardizált bemenetekkel; teszt-AUC ${MODEL.meta.test_auc.toLocaleString("hu-HU")} (${MODEL.meta.test_rows.toLocaleString("hu-HU")} soros teszthalmazon).</li>
-      <li><b>Kalibráció:</b> a modell kiegyensúlyozott osztálysúlyokkal tanult, ezért a nyers kimenet a valós kockázat többszörösét mutatná. A megjelenített PD prior-korrigált a valós ${pct(MODEL.meta.overall_default_rate)}-os historikus arányra.</li>
-      <li><b>Döntési küszöbök:</b> PD &lt; ${pct(THRESHOLDS.approve, 0)} jóváhagyás, ${pct(THRESHOLDS.approve, 0)}–${pct(THRESHOLDS.reject, 0)} felülvizsgálat, ≥ ${pct(THRESHOLDS.reject, 0)} elutasítás (demo-küszöbök, nem üzleti kalibráció).</li>
-      <li><b>Bemeneti limitek:</b> a tanításnál használt 99,5. percentilises limiteket az app is alkalmazza; a tartományon kívüli értékekre figyelmeztetés jelenik meg.</li>
-      <li><b>Ismert korlát:</b> az adósságteher-arány együtthatója a kiugró értékek miatt nem értelmezhető irányú, ezért nem elsődleges magyarázó tényező.</li>
-    </ul>`;
+  LANG = initialLang();
+  applyStaticTexts();
 
   let theme = "light";
   try { theme = localStorage.getItem("hk-theme") || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"); } catch (e) {}
   applyTheme(theme);
   $("themeBtn").addEventListener("click", () => applyTheme(document.documentElement.dataset.theme === "dark" ? "light" : "dark"));
+  $("langBtn").addEventListener("click", () => setLang(LANG === "hu" ? "en" : "hu"));
 
   $("form").addEventListener("submit", e => {
     e.preventDefault();
@@ -966,12 +1280,12 @@ function init() {
       if (input) render(input);
     } catch (err) {
       console.error(err);
-      alert("Váratlan hiba a számítás közben. Ellenőrizd a megadott értékeket.");
+      alert(t("err.unexpected"));
     }
   });
   document.querySelectorAll("[data-preset]").forEach(btn => btn.addEventListener("click", () => {
     const p = PRESETS[btn.dataset.preset];
-    for (const f of FIELDS) $("in-" + f.key).value = String(p[f.key]).replace(".", ",");
+    for (const f of FIELDS) $("in-" + f.key).value = fmtInput(p[f.key]);
     $("form").requestSubmit();
   }));
   $("resetBtn").addEventListener("click", () => {

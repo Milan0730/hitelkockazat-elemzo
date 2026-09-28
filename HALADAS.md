@@ -71,6 +71,10 @@ Minta-eredmények: 88 jóváhagyás / 9 felülvizsgálat / 3 elutasítás. A 7 n
 - `private/CV_LINKEDIN.md`: CV-bejegyzés két fókusszal (AI QA / Credit Risk), LinkedIn Projects szöveg, poszt-vázlat, STAR interjú-beszédtémák.
 - A `private/` mappa gitignore-ban van.
 
+**Angol nyelvű felület — KÉSZ (2026-09-28):**
+- HU/EN gomb a fejlécben, `?lang=en` link, automatikus nyelvválasztás (URL → mentett választás → böngésző nyelve). Minden szöveg átvált: űrlap, hibák, magyarázatok, portfólió, diagramok, Excel (munkalapnevek, fájlnév). Nyelvfüggő számbevitel (TESZT_NAPLO 9. pont).
+- Automatizált tesztek: 96/96 (új, 9. csoport a nyelvváltásra).
+
 **Egyetlen nyitott tétel: külső tesztelés** 3–5 fővel a `TESZTELESI_TERV.md` alapján (a felhasználó szervezi, az élő linkkel). Utána: az eredmények és a javítások bevezetése a `TESZT_NAPLO.md`-be és a `CASE_STUDY.md` 6. fejezetébe, valamint a CV ⏳ sora.
 
 _(Korábbi terv, archív:)_

@@ -17,7 +17,7 @@ A cél igazolni, hogy az app **helyesen számol**, **nem omlik össze hibás bev
 
 | Szint | Ki / mi | Állapot |
 |---|---|---|
-| **A. Automatizált regressziós tesztek** | `selftest.js`, 77 teszt, 8 csoportban | ✅ 77/77 sikeres (2026-09-28) |
+| **A. Automatizált regressziós tesztek** | `selftest.js`, 96 teszt, 9 csoportban | ✅ 96/96 sikeres (2026-09-28) |
 | **B. AI-agent feltáró tesztelés** | Claude: kódolás közbeni és böngészős tesztek | ✅ 7 talált probléma, ld. `TESZT_NAPLO.md` |
 | **C. Külső felhasználói teszt** | 3–5 tesztelő, feladatalapú, moderált | ⏳ ez a dokumentum 3–8. pontja |
 
@@ -51,7 +51,7 @@ Majd a böngészőben: `http://localhost:8080/?selftest`. A riport az oldal alj�
   - 1–2 pénzügyes/üzleti hátterű (Corvinus): szakmai hitelesség, értik-e a PD-t
   - 1–2 nem pénzügyes: érthetőség, a „5 perc” kritérium valódi próbája
   - legalább 1 fő telefonon
-- **Nyelv**: a felület csak magyar (a v1 scope szerint). Nem magyar anyanyelvű (pl. UBC-s) tesztelő így érdemben nem tudja a K3-at tesztelni; őket érdemes későbbre, egy esetleges angol verzióhoz hagyni, vagy a nem nyelvfüggő részekre (vizualitás, export) kérni.
+- **Nyelv**: a felület magyar és angol (HU/EN gomb, vagy közvetlen link: `?lang=en`). A nem magyar anyanyelvű (pl. UBC-s) tesztelők az angol változatot kapják; a feladatlapot ilyenkor angolul kell kiadni, és a várt értékek angol számformátumban szerepelnek (pl. 10.2%).
 
 ## 4. Lebonyolítás (moderátornak)
 

@@ -2,7 +2,7 @@
 
 A single-file web app that estimates a loan applicant's **probability of default (PD)** with an interpretable logistic regression model trained on real public credit data. It returns a decision recommendation, an explanation of the drivers, and a comparison with how similar borrowers actually performed.
 
-**Live demo:** https://milan0730.github.io/hitelkockazat-elemzo/ · **Run the test suite live:** [`?selftest`](https://milan0730.github.io/hitelkockazat-elemzo/?selftest) · **UI language:** Hungarian
+**Live demo:** https://milan0730.github.io/hitelkockazat-elemzo/ · **Run the test suite live:** [`?selftest`](https://milan0730.github.io/hitelkockazat-elemzo/?selftest) · **UI language:** English / Hungarian ([`?lang=en`](https://milan0730.github.io/hitelkockazat-elemzo/?lang=en))
 
 > ⚠️ **Educational / demo project.** Not a credit decision tool, not a loan offer, not financial advice.
 
@@ -13,6 +13,7 @@ A single-file web app that estimates a loan applicant's **probability of default
 - **Historical benchmark:** actual default rate of the applicant's age × utilization segment, plus a 5×5 heatmap
 - **Sample portfolio:** 100 real (anonymized, cleaned) borrowers, with model recommendation vs. actual outcome, sorting, filtering and data-quality flags
 - **Formatted Excel export** (xlsx-js-style) for both views
+- **Bilingual UI (English / Hungarian)** with locale-aware number input (5,400 vs. 5 400), language-specific Excel exports and shareable ?lang=en links
 - Dark / light mode, responsive layout, no backend, no build step
 
 ## Model
@@ -31,7 +32,7 @@ This project is also a case study in **systematic AI-agent testing**: it was bui
 
 📄 **Read the full case study: [CASE_STUDY.md](CASE_STUDY.md)**
 
-**Automated regression suite** ([`selftest.js`](selftest.js)): 77 tests in 8 groups (model math, thresholds and band edges, input parsing, UI validation, user flows, portfolio, Excel export, basic accessibility).
+**Automated regression suite** ([`selftest.js`](selftest.js)): 96 tests in 9 groups (model math, thresholds and band edges, input parsing, UI validation, user flows, portfolio, Excel export, basic accessibility, language switching).
 - Expected values come from an **independent oracle**: they were computed outside the app (PowerShell), not by the code under test.
 - A **mutation check** (2 injected bugs → 14 failing tests) confirms that the suite actually catches regressions.
 

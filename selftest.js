@@ -54,7 +54,10 @@
   const savedTheme = document.documentElement.dataset.theme;
   const savedPf = Object.assign({}, pfState);
   const savedStorage = {};
-  try { for (const k of ["hk-theme", "hk-tab"]) savedStorage[k] = localStorage.getItem(k); } catch (e) {}
+  try { for (const k of ["hk-theme", "hk-tab", "hk-lang"]) savedStorage[k] = localStorage.getItem(k); } catch (e) {}
+  // Az 1–8. csoport a magyar felületre készült elvárt szövegeket használ
+  const savedLang = LANG;
+  setLang("hu", false);
 
   /* 1. Modell-matematika az orákulum ellen (tiszta függvény, capping nélkül = score() közvetlen hívása) */
   group = "1. Modell-matematika";
@@ -262,7 +265,89 @@
   test("Disclaimer látható mindkét fülön (a füleken kívül van)", () => !q("#disclaimer").closest("[role=tabpanel]") || "tabpanelen belül van");
   test("<html lang='hu'>", () => eq(document.documentElement.lang, "hu"));
 
+  /* 9. Nyelvváltás (HU ↔ EN) */
+  group = "9. Nyelvváltás (EN)";
+  test("Minden fordítási kulcs megvan mindkét nyelven, azonos típussal", () => {
+    const missing = [];
+    for (const [a, b] of [["hu", "en"], ["en", "hu"]])
+      for (const k of Object.keys(STR[a])) if (!(k in STR[b]) || typeof STR[a][k] !== typeof STR[b][k]) missing.push(`${b}:${k}`);
+    return missing.length === 0 || missing.join(", ");
+  });
+  test("Tömb-értékű kulcsok hossza egyezik (Excel fejlécek)", () => {
+    const bad = Object.keys(STR.hu).filter(k => Array.isArray(STR.hu[k]) && STR.hu[k].length !== STR.en[k].length);
+    return bad.length === 0 || bad.join(", ");
+  });
+  test("EN számbevitel: '5,400' → 5400", () => eq(parseNum("5,400", "en").value, 5400));
+  test("EN számbevitel: '1,234.5' → 1234.5", () => eq(parseNum("1,234.5", "en").value, 1234.5));
+  test("EN számbevitel: '0.35' → 0.35", () => eq(parseNum("0.35", "en").value, 0.35));
+  test("EN számbevitel: '0,35' → érvénytelen (nem tippelünk)", () => eq(parseNum("0,35", "en").invalid, true));
+  test("HU számbevitel változatlan: '0,35' → 0.35", () => eq(parseNum("0,35", "hu").value, 0.35));
+
+  showTab("single");
+  test("Váltás közben a mezőértékek átalakulnak ('0,5' → '0.5') és az eredmény megmarad", () => {
+    fill([34, 4200, "72,5", 45, 1, 0]); submit();
+    const pdHu = lastResult.pd;
+    q("#langBtn").click();
+    const v = document.getElementById("in-RevolvingUtilizationOfUnsecuredLines").value;
+    return LANG === "en" && v === "72.5" && near(lastResult.pd, pdHu) === true || `LANG=${LANG}, mező='${v}'`;
+  });
+  test("EN: fejléc, gombok, <html lang>", () => {
+    return q("h1").textContent === "Credit Risk Analyzer" && q("#langBtn").textContent === "HU" &&
+      document.documentElement.lang === "en" && q('#form button[type="submit"]').textContent === "Evaluate" || q("h1").textContent;
+  });
+  test("EN: példa-profil 'mid' → '15.0%' és 'Manual review'", () => {
+    q("[data-preset=mid]").click();
+    return q("#pdValue").textContent === "15.0%" && q("#decisionBadge").textContent === "Manual review" || `${q("#pdValue").textContent} / ${q("#decisionBadge").textContent}`;
+  });
+  test("EN: PD azonos a magyar módban számolttal (nyelvfüggetlen számítás)", () => near(lastResult.pd, ORACLE.mid.pd));
+  test("EN: tényező-magyarázat angolul", () => /compared with the average borrower/.test(q("#factorList").textContent) || q("#factorList").textContent.slice(0, 80));
+  test("EN: validációs üzenet angolul", () => {
+    fill([-5, 3000, 30, 30, 0, 0]); submit();
+    const ok = msg("age") === "Cannot be negative.";
+    q("[data-preset=mid]").click();
+    return ok || msg("age");
+  });
+  test("EN: nincs magyar szöveg a látható felületen (egyedi fül)", () => {
+    const hits = (document.body.innerText.match(/[^\s]*[őűŐŰáéíóöúüÁÉÍÓÖÚÜ][^\s]*/g) || []);
+    return hits.length === 0 || [...new Set(hits)].slice(0, 8).join(" | ");
+  });
+  test("EN: nincs magyar szöveg a portfólió fülön (táblázat, KPI, mátrix)", () => {
+    showTab("portfolio");
+    const hits = (document.body.innerText.match(/[^\s]*[őűŐŰáéíóöúüÁÉÍÓÖÚÜ][^\s]*/g) || []);
+    return hits.length === 0 || [...new Set(hits)].slice(0, 8).join(" | ");
+  });
+  test("EN: nincs magyar szöveg a title/aria attribútumokban", () => {
+    const attrs = qa("[title],[aria-label]").map(el => (el.getAttribute("title") || "") + " " + (el.getAttribute("aria-label") || ""));
+    // a nyelvváltó gomb aria-label-je szándékosan a másik nyelven van ("Váltás magyar nyelvre")
+    const hits = attrs.filter(s => /[őűáéíóöúü]/i.test(s) && !/Váltás magyar/.test(s));
+    return hits.length === 0 || hits.slice(0, 3).join(" | ");
+  });
+  if (typeof XLSX !== "undefined") {
+    test("EN: Excel export angol munkalapnevekkel, fejlécekkel és fájlnévvel", () => {
+      let cap = null; const orig = XLSX.writeFile;
+      XLSX.writeFile = (wb, name) => { cap = { name, wb: XLSX.read(XLSX.write(wb, { type: "array", bookType: "xlsx" })) }; };
+      try { q("#pfExportBtn").click(); } finally { XLSX.writeFile = orig; }
+      const sh = cap && cap.wb.Sheets["Portfolio"];
+      return cap && /^credit_risk_portfolio_/.test(cap.name) && cap.wb.SheetNames.join("|") === "Portfolio|Summary|Methodology" &&
+        sh.A4.v === "Client" && /^NOTE:/.test(cap.wb.Sheets["Methodology"].A3.v) || (cap ? cap.name + " " + cap.wb.SheetNames.join("|") : "nincs export");
+    });
+  }
+  test("Vissza HU-ra: szövegek és formátum visszaállnak", () => {
+    showTab("single"); q("[data-preset=mid]").click();
+    q("#langBtn").click();
+    return LANG === "hu" && q("h1").textContent === "Hitelkockázat-elemző" && q("#pdValue").textContent === "15,0%" || `${LANG} ${q("#pdValue").textContent}`;
+  });
+  test("?lang=en URL-paraméter felismerése", () => {
+    const original = location.href;
+    const u = new URL(original); u.searchParams.set("lang", "en");
+    history.replaceState(null, "", u);
+    const r = initialLang();
+    history.replaceState(null, "", original);
+    return eq(r, "en");
+  });
+
   // Állapot visszaállítása
+  setLang(savedLang, false);
   Object.assign(pfState, savedPf);
   setSelect("pfDecision", savedPf.decision); setSelect("pfOutcome", savedPf.outcome); q("#pfFlagged").checked = savedPf.flagged;
   q("#resetBtn").click();
