@@ -627,7 +627,7 @@ const STR = {
     "hist.title": "Historikus összevetés",
     "heat.note": "Tényleges historikus nemteljesítési arány kor × hitelkeret-kihasználtság szegmensenként (minden cella legalább 30 hitelfelvevő). A kiemelt cella a megadott profil szegmense.",
     "method.summary": "Módszertan és adatforrás",
-    "footer": "Adatforrás: {source} · Test AUC: {auc}",
+    "footer": "Adatforrás: {source} · Test AUC: {auc} · © 2026 Tóth György Milán, minden jog fenntartva",
 
     "f.age.label": "Életkor", "f.age.hint": "Betöltött életkor (18–110)",
     "f.MonthlyIncome.label": "Havi nettó jövedelem", "f.MonthlyIncome.hint": "USD / hó (az adathalmaz amerikai hitelfelvevőkből áll)",
@@ -826,7 +826,7 @@ const STR = {
     "hist.title": "Historical comparison",
     "heat.note": "Actual historical default rate by age × credit utilization segment (every cell has at least 30 borrowers). The highlighted cell is this applicant's segment.",
     "method.summary": "Methodology and data source",
-    "footer": "Data source: {source} · Test AUC: {auc}",
+    "footer": "Data source: {source} · Test AUC: {auc} · © 2026 György Milán Tóth, all rights reserved",
 
     "f.age.label": "Age", "f.age.hint": "Age in full years (18–110)",
     "f.MonthlyIncome.label": "Monthly net income", "f.MonthlyIncome.hint": "USD per month (the dataset covers US borrowers)",
@@ -1354,7 +1354,7 @@ function buildMemo() {
     <div class="m-foot">
       <span>${t("memo.method", { source: esc(t("meta.source")), rows: nf(m.trained_rows + m.test_rows), auc: nf(m.test_auc, { minimumFractionDigits: 3 }),
         gini: nf(V.gini, { minimumFractionDigits: 3 }), rate: pct(m.overall_default_rate) })}</span>
-      <div style="display:flex;justify-content:space-between;gap:12px"><span>${t("memo.disc")}</span><span>${esc(t("memo.page"))}</span></div>
+      <div style="display:flex;justify-content:space-between;gap:12px"><span>${t("memo.disc")}</span><span style="white-space:nowrap">© 2026 ${esc(LANG === "hu" ? "Tóth György Milán" : "György Milán Tóth")} · ${esc(t("memo.page"))}</span></div>
     </div>`;
   return true;
 }

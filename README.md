@@ -99,3 +99,7 @@ This regenerates `model_export.json` and `sample_portfolio.json`. The app embeds
 ## Author
 
 György Milán Tóth
+
+## License
+
+© 2026 György Milán Tóth — **all rights reserved.** The code is public so that it can be reviewed as a portfolio project. It is not open source: you may view it and run the app, but reuse requires written permission. See [`LICENSE`](LICENSE). Third-party components in `vendor/` keep their own licenses.

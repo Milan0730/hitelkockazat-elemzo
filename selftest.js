@@ -317,12 +317,14 @@
     return ok || msg("age");
   });
   test("EN: nincs magyar szöveg a látható felületen (egyedi fül)", () => {
-    const hits = (document.body.innerText.match(/[^\s]*[őűŐŰáéíóöúüÁÉÍÓÖÚÜ][^\s]*/g) || []);
+    // a szerző neve tulajdonnév, nem lefordítatlan szöveg
+    const hits = (document.body.innerText.replace(/György Milán Tóth/g, "").match(/[^\s]*[őűŐŰáéíóöúüÁÉÍÓÖÚÜ][^\s]*/g) || []);
     return hits.length === 0 || [...new Set(hits)].slice(0, 8).join(" | ");
   });
   test("EN: nincs magyar szöveg a portfólió fülön (táblázat, KPI, mátrix)", () => {
     showTab("portfolio");
-    const hits = (document.body.innerText.match(/[^\s]*[őűŐŰáéíóöúüÁÉÍÓÖÚÜ][^\s]*/g) || []);
+    // a szerző neve tulajdonnév, nem lefordítatlan szöveg
+    const hits = (document.body.innerText.replace(/György Milán Tóth/g, "").match(/[^\s]*[őűŐŰáéíóöúüÁÉÍÓÖÚÜ][^\s]*/g) || []);
     return hits.length === 0 || [...new Set(hits)].slice(0, 8).join(" | ");
   });
   test("EN: nincs magyar szöveg a title/aria attribútumokban", () => {

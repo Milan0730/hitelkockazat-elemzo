@@ -1,0 +1,29 @@
+Copyright (c) 2026 György Milán Tóth. All rights reserved.
+
+This repository and the Credit Risk Analyzer (Hitelkockázat-elemző) application
+are published for portfolio and demonstration purposes only.
+
+You may:
+  - view the source code and documentation;
+  - run the application, including the live demo, for personal evaluation;
+  - fork the repository on GitHub, to the extent permitted by the GitHub
+    Terms of Service.
+
+Without the author's prior written permission, you may not copy, modify,
+merge, publish, distribute, sublicense, sell, or reuse this code, the model
+export, the documentation (including CASE_STUDY.md and the test logs), the
+design, or any substantial part of them, in any other project, commercial or
+non-commercial, and you may not present the work as your own.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND. It is an
+educational demo: it is not a credit decision tool, a loan offer, or financial
+advice.
+
+Third-party components keep their own licenses (see vendor/licenses/):
+  - Chart.js — MIT License
+  - xlsx-js-style — Apache License 2.0
+  - Instrument Serif, Instrument Sans — SIL Open Font License 1.1
+The "Give Me Some Credit" dataset (Kaggle, 2011) is not included in this
+repository; only derived aggregate statistics and a small test-set sample are.
+
+For permission requests, contact the author via GitHub or LinkedIn.
