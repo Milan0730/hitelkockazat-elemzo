@@ -660,8 +660,12 @@ const STR = {
     "factor.html": "<b>{label}</b> ({value}) — {strength} {dir} a kockázatot az átlagos hitelfelvevőhöz képest.",
     "factor.strong": "erősen", "factor.moderate": "mérsékelten", "factor.slight": "enyhén",
     "factor.up": "növeli", "factor.down": "csökkenti",
-    "contrib.note": "A sávok a log-esély hozzájárulást mutatják az átlagos tanító-mintabeli profilhoz képest (pozitív = kockázatnövelő). Az adósságteher-arány a modellben szerepel (hatása most {dr}), de adatminőségi okokból nem elsődleges magyarázó tényező.",
-    "chart.tooltip": "log-esély hozzájárulás",
+    "contrib.note": "A sávok azt mutatják, mennyivel tolja el egy-egy tényező a kockázatot egy átlagos hitelfelvevőhöz képest: jobbra (piros) növeli, balra (zöld) csökkenti. Vidd az egeret egy sávra, és a buborék megmutatja, hányszorosára változik a nemteljesítés esélye. Az adósságteher-arány a modellben szerepel (hatása most {dr}), de adatminőségi okokból nem elsődleges tényező.",
+    "chart.tooltip": "modellhatás: {v} log-esély",
+    "chart.less": "{p}-kal kisebb nemteljesítési esély az átlagosnál",
+    "chart.more": "{p}-kal nagyobb nemteljesítési esély az átlagosnál",
+    "chart.times": "{m}-szer akkora nemteljesítési esély, mint átlagosan",
+    "chart.axis": "← csökkenti a kockázatot   ·   növeli a kockázatot →",
     "chart.na.single": "A grafikon nem tölthető be (Chart.js nem érhető el offline). A fenti lista a teljes magyarázatot tartalmazza.",
     "chart.na.pf": "A grafikon nem tölthető be (Chart.js nem érhető el offline). A mellette lévő táblázat ugyanezeket az adatokat mutatja.",
 
@@ -859,8 +863,12 @@ const STR = {
     "factor.html": "<b>{label}</b> ({value}) — {strength} {dir} risk compared with the average borrower.",
     "factor.strong": "strongly", "factor.moderate": "moderately", "factor.slight": "slightly",
     "factor.up": "increases", "factor.down": "reduces",
-    "contrib.note": "Bars show each factor's log-odds contribution relative to the average borrower in the training data (positive = increases risk). The debt-to-income ratio is part of the model (current effect {dr}), but for data-quality reasons it is not used as a primary explanation.",
-    "chart.tooltip": "log-odds contribution",
+    "contrib.note": "Bars show how far each factor shifts the risk relative to an average borrower: to the right (red) it raises risk, to the left (green) it lowers it. Hover over a bar to see how much it changes the odds of default. The debt-to-income ratio is part of the model (current effect {dr}), but for data-quality reasons it is not a primary factor.",
+    "chart.tooltip": "model effect: {v} log-odds",
+    "chart.less": "{p} lower odds of default than average",
+    "chart.more": "{p} higher odds of default than average",
+    "chart.times": "{m}× the average odds of default",
+    "chart.axis": "← lowers risk   ·   raises risk →",
     "chart.na.single": "The chart could not be loaded (Chart.js is unavailable offline). The list above contains the full explanation.",
     "chart.na.pf": "The chart could not be loaded (Chart.js is unavailable offline). The table next to it shows the same data.",
 
@@ -1370,6 +1378,17 @@ function formatUser(key, v) {
   return nf(v) + unitSuffix(f.unit);
 }
 
+// Buborékszöveg: közérthető esélyszorzó elöl, a szakmai log-esély érték zárójelben
+function contribTip(v) {
+  const m = Math.exp(v);
+  const p = x => nf(x * 100, { maximumFractionDigits: 0 }) + "%";
+  const main = m < 1 ? t("chart.less", { p: p(1 - m) })
+             : m < 2 ? t("chart.more", { p: p(m - 1) })
+             : t("chart.times", { m: nf(m, { maximumFractionDigits: 1 }) });
+  const signed = (v > 0 ? "+" : v < 0 ? "−" : "") + nf(Math.abs(v), { minimumFractionDigits: 3, maximumFractionDigits: 3 });
+  return [" " + main, " (" + t("chart.tooltip", { v: signed }) + ")"];
+}
+
 function drawChart(items) {
   if (typeof Chart === "undefined") {
     $("contribChart").parentElement.innerHTML = `<div class="note">${esc(t("chart.na.single"))}</div>`;
@@ -1380,15 +1399,19 @@ function drawChart(items) {
     labels: items.map(c => t("s." + c.feature)),
     datasets: [{ data: items.map(c => +c.value.toFixed(3)), backgroundColor: items.map(c => c.value > 0 ? bad : good), borderRadius: 4 }]
   };
-  if (chart) { chart.data = data; chart.options.scales.x.ticks.color = muted; chart.options.scales.y.ticks.color = muted; chart.options.scales.x.grid.color = border; chart.update(); return; }
+  if (chart) {
+    chart.data = data; chart.options.scales.x.ticks.color = muted; chart.options.scales.y.ticks.color = muted; chart.options.scales.x.grid.color = border;
+    chart.options.scales.x.title.text = t("chart.axis"); chart.options.scales.x.title.color = muted;
+    chart.update(); return;
+  }
   chart = new Chart($("contribChart"), {
     type: "bar", data,
     options: {
       indexAxis: "y", responsive: true, maintainAspectRatio: false,
       animation: REDUCED.matches ? false : { duration: 900, easing: "easeOutQuart" },
-      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => `${t("chart.tooltip")}: ${ctx.raw > 0 ? "+" : ""}${nf(ctx.raw)}` } } },
+      plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => contribTip(ctx.raw) } } },
       scales: {
-        x: { ticks: { color: muted }, grid: { color: border } },
+        x: { ticks: { color: muted }, grid: { color: border }, title: { display: true, text: t("chart.axis"), color: muted } },
         y: { ticks: { color: muted }, grid: { display: false } }
       }
     }
