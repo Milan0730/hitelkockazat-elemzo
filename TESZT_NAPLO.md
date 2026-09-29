@@ -124,3 +124,33 @@ Cél: az app parancsikonnal, saját ablakban, weboldal és internet nélkül is 
   - HTTP-n (tesztharness) is 96/96.
   - `install.ps1`: PowerShell 7.4 szintaxis-ellenőrzés; dry-run böngésző nélkül (érthető hibaüzenet) és álböngészővel (helyes útvonalak). A Windows-útvonal → `file:///` URL átalakítás ékezetes, szóközös útvonallal is helyes.
   - **Nem ellenőrizhető itt**: a `.lnk` tényleges létrehozása (WScript.Shell COM csak Windows alatt létezik) → első futtatás a saját gépen.
+
+## 13. Új funkciók és a portfólió mintavételi hibája (M4, 2026-09-29)
+
+**Talált hiba (CASE_STUDY F8):** a 100 elemű „minta-portfólió” a teljes tisztított adatból volt véletlenszerűen kiválasztva (`d.sample(n=100)`), így kb. 80%-a a tanítóhalmazból jött. A portfólió fül következtetései ráadásul 100 hitelen és 7 nemteljesítőn alapultak (az elutasítási sáv „33%”-a 3 hitelen).
+- **Hatás:** a bemutató a valósnál jobbnak mutatta a modellt, és zajt mutatott bizonyítékként.
+- **Javítás:** a böngészhető minta csak a teszthalmazból jön. Az indexekre alkalmazott split azonosságát a szkript `assert`-tel ellenőrzi. A portfólió fül a teljes, 29 946 soros teszthalmazon validál: AUC 0,839, Gini 0,678, KS 0,524, kalibráció tizedenként, döntési sávok. Csak összesítések kerülnek a fájlba.
+- **Reprodukció:** a tréningszkript újrafuttatva. Az együtthatók, a skálázás és a szegmensek **bitre azonosak**, csak a `validation` blokk és az adatforrás pontosabb megnevezése új. A beágyazott `MODEL` és `PORTFOLIO_RAW` 1:1 egyezik a JSON-fájlokkal (géppel ellenőrizve).
+- **Tesztorákulum:** az új minta elvárt értékeit numpy-val számoltam, az apptól függetlenül: átlagos PD 7,06%, a 100. sor PD-je 11,83%, 80/14/6 sáv, 4 nemteljesítő, 15 adatminőségi jelzés.
+
+**Új funkciók:**
+- pontszám (600 pont 50:1 esélynél, PDO 20);
+- kontrafaktuális magyarázat (zárt képlet a keret-kihasználtságra);
+- várható veszteség (opcionális hitelösszeg, 2 évesből éves PD, LGD 45%);
+- élő újraszámolás;
+- nyomtatható A4 hitelmemo;
+- modellvalidáció.
+
+**Ellenőrzés:**
+- **115/115 teszt.** A 19 új teszt a 10. csoportban van:
+  - a pontskála definíciója;
+  - a kontrafaktuális határ, újraszámolással ellenőrizve (a javasolt értéken a határ alatt, 1 százalékponttal feljebb már nem);
+  - a várható veszteség független képlettel;
+  - az opcionális mező validációja;
+  - az élő számolás (félig beírt értékre nem ad hibaüzenetet);
+  - a memo tartalma és rejtettsége;
+  - a validációs összegek (sávok, tizedek = 29 946);
+  - mindkét Excel-export.
+- **Megjelenés:** képernyőképek világos és sötét módban, HU és EN nyelven. A memo A4 PDF-ként egyoldalas. Mobilon (375 px) nincs túlcsúszás.
+- **Diagramszínek:** a kalibrációs diagram színpárját mindkét témára palettaellenőrzővel validáltam (CVD-elválasztás, kontraszt).
+- **Javított apróság:** a memón a tényezők hatás-oszlopa túl keskeny volt („mérsékelten növeli” két sorba tört), ezért kiszélesítettem.

@@ -7,19 +7,19 @@
 
 ## TL;DR
 
-I built a credit risk web app with an AI coding agent (Claude) as the implementer. My role was to scope the product, make the decisions, and validate every result. The code worked and the model scored well (AUC 0.839), yet **systematic testing surfaced 7 real defects**, including one that made every displayed probability **~5× too high** without affecting any headline metric.
+I built a credit risk web app with an AI coding agent (Claude) as the implementer. My role was to scope the product, make the decisions, and validate every result. The code worked and the model scored well (AUC 0.839), yet **systematic testing surfaced 8 real defects**, including one that made every displayed probability **~5× too high** without affecting any headline metric.
 
 | | |
 |---|---|
-| Defects found and fixed | **7** (1 critical, 3 high, 2 medium, 1 low) |
-| Automated regression tests | **96**, in 9 groups, run against an **independent oracle** |
+| Defects found and fixed | **8** (1 critical, 3 high, 3 medium, 1 low) |
+| Automated regression tests | **115**, in 10 groups, run against an **independent oracle** |
 | Test-suite effectiveness | **2/2 injected bugs caught**, 14 tests failed on mutation |
 | Model reproducibility | re-trained on a different stack, results **bit-identical** (≤ 1.1·10⁻¹⁵) |
-| Live suite | [`?selftest`](https://milan0730.github.io/hitelkockazat-elemzo/?selftest): 96/96 on the deployed site |
+| Live suite | [`?selftest`](https://milan0730.github.io/hitelkockazat-elemzo/?selftest): 115/115 on the deployed site |
 
 ## 1. Context
 
-- **Product:** a single-file web app that estimates the probability of default (PD) for a loan applicant. It explains the drivers, benchmarks the applicant against real historical segments, and shows a 100-borrower sample portfolio with Excel export.
+- **Product:** a single-file web app that estimates the probability of default (PD) for a loan applicant. It explains the drivers, shows what would change the decision, estimates the expected loss, benchmarks the applicant against real historical segments, validates the model on the 29,946-loan test set, and offers a 100-borrower browsable sample, a printable credit memo and Excel export.
 - **Data and model:** *Give Me Some Credit* (Kaggle, 150k borrowers). Logistic regression on 6 features, with balanced class weights.
 - **Division of labour:** the AI agent wrote the code, the training script and the documentation, and carried out most hands-on test execution. I defined the scope and the acceptance criteria, directed what to verify, reviewed the evidence, and decided how each finding was handled. In this report, "I" refers to that directed and verified work.
 - **This is my second AI-agent test report.** It uses the same *problem → impact → fix* method as my earlier investment-tracker case study.
@@ -30,7 +30,7 @@ Three layers, each designed to catch what the others miss:
 
 | Layer | What it catches | How |
 |---|---|---|
-| **A. Automated regression** | calculation errors, regressions after changes | 96 browser tests; expected values computed **outside the app** (PowerShell), so the code is never checked against itself; boundary values at every threshold; the suite's own quality verified with **mutation testing** |
+| **A. Automated regression** | calculation errors, regressions after changes | 115 browser tests; expected values computed **outside the app** (PowerShell, numpy), so the code is never checked against itself; boundary values at every threshold; the suite's own quality verified with **mutation testing** |
 | **B. Exploratory / agent testing** | wrong assumptions, data issues, UX defects | questioning outputs against ground truth, reproducing pipeline steps from raw data, device and edge-case sweeps |
 | **C. Moderated user testing** | comprehension and usability | 3–5 non-technical testers, 7 task-based scenarios, success criteria and a questionnaire ([test plan](TESZTELESI_TERV.md)) |
 
@@ -47,6 +47,7 @@ Three layers, each designed to catch what the others miss:
 | F5 | Age-band labels contradict the real boundaries | 🟡 Medium | B: boundary testing | ✅ Fixed |
 | F6 | Horizontal overflow on mobile (451 px content in a 375 px viewport) | 🟡 Medium | B: device sweep | ✅ Fixed |
 | F7 | Implausible debt ratios (e.g. 20,000%) accepted silently | 🟢 Low | B: edge cases | ✅ Fixed |
+| F8 | Showcase portfolio drawn from training data (~80% in-sample) | 🟡 Medium | B: questioning a small-sample result | ✅ Fixed |
 
 ### F1 — Displayed PD ~5× too high 🔴
 
@@ -101,9 +102,16 @@ Three layers, each designed to catch what the others miss:
 - **Problem:** opening a flagged portfolio row in the analysis form put a debt ratio of 20,000% into the form, and no warning was shown.
 - **Fix:** the form now warns above 1,000% and explains the likely data-quality cause.
 
+### F8 — The showcase portfolio was mostly training data 🟡
+
+- **Problem:** the 100 loans on the portfolio tab were sampled from the whole cleaned dataset. About 80 of them had been used to train the model, and the tab's statistics rested on 100 loans with 7 defaults (for example, a "33% default rate" in the decline band was based on 3 loans).
+- **Impact:** the portfolio view flattered the model and presented noise as evidence. A reviewer would rightly discount it.
+- **Found by:** asking why a 150k-row project showed conclusions from 100 rows, then re-reading the sampling line in the training script.
+- **Fix:** the browsable sample is now drawn only from the test set, and the tab shows validation on all 29,946 test loans (AUC 0.839, Gini 0.678, KS 0.524, calibration by decile, decision-band outcomes). Only aggregates are exported, never raw rows. After re-running the training script, the model parameters were verified to be **bit-identical**.
+
 ## 4. Automated Suite
 
-The 96 tests are grouped as follows:
+The 115 tests are grouped as follows:
 1. Model math against the oracle
 2. Threshold and band boundaries
 3. Input parsing (Hungarian number formats)
@@ -113,10 +121,11 @@ The 96 tests are grouped as follows:
 7. Excel export: the download is intercepted, and the workbook is read back and inspected
 8. Basic accessibility
 9. Language switching (Hungarian / English): translation-key completeness, locale-aware number parsing, values converted on switch, and a scan of the visible UI and attributes for untranslated text
+10. New features: scorecard scale definition (600 points at 50:1, +20 per doubling), counterfactual thresholds verified by re-scoring at the suggested value, expected loss against an independent formula, optional-field validation, live updates that never flash errors, the print memo, and validation aggregates that must add up to the test-set size
 
 **Testing the tests:** I injected two realistic bugs, a skipped calibration and an off-by-one at the 10% threshold. **14 tests failed**, and both bugs were caught. A suite that stays green under mutation would have given false confidence.
 
-**Independent oracle:** reference PDs were computed in a separate PowerShell implementation directly from the exported model. The two implementations agree within ~4·10⁻⁸, and the tolerance is set at 10⁻⁶.
+**Independent oracle:** reference PDs were computed in a separate PowerShell implementation directly from the exported model, and the portfolio-sample expectations with numpy. The two implementations agree within ~4·10⁻⁸, and the tolerance is set at 10⁻⁶.
 
 ## 5. What I Would Tell a Team Using AI Coding Agents
 
@@ -144,6 +153,8 @@ _Findings from user testing will be added here in the same problem → impact �
 - Calibration is imperfect in the highest-risk band (F1 residual).
 - `DebtRatio` is flagged in the UI but not yet fixed in the model (F2).
 - The dataset is US data from 2011. The model is a teaching tool and has not been validated for any real lending use.
+- Expected loss uses a fixed LGD assumption (45%) and converts the 2-year PD to 1-year assuming a constant hazard. The score scale (600 at 50:1, PDO 20) is a convention, not a calibrated business scale.
+- The counterfactual only varies credit utilization. It is exact for this linear model, but it is not a full recourse analysis across all features.
 - The UI is bilingual (Hungarian / English). Only the internal test log (`TESZT_NAPLO.md`) and test plan are in Hungarian.
 
 ---

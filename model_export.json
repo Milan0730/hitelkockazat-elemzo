@@ -1,6 +1,6 @@
 {
   "meta": {
-    "source_dataset": "Give Me Some Credit (Kaggle, 2011) - publikus, CC0-jellegű oktatási dataset",
+    "source_dataset": "Give Me Some Credit (Kaggle, 2011) - nyilvános oktatási verseny-adatkészlet (a nyers fájl nem része a tárolónak)",
     "trained_rows": 119784,
     "test_rows": 29946,
     "excluded_bad_code_rows": 269,
@@ -192,5 +192,96 @@
       "mean": 0.3053,
       "count": 380
     }
-  ]
+  ],
+  "validation": {
+    "n": 29946,
+    "defaults": 1976,
+    "auc": 0.8391,
+    "gini": 0.6782,
+    "ks": 0.524,
+    "mean_pd": 0.0676,
+    "actual_rate": 0.066,
+    "deciles": [
+      {
+        "decile": 1,
+        "n": 2995,
+        "mean_pd": 0.0103,
+        "actual": 0.007
+      },
+      {
+        "decile": 2,
+        "n": 2995,
+        "mean_pd": 0.0128,
+        "actual": 0.0063
+      },
+      {
+        "decile": 3,
+        "n": 2994,
+        "mean_pd": 0.0151,
+        "actual": 0.009
+      },
+      {
+        "decile": 4,
+        "n": 2995,
+        "mean_pd": 0.0178,
+        "actual": 0.0147
+      },
+      {
+        "decile": 5,
+        "n": 2994,
+        "mean_pd": 0.0214,
+        "actual": 0.0237
+      },
+      {
+        "decile": 6,
+        "n": 2995,
+        "mean_pd": 0.0272,
+        "actual": 0.0317
+      },
+      {
+        "decile": 7,
+        "n": 2994,
+        "mean_pd": 0.0381,
+        "actual": 0.0478
+      },
+      {
+        "decile": 8,
+        "n": 2995,
+        "mean_pd": 0.0603,
+        "actual": 0.0838
+      },
+      {
+        "decile": 9,
+        "n": 2994,
+        "mean_pd": 0.1032,
+        "actual": 0.1119
+      },
+      {
+        "decile": 10,
+        "n": 2995,
+        "mean_pd": 0.3693,
+        "actual": 0.3239
+      }
+    ],
+    "bands": [
+      {
+        "band": "good",
+        "n": 25396,
+        "defaults": 823,
+        "rate": 0.0324
+      },
+      {
+        "band": "warn",
+        "n": 3238,
+        "defaults": 536,
+        "rate": 0.1655
+      },
+      {
+        "band": "bad",
+        "n": 1312,
+        "defaults": 617,
+        "rate": 0.4703
+      }
+    ]
+  }
 }

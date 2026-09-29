@@ -115,9 +115,38 @@ overall_rate = float(d["SeriousDlqin2yrs"].mean())
 print("\nTeljes minta historikus nemteljesítési aránya:", round(overall_rate, 4))
 print("Szegmensek száma (>=30 minta):", len(segment_rates))
 
+# ---- VALIDÁCIÓ A TESZTHALMAZON ----
+# Az app képletével számolt (prior-korrigált) PD-n; a fájlba csak összesítések kerülnek, nyers sor nem.
+from sklearn.metrics import roc_curve
+
+prior_rate = round(overall_rate, 4)  # az app is ezt a kerekített arányt használja
+prior = np.log(prior_rate / (1 - prior_rate))
+pd_test = 1 / (1 + np.exp(-(model.decision_function(X_test_s) + prior)))
+fpr, tpr, _ = roc_curve(y_test, pd_test)
+auc_pd = roc_auc_score(y_test, pd_test)  # monoton transzformáció: azonos a fenti AUC-val
+deciles = []
+dec_idx = pd.qcut(pd_test, 10, labels=False)
+for k in range(10):
+    m = dec_idx == k
+    deciles.append({"decile": k + 1, "n": int(m.sum()),
+                    "mean_pd": round(float(pd_test[m].mean()), 4), "actual": round(float(y_test[m].mean()), 4)})
+bands = []
+for name, lo, hi in [("good", 0.0, 0.10), ("warn", 0.10, 0.30), ("bad", 0.30, 1.01)]:
+    m = (pd_test >= lo) & (pd_test < hi)
+    bands.append({"band": name, "n": int(m.sum()), "defaults": int(y_test[m].sum()),
+                  "rate": round(float(y_test[m].mean()), 4)})
+validation = {
+    "n": int(len(y_test)), "defaults": int(y_test.sum()),
+    "auc": round(float(auc_pd), 4), "gini": round(float(2 * auc_pd - 1), 4), "ks": round(float(np.max(tpr - fpr)), 4),
+    "mean_pd": round(float(pd_test.mean()), 4), "actual_rate": round(float(y_test.mean()), 4),
+    "deciles": deciles, "bands": bands,
+}
+print("\n=== VALIDÁCIÓ (teszthalmaz, prior-korrigált PD) ===")
+print({k: v for k, v in validation.items() if k not in ("deciles", "bands")})
+
 export = {
     "meta": {
-        "source_dataset": "Give Me Some Credit (Kaggle, 2011) - publikus, CC0-jellegű oktatási dataset",
+        "source_dataset": "Give Me Some Credit (Kaggle, 2011) - nyilvános oktatási verseny-adatkészlet (a nyers fájl nem része a tárolónak)",
         "trained_rows": int(len(y_train)),
         "test_rows": int(len(y_test)),
         "excluded_bad_code_rows": int(n_bad),
@@ -131,12 +160,17 @@ export = {
     "coefficients": model.coef_[0].tolist(),
     "intercept": float(model.intercept_[0]),
     "segments": segment_rates.astype(object).where(pd.notnull(segment_rates), None).to_dict(orient="records"),
+    "validation": validation,
 }
 
 with open(f"{OUT_DIR}/model_export.json", "w", encoding="utf-8") as f:
     json.dump(export, f, ensure_ascii=False, indent=2, default=str)
 
-sample = d[features + ["SeriousDlqin2yrs"]].sample(n=100, random_state=7).reset_index(drop=True)
+# A böngészhető minta CSAK a teszthalmazból: a modell egyik bemutatott hitelen sem tanult.
+# A split csak a sorok számától és y-tól függ, így az indexekre alkalmazva ugyanazt a felosztást adja.
+_, idx_test = train_test_split(d.index, test_size=0.2, random_state=42, stratify=y)
+assert np.array_equal(d.loc[idx_test, features].values, X_test), "a teszthalmaz indexei nem egyeznek"
+sample = d.loc[idx_test, features + ["SeriousDlqin2yrs"]].sample(n=100, random_state=7).reset_index(drop=True)
 sample.to_json(f"{OUT_DIR}/sample_portfolio.json", orient="records", indent=2)
 
 print("\nExport kész: model_export.json, sample_portfolio.json")

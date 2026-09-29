@@ -1,9 +1,10 @@
 /* Automatizált regressziós tesztcsomag — Hitelkockázat-elemző
    Futtatás: index.html?selftest  (csak ekkor töltődik be, a normál működést nem érinti)
 
-   Az orákulum-értékek az apptól FÜGGETLENÜL, PowerShell-ben készültek a model_export.json
-   és a sample_portfolio.json alapján (ld. TESZTELESI_TERV.md, "Orákulum"). A tesztek az app
-   globális függvényeit (score, decide, parseNum, ...) és a DOM-ot használják. */
+   Az orákulum-értékek az apptól FÜGGETLENÜL készültek: az egyedi PD-k PowerShell-ben
+   (ld. TESZTELESI_TERV.md, "Orákulum"), a teszthalmazból vett 100-as minta értékei numpy-val
+   a model_export.json és a sample_portfolio.json alapján. A tesztek az app globális
+   függvényeit (score, decide, parseNum, ...) és a DOM-ot használják. */
 (function () {
   "use strict";
 
@@ -18,7 +19,9 @@
     extrap: { in: [40, 3000, 50, 30, 20, 20],     pd: 0.9999999999999889 },
     old:    { in: [110, 5000, 20, 30, 0, 0],      pd: 0.008445853197037374 }
   };
-  const ORACLE_PF = { mean: 0.046529074110745174, row100: 0.31128214317908831, good: 88, warn: 9, bad: 3, defaults: 7, flagged: 20 };
+  // 100 hitel a TESZTHALMAZBÓL (random_state=7) — numpy-val számolva, az apptól függetlenül
+  const ORACLE_PF = { mean: 0.07063458132107489, row100: 0.11827253114836743, good: 80, warn: 14, bad: 6,
+                      defaults: 4, flagged: 15, badDefaulted: 2, firstFlagId: 26 };
   const KEYS = ["age", "MonthlyIncome", "RevolvingUtilizationOfUnsecuredLines", "DebtRatio",
                 "NumberOfTime30-59DaysPastDueNotWorse", "NumberOfTimes90DaysLate"];
 
@@ -173,16 +176,16 @@
   });
   test("Átlagos PD = orákulum", () => near(pfSummary(PORTFOLIO).avgPd, ORACLE_PF.mean));
   test("#100 PD = orákulum", () => near(PORTFOLIO[99].pd, ORACLE_PF.row100));
-  test("Döntés-megoszlás 88 / 9 / 3", () => {
+  test(`Döntés-megoszlás ${ORACLE_PF.good} / ${ORACLE_PF.warn} / ${ORACLE_PF.bad}`, () => {
     const b = pfSummary(PORTFOLIO).by;
     return b.good.n === ORACLE_PF.good && b.warn.n === ORACLE_PF.warn && b.bad.n === ORACLE_PF.bad || `${b.good.n}/${b.warn.n}/${b.bad.n}`;
   });
-  test("7 nemteljesítő, 20 adatminőségi jelzés", () => {
+  test(`${ORACLE_PF.defaults} nemteljesítő, ${ORACLE_PF.flagged} adatminőségi jelzés`, () => {
     const s = pfSummary(PORTFOLIO);
     return s.defaults === ORACLE_PF.defaults && s.flagged === ORACLE_PF.flagged || `${s.defaults} / ${s.flagged}`;
   });
-  test("Szűrés: Elutasítás → 3 sor", () => { setSelect("pfDecision", "bad"); return eq(qa("#pfBody tr[data-id]").length, 3); });
-  test("Szűrés: Elutasítás + Nemteljesített → 1 sor", () => { setSelect("pfOutcome", "1"); return eq(qa("#pfBody tr[data-id]").length, 1); });
+  test(`Szűrés: Elutasítás → ${ORACLE_PF.bad} sor`, () => { setSelect("pfDecision", "bad"); return eq(qa("#pfBody tr[data-id]").length, ORACLE_PF.bad); });
+  test(`Szűrés: Elutasítás + Nemteljesített → ${ORACLE_PF.badDefaulted} sor`, () => { setSelect("pfOutcome", "1"); return eq(qa("#pfBody tr[data-id]").length, ORACLE_PF.badDefaulted); });
   test("Üres szűrési eredmény → üzenet, nincs összeomlás", () => {
     setSelect("pfDecision", "bad"); setSelect("pfOutcome", "1"); q("#pfFlagged").checked = true; q("#pfFlagged").dispatchEvent(new Event("change"));
     const n = qa("#pfBody tr[data-id]").length;
@@ -191,10 +194,10 @@
     setSelect("pfDecision", ""); setSelect("pfOutcome", "");
     return ok || "hiányzó üres-állapot üzenet";
   });
-  test("Csak jelzéssel → 20 sor, mind ⚠", () => {
+  test(`Csak jelzéssel → ${ORACLE_PF.flagged} sor, mind ⚠`, () => {
     q("#pfFlagged").click();
     const rows = qa("#pfBody tr[data-id]");
-    const ok = rows.length === 20 && rows.every(tr => tr.querySelector(".flag"));
+    const ok = rows.length === ORACLE_PF.flagged && rows.every(tr => tr.querySelector(".flag"));
     q("#pfFlagged").click();
     return ok || `${rows.length} sor`;
   });
@@ -217,7 +220,13 @@
     const ok = q("#tabbtn-single").getAttribute("aria-selected") === "true" && q("#pdValue").textContent === pct(r.pd);
     return ok || `${q("#pdValue").textContent} vs ${pct(r.pd)}`;
   });
-  test("Megjelölt sor megnyitása → adósságteher-figyelmeztetés", () => /Szokatlanul magas/.test(msg("DebtRatio")) || msg("DebtRatio"));
+  test(`Megjelölt sor (#${ORACLE_PF.firstFlagId}) megnyitása → adósságteher-figyelmeztetés`, () => {
+    showTab("portfolio");
+    q(`#pfBody tr[data-id="${ORACLE_PF.firstFlagId}"]`).click();
+    return /Szokatlanul magas/.test(msg("DebtRatio")) || msg("DebtRatio");
+  });
+  test("Mintából megnyitott hitelnél nincs hitelösszeg → nincs várható veszteség", () =>
+    document.getElementById("in-loan").value === "" && q("#elWrap").classList.contains("hidden") || "maradt hitelösszeg");
 
   /* 7. Excel export (a letöltést elfogjuk, a munkafüzetet visszaolvassuk) */
   group = "7. Excel export";
@@ -246,7 +255,7 @@
     test("Portfólió: megjelölt sorokban 'Adatminőség' szöveg", () => {
       const sh = pf.wb.Sheets["Portfólió"]; let n = 0;
       for (let r = 5; r <= 104; r++) if (sh["K" + r] && /Hiányzó jövedelem/.test(sh["K" + r].v)) n++;
-      return eq(n, 20);
+      return eq(n, ORACLE_PF.flagged);
     });
     test("Módszertan: disclaimer szerepel", () => /Oktatási \/ demo/.test(pf.wb.Sheets["Módszertan"].A3.v) || "nincs disclaimer");
     test("Egyedi: munkalapok és PD = orákulum (magas profil)", () => {
@@ -345,6 +354,112 @@
     history.replaceState(null, "", original);
     return eq(r, "en");
   });
+
+  /* 10. Új funkciók: pontszám, kontrafaktuális, várható veszteség, élő számolás, memo, validáció */
+  group = "10. Új funkciók";
+  showTab("single");
+  const utilAt = (model, u) => score({ ...model, RevolvingUtilizationOfUnsecuredLines: Math.min(u / 100, TRAIN_CAPS.RevolvingUtilizationOfUnsecuredLines) }).pd;
+  test("Pontskála: 50:1 esély = 600 pont, dupla esély = +20 pont (PDO)", () =>
+    near(scoreOf(1 / 51), 600, 1e-9) === true && near(scoreOf(1 / 101) - scoreOf(1 / 51), 20, 1e-9) === true || `${scoreOf(1 / 51)} / ${scoreOf(1 / 101)}`);
+  test("Közepes profil: pontszám 537, sávhatárok ≥ 551 / ≤ 511", () => {
+    q("[data-preset=mid]").click();
+    const s = q("#scoreText").textContent;
+    return q("#scoreValue").textContent === "537" && /551/.test(s) && /511/.test(s) || `${q("#scoreValue").textContent} / ${s}`;
+  });
+  test("Kontrafaktuális (közepes): 'legfeljebb 48%', és a határ valóban ott van", () => {
+    const cf = lastResult.cf, m = lastResult.input.model;
+    return cf.key === "cf.warn" && cf.n10 === 48 && /legfeljebb 48%/.test(q("#cfMain").textContent) &&
+      utilAt(m, cf.n10) < 0.10 && utilAt(m, cf.n10 + 1) > 0.0998 || `${cf.key} ${cf.n10} ${utilAt(m, cf.n10)}`;
+  });
+  test("Kontrafaktuális (alacsony): jóváhagyás, 'fölé nőne' határa pontos", () => {
+    q("[data-preset=low]").click();
+    const cf = lastResult.cf, m = lastResult.input.model;
+    return cf.key === "cf.good" && utilAt(m, cf.n) >= 0.10 && utilAt(m, cf.n - 1) < 0.10 && /fölé nőne/.test(q("#cfMain").textContent) || JSON.stringify(cf);
+  });
+  test("Kontrafaktuális (magas): elutasítási magyarázat, a sávhatár helyes", () => {
+    q("[data-preset=high]").click();
+    const cf = lastResult.cf, m = lastResult.input.model;
+    if (!cf.key.startsWith("cf.bad")) return cf.key;
+    if (cf.n30 !== undefined && !(utilAt(m, cf.n30) < 0.30)) return `n30=${cf.n30} → ${utilAt(m, cf.n30)}`;
+    return q("#cfMain").textContent.length > 20 || "üres";
+  });
+  test("Várható veszteség (közepes, 20 000 USD): 7,8% · 702 USD · 3,51%", () => {
+    q("[data-preset=mid]").click();
+    const indep = (1 - Math.sqrt(1 - ORACLE.mid.pd)) * 0.45 * 20000;   // független képlet
+    return !q("#elWrap").classList.contains("hidden") && q("#elPd1").textContent === "7,8%" &&
+      q("#elAmount").textContent === "702 USD" && q("#elPremium").textContent === "3,51%" && Math.round(indep) === 702 ||
+      `${q("#elPd1").textContent} | ${q("#elAmount").textContent} | ${q("#elPremium").textContent}`;
+  });
+  test("Hitelösszeg üresen: nincs várható-veszteség sáv és nincs hiba", () => {
+    document.getElementById("in-loan").value = ""; submit();
+    return q("#elWrap").classList.contains("hidden") && fieldState("loan") === "ok" || "hibás";
+  });
+  test("Hitelösszeg érvénytelen ('sok') → hiba; javítás után újra számol", () => {
+    document.getElementById("in-loan").value = "sok"; submit();
+    const err = fieldState("loan") === "err";
+    document.getElementById("in-loan").value = "20 000"; submit();
+    return err && fieldState("loan") === "ok" && !q("#elWrap").classList.contains("hidden") || "nincs hiba / nem számolt";
+  });
+  test("Élő újraszámolás: érvényes módosítás frissít, félig beírt érték nem jelez hibát", () => {
+    q("[data-preset=mid]").click();
+    const util = document.getElementById("in-RevolvingUtilizationOfUnsecuredLines");
+    util.value = "40"; const r1 = liveUpdate(); const pdLow = lastResult.pd;
+    util.value = ""; const r2 = liveUpdate();
+    const quiet = fieldState("RevolvingUtilizationOfUnsecuredLines") !== "err";
+    util.value = "72"; liveUpdate();
+    return r1 === true && pdLow < ORACLE.mid.pd && r2 === false && quiet && near(lastResult.pd, ORACLE.mid.pd) === true ||
+      `r1=${r1} r2=${r2} quiet=${quiet}`;
+  });
+  test("Élő újraszámolás csak az első kiértékelés után indul", () => {
+    q("#resetBtn").click(); fill(ORACLE.mid.in);
+    const r = liveUpdate();
+    return r === false && q("#results").classList.contains("hidden") || "kiértékelés előtt számolt";
+  });
+  test("Hitelmemo: PD, pontszám, javaslat, kontrafaktuális, várható veszteség, disclaimer", () => {
+    q("[data-preset=mid]").click();
+    const ok = buildMemo(), m = q("#printMemo").textContent;
+    return ok && m.includes("15,0%") && m.includes("537") && m.includes("Egyedi felülvizsgálat") && m.includes("legfeljebb 48%") &&
+      m.includes("702 USD") && /Oktatási \/ demo/.test(m) || m.slice(0, 160);
+  });
+  test("Hitelmemo: a képernyőn rejtett (csak nyomtatáskor látszik)", () => getComputedStyle(q("#printMemo")).display === "none" || "látszik");
+  test("Hitelmemo: kiértékelés nélkül nem készül", () => {
+    q("#resetBtn").click(); const r = buildMemo(); q("[data-preset=mid]").click();
+    return r === false || "készült eredmény nélkül";
+  });
+  test("Validáció: sávok és tizedek összege = teszthalmaz; AUC = meta; 10 tized", () => {
+    const V = MODEL.validation;
+    const sb = V.bands.reduce((a, b) => a + b.n, 0), sd = V.bands.reduce((a, b) => a + b.defaults, 0), dn = V.deciles.reduce((a, d) => a + d.n, 0);
+    return sb === V.n && sd === V.defaults && dn === V.n && V.n === MODEL.meta.test_rows && V.auc === MODEL.meta.test_auc && V.deciles.length === 10 || `${sb}/${sd}/${dn}`;
+  });
+  test("Validáció: a tizedek átlagos becsült PD-je monoton nő", () =>
+    MODEL.validation.deciles.every((d, i, a) => i === 0 || a[i - 1].mean_pd <= d.mean_pd) || "nem monoton");
+  test("Validáció a felületen: AUC 0,839 · Gini 0,678 · KS 0,524, 3 sáv", () => {
+    showTab("portfolio");
+    const k = q("#pfKpis").textContent, rows = qa("#pfMatrix tr").length;
+    showTab("single");
+    return k.includes("0,839") && k.includes("0,678") && k.includes("0,524") && rows === 4 || `${k.slice(0, 80)} / ${rows}`;
+  });
+  if (typeof XLSX !== "undefined") {
+    const grab = btn => {
+      let cap = null; const orig = XLSX.writeFile;
+      XLSX.writeFile = wb => { cap = XLSX.read(XLSX.write(wb, { type: "array", bookType: "xlsx" })); };
+      try { q(btn).click(); } finally { XLSX.writeFile = orig; }
+      return cap;
+    };
+    test("Excel (egyedi): pontszám, kontrafaktuális mondat, várható veszteség", () => {
+      q("[data-preset=mid]").click();
+      const wb = grab("#singleExportBtn"), sh = wb.Sheets["Kiértékelés"];
+      const vals = Object.keys(sh).filter(k => k[0] !== "!").map(k => sh[k].v);
+      return vals.includes(537) && vals.some(v => typeof v === "string" && v.includes("legfeljebb 48%")) && vals.includes(702) || "hiányzó sor";
+    });
+    test("Excel (portfólió): Összesítő = validáció (AUC, 3 sáv, 10 tized)", () => {
+      showTab("portfolio");
+      const wb = grab("#pfExportBtn"), sh = wb.Sheets["Összesítő"];
+      showTab("single");
+      const vals = Object.keys(sh).filter(k => k[0] !== "!").map(k => sh[k].v);
+      return sh.B4.v === MODEL.validation.auc && vals.includes(MODEL.validation.bands[0].n) && vals.includes(10) || JSON.stringify(sh.B4);
+    });
+  }
 
   // Állapot visszaállítása
   setLang(savedLang, false);

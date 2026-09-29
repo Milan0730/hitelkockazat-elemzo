@@ -30,6 +30,7 @@
   --good-soft: rgba(47,94,71,.10); --warn-soft: rgba(176,141,87,.16); --bad-soft: rgba(142,59,53,.10);
   --zone-good: #9DB3A5; --zone-warn: #B08D57; --zone-bad: #8E3B35;
   --heat-rgb: 14,27,44; --heat-hi: #F5F1E9; --heat-lo: #14202E; --heat-ring: #B08D57;
+  --cal-actual: #2B63A6; --cal-pred: #B7832F;
   --ease: cubic-bezier(.16, 1, .3, 1);
   --serif: "Instrument Serif", Georgia, "Times New Roman", serif;
   --sans: "Instrument Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
@@ -45,6 +46,7 @@
   --good-soft: rgba(143,209,174,.12); --warn-soft: rgba(227,168,88,.14); --bad-soft: rgba(238,154,142,.12);
   --zone-good: #5E8F73; --zone-warn: #C7A46B; --zone-bad: #B0544B;
   --heat-rgb: 199,164,107; --heat-hi: #0B1422; --heat-lo: #ECE6DA; --heat-ring: #ECE6DA;
+  --cal-actual: #5B8FD0; --cal-pred: #B8893A;
 }
 * { box-sizing: border-box; }
 body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 var(--sans); transition: background .25s, color .25s; }
@@ -145,8 +147,28 @@ h1 { font-family: var(--serif); font-size: 30px; font-weight: 400; letter-spacin
 
 .report-head { position: relative; display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; padding-bottom: 16px; }
 .report-head::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: var(--accent); transform-origin: left; }
+.report-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+.score-big { font-family: var(--serif); font-size: 44px; line-height: 1; letter-spacing: -.01em; font-variant-numeric: tabular-nums; }
+.el-wrap { display: flex; flex-direction: column; gap: 12px; padding: 18px 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.el-band { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.el-band > div { display: flex; flex-direction: column; gap: 4px; padding: 0 20px; border-left: 1px solid var(--border-2); }
+.el-band > div:first-child { padding-left: 0; border-left: 0; }
+.el-v { font-family: var(--serif); font-size: 30px; line-height: 1.05; font-variant-numeric: tabular-nums; }
+.el-l { font-size: 12px; color: var(--muted); line-height: 1.45; }
+.cf { background: var(--panel); border-left: 3px solid var(--accent); padding: 22px 26px; display: flex; flex-direction: column; gap: 10px; }
+.cf .cf-main { font-family: var(--serif); font-size: 26px; line-height: 1.25; margin: 0; }
+.cf .cf-note { font-size: 12.5px; line-height: 1.55; color: var(--muted); margin: 0; }
+.field.optional { padding-top: 16px; border-top: 1px dashed var(--border); }
+.field.optional label .opt { font-weight: 500; letter-spacing: .04em; text-transform: none; color: var(--muted-2); }
+.live-note { font-size: 12px; color: var(--muted-2); text-align: center; margin: 2px 0 0; }
+.dist-block { display: flex; flex-direction: column; gap: 8px; margin-top: 16px; }
+.dist { display: flex; gap: 2px; }
+.dist > div { height: 10px; border-radius: 2px; }
+.dist-l { display: flex; gap: 2px; font-size: 12px; }
+.dist-l span { min-width: 0; }
+#printMemo { display: none; }
 .report-head h2 { font-family: var(--serif); font-weight: 400; font-size: 48px; letter-spacing: -.01em; line-height: 1.05; margin: 4px 0 0; }
-.summary { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); }
+.summary { display: grid; grid-template-columns: 1.3fr .95fr 1.15fr 1.15fr; }
 .summary > div { display: flex; flex-direction: column; gap: 8px; padding: 0 26px; border-left: 1px solid var(--border); }
 .summary > div:first-child { padding-left: 0; border-left: 0; }
 .pd-big { font-family: var(--serif); font-size: 88px; font-weight: 400; line-height: .95; letter-spacing: -.02em; }
@@ -236,7 +258,14 @@ footer { margin-top: 24px; color: var(--muted); font-size: 12px; text-align: cen
   .panel { padding: 20px 18px; }
   .report-head h2, .pf-head h2 { font-size: 32px; }
   .summary { grid-template-columns: 1fr 1fr; row-gap: 22px; }
-  .summary > div:nth-child(3) { grid-column: 1 / -1; padding-left: 0; border-left: 0; border-top: 1px solid var(--border); padding-top: 16px; }
+  .summary > div:nth-child(3) { padding-left: 0; border-left: 0; border-top: 1px solid var(--border); padding-top: 16px; }
+  .summary > div:nth-child(4) { border-top: 1px solid var(--border); padding-top: 16px; }
+  .score-big { font-size: 36px; }
+  .el-band { grid-template-columns: 1fr 1fr; row-gap: 16px; }
+  .el-band > div:nth-child(3) { padding-left: 0; border-left: 0; }
+  .el-v { font-size: 24px; }
+  .cf { padding: 18px; }
+  .cf .cf-main { font-size: 21px; }
   .pd-big { font-size: 58px; }
   .badge, .ref-value { font-size: 26px; }
   .kpis { grid-template-columns: 1fr 1fr; row-gap: 20px; }
@@ -253,6 +282,48 @@ footer { margin-top: 24px; color: var(--muted); font-size: 12px; text-align: cen
   .matrix th, .matrix td { padding: 9px 5px; font-size: 13px; }
   .head-actions .mast-btn { padding: 10px 12px; }
 }
+/* Nyomtatás: a „Jelentés nyomtatása” gomb (vagy Ctrl+P egy kiértékelés után) egyoldalas hitelmemót ad */
+@media print {
+  @page { size: A4; margin: 14mm 15mm; }
+  html.print-memo body { background: #fff; }
+  html.print-memo body > *:not(#printMemo) { display: none !important; }
+  html.print-memo #printMemo { display: block; }
+}
+#printMemo { color: #14202E; font: 11pt/1.45 var(--sans); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+#printMemo .m-top { display: flex; justify-content: space-between; align-items: flex-start; padding-bottom: 10px; border-bottom: 1.5px solid #14202E; }
+#printMemo .m-brand { display: flex; align-items: center; gap: 10px; }
+#printMemo .m-logo { width: 26px; height: 26px; border-radius: 5px; background: #0E1B2C; color: #C7A46B; display: flex; align-items: center; justify-content: center; font: 17px/1 var(--serif); }
+#printMemo .m-name { font: 16pt/1.1 var(--serif); }
+#printMemo .m-k { font-size: 7.5pt; letter-spacing: .2em; font-weight: 700; text-transform: uppercase; color: #4A5563; }
+#printMemo .m-k.brass { color: #7A5C2E; }
+#printMemo .m-meta { display: grid; grid-template-columns: auto auto; column-gap: 12px; font-size: 8.5pt; color: #4A5563; text-align: right; }
+#printMemo .m-meta b { color: #14202E; }
+#printMemo h1 { font: 26pt/1.05 var(--serif); margin: 2px 0 0; letter-spacing: -.01em; }
+#printMemo .m-sum { display: grid; grid-template-columns: 1.3fr 1fr 1.3fr 1fr; border-top: 1px solid #D8CFBF; border-bottom: 1px solid #D8CFBF; margin: 12px 0; }
+#printMemo .m-sum > div { padding: 8px 10px; border-left: 1px solid #E2D9C8; display: flex; flex-direction: column; gap: 2px; }
+#printMemo .m-sum > div:first-child { padding-left: 0; border-left: 0; }
+#printMemo .m-big { font: 26pt/1 var(--serif); }
+#printMemo .m-dec { font: 16pt/1.1 var(--serif); }
+#printMemo .m-dec.good { color: #2F5E47; } #printMemo .m-dec.warn { color: #7A4A12; } #printMemo .m-dec.bad { color: #8E3B35; }
+#printMemo .m-scale { position: relative; height: 12px; margin-top: 4px; }
+#printMemo .m-scale .z { position: absolute; top: 4px; height: 4px; }
+#printMemo .m-scale .mk { position: absolute; top: 0; width: 10px; height: 10px; margin-left: -5px; background: #14202E; border: 2px solid #fff; transform: rotate(45deg); box-sizing: border-box; }
+#printMemo .m-zones { display: flex; font-size: 8pt; color: #4A5563; margin-bottom: 12px; }
+#printMemo .m-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+#printMemo .m-sec { margin-top: 12px; break-inside: avoid; }
+#printMemo .m-sec > .m-k { display: block; padding-bottom: 3px; border-bottom: 1px solid #14202E; margin-bottom: 5px; }
+#printMemo .m-kv { display: grid; grid-template-columns: 1fr auto; row-gap: 3px; column-gap: 12px; }
+#printMemo .m-kv span:nth-child(even) { font-weight: 700; text-align: right; }
+#printMemo .m-f { display: grid; grid-template-columns: 1fr 70px 190px; row-gap: 3px; column-gap: 10px; }
+#printMemo .m-f .l { font: 12.5pt/1.2 var(--serif); }
+#printMemo .m-cf { margin-top: 14px; border-left: 3px solid #B08D57; padding: 2px 0 2px 12px; break-inside: avoid; }
+#printMemo .m-cf p { margin: 3px 0 0; font: 13pt/1.3 var(--serif); }
+#printMemo .m-note { font-size: 8pt; color: #5A6573; }
+#printMemo .m-sign { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: 18px; margin-top: 18px; }
+#printMemo .m-sign > div { display: flex; flex-direction: column; gap: 18px; }
+#printMemo .m-sign .line { border-bottom: 1px solid #14202E; min-height: 14px; font-size: 8.5pt; color: #5A6573; }
+#printMemo .m-foot { margin-top: 16px; padding-top: 8px; border-top: 1px solid #D8CFBF; font-size: 7.5pt; color: #5A6573; display: flex; flex-direction: column; gap: 4px; }
+#printMemo .m-foot b { color: #14202E; }
 </style>
 </head>
 <body>
@@ -294,9 +365,19 @@ footer { margin-top: 24px; color: var(--muted); font-size: 12px; text-align: cen
         <button class="btn" type="button" data-preset="high" data-i18n="preset.high"></button>
       </div>
       <div id="fields"></div>
+      <div class="field optional" id="f-loan">
+        <label for="in-loan"><span data-i18n="f.loan.label"></span> <span class="opt" data-i18n="f.loan.opt"></span></label>
+        <div class="hint" id="h-loan" data-i18n="f.loan.hint"></div>
+        <div class="inwrap">
+          <input id="in-loan" name="loan" inputmode="decimal" autocomplete="off" aria-describedby="h-loan m-loan">
+          <span class="unit" aria-hidden="true">USD</span>
+        </div>
+        <div class="msg" id="m-loan" aria-live="polite"></div>
+      </div>
       <div class="actions">
         <button class="btn primary" type="submit" data-i18n="btn.evaluate"></button>
         <button class="btn link" type="button" id="resetBtn" data-i18n="btn.reset"></button>
+        <p class="live-note" data-i18n="live.note"></p>
       </div>
     </form>
 
@@ -310,7 +391,10 @@ footer { margin-top: 24px; color: var(--muted); font-size: 12px; text-align: cen
               <span class="kicker brass" id="reportKicker"></span>
               <h2 id="reportTitle"></h2>
             </div>
-            <button class="btn outline" type="button" id="singleExportBtn" data-i18n="btn.export"></button>
+            <div class="report-actions">
+              <button class="btn primary" type="button" id="printBtn" data-i18n="btn.print"></button>
+              <button class="btn outline" type="button" id="singleExportBtn" data-i18n="btn.export"></button>
+            </div>
           </div>
         </section>
 
@@ -319,6 +403,11 @@ footer { margin-top: 24px; color: var(--muted); font-size: 12px; text-align: cen
             <span class="kicker" data-i18n="sum.pd"></span>
             <div class="pd-big" id="pdValue">–</div>
             <div class="pd-label" data-i18n="pd.label"></div>
+          </div>
+          <div>
+            <span class="kicker" data-i18n="sum.score"></span>
+            <span class="score-big" id="scoreValue">–</span>
+            <div class="sum-note" id="scoreText"></div>
           </div>
           <div>
             <span class="kicker" data-i18n="sum.dec"></span>
@@ -332,6 +421,16 @@ footer { margin-top: 24px; color: var(--muted); font-size: 12px; text-align: cen
           </div>
         </section>
 
+        <section class="el-wrap fade-in hidden" id="elWrap" aria-live="polite">
+          <span class="kicker" id="elKicker"></span>
+          <div class="el-band">
+            <div><span class="el-v" id="elPd1"></span><span class="el-l" data-i18n="el.pd1"></span></div>
+            <div><span class="el-v" id="elLgd"></span><span class="el-l" data-i18n="el.lgd"></span></div>
+            <div><span class="el-v" id="elAmount"></span><span class="el-l" data-i18n="el.amount"></span></div>
+            <div><span class="el-v" id="elPremium"></span><span class="el-l" data-i18n="el.premium"></span></div>
+          </div>
+        </section>
+
         <section class="scale-block fade-in">
           <span class="kicker" data-i18n="scale.title"></span>
           <div class="scale-wrap">
@@ -340,6 +439,12 @@ footer { margin-top: 24px; color: var(--muted); font-size: 12px; text-align: cen
           </div>
           <div class="scale-ticks" id="scaleTicks"></div>
           <div class="scale-zones" id="scaleZones"></div>
+        </section>
+
+        <section class="cf fade-in" id="cfBox" aria-live="polite">
+          <span class="kicker brass" data-i18n="cf.title"></span>
+          <p class="cf-main" id="cfMain"></p>
+          <p class="cf-note" data-i18n="cf.note"></p>
         </section>
 
         <section class="panel fade-in">
@@ -379,6 +484,11 @@ footer { margin-top: 24px; color: var(--muted); font-size: 12px; text-align: cen
       <div class="panel navy">
         <h2 data-i18n="pf.matrix.title"></h2>
         <div class="matrix-wrap"><table class="matrix" id="pfMatrix"></table></div>
+        <div class="dist-block">
+          <span class="kicker" id="pfDistTitle"></span>
+          <div class="dist" id="pfDist"></div>
+          <div class="dist-l" id="pfDistL"></div>
+        </div>
         <div class="note" id="pfMatrixNote"></div>
       </div>
     </div>
@@ -418,12 +528,13 @@ footer { margin-top: 24px; color: var(--muted); font-size: 12px; text-align: cen
 
   <footer id="footer"></footer>
 </div>
+<div id="printMemo" aria-hidden="true"></div>
 
 <script>
 /* ---------- Beágyazott modell (model_export.json, 1:1 másolat) ---------- */
 const MODEL = {
   "meta": {
-    "source_dataset": "Give Me Some Credit (Kaggle, 2011) - publikus, CC0-jellegű oktatási dataset",
+    "source_dataset": "Give Me Some Credit (Kaggle, 2011) - nyilvános oktatási verseny-adatkészlet (a nyers fájl nem része a tárolónak)",
     "trained_rows": 119784, "test_rows": 29946, "excluded_bad_code_rows": 269,
     "test_auc": 0.8391, "overall_default_rate": 0.066,
     "disclaimer": "Oktatási / demo célú, egyszerűsített modell. Nem éles hitelbírálati döntéshozatalra készült."
@@ -436,20 +547,39 @@ const MODEL = {
   "segments": [
     {"age_band":"<30","util_band":"0-10%","mean":0.0343,"count":2824},{"age_band":"<30","util_band":"10-30%","mean":0.0435,"count":1655},
     {"age_band":"<30","util_band":"30-60%","mean":0.0876,"count":1643},{"age_band":"<30","util_band":"60-100%","mean":0.1714,"count":3973},
-    {"age_band":"<30","util_band":"100%+","mean":0.3574,"count":512},
-    {"age_band":"30-39","util_band":"0-10%","mean":0.0259,"count":7367},{"age_band":"30-39","util_band":"10-30%","mean":0.041,"count":4684},
-    {"age_band":"30-39","util_band":"30-60%","mean":0.0678,"count":4171},{"age_band":"30-39","util_band":"60-100%","mean":0.1845,"count":7156},
-    {"age_band":"30-39","util_band":"100%+","mean":0.4126,"count":921},
+    {"age_band":"<30","util_band":"100%+","mean":0.3574,"count":512},{"age_band":"30-39","util_band":"0-10%","mean":0.0259,"count":7367},
+    {"age_band":"30-39","util_band":"10-30%","mean":0.041,"count":4684},{"age_band":"30-39","util_band":"30-60%","mean":0.0678,"count":4171},
+    {"age_band":"30-39","util_band":"60-100%","mean":0.1845,"count":7156},{"age_band":"30-39","util_band":"100%+","mean":0.4126,"count":921},
     {"age_band":"40-49","util_band":"0-10%","mean":0.0222,"count":12303},{"age_band":"40-49","util_band":"10-30%","mean":0.0337,"count":7188},
     {"age_band":"40-49","util_band":"30-60%","mean":0.0751,"count":6021},{"age_band":"40-49","util_band":"60-100%","mean":0.1821,"count":8592},
-    {"age_band":"40-49","util_band":"100%+","mean":0.3768,"count":897},
-    {"age_band":"50-59","util_band":"0-10%","mean":0.0196,"count":14718},{"age_band":"50-59","util_band":"10-30%","mean":0.0317,"count":7190},
-    {"age_band":"50-59","util_band":"30-60%","mean":0.0653,"count":5540},{"age_band":"50-59","util_band":"60-100%","mean":0.1528,"count":6714},
-    {"age_band":"50-59","util_band":"100%+","mean":0.3601,"count":611},
+    {"age_band":"40-49","util_band":"100%+","mean":0.3768,"count":897},{"age_band":"50-59","util_band":"0-10%","mean":0.0196,"count":14718},
+    {"age_band":"50-59","util_band":"10-30%","mean":0.0317,"count":7190},{"age_band":"50-59","util_band":"30-60%","mean":0.0653,"count":5540},
+    {"age_band":"50-59","util_band":"60-100%","mean":0.1528,"count":6714},{"age_band":"50-59","util_band":"100%+","mean":0.3601,"count":611},
     {"age_band":"60+","util_band":"0-10%","mean":0.0117,"count":27192},{"age_band":"60+","util_band":"10-30%","mean":0.0207,"count":7761},
     {"age_band":"60+","util_band":"30-60%","mean":0.049,"count":4512},{"age_band":"60+","util_band":"60-100%","mean":0.1012,"count":5205},
     {"age_band":"60+","util_band":"100%+","mean":0.3053,"count":380}
-  ]
+  ],
+  "validation": {
+    "n": 29946, "defaults": 1976, "auc": 0.8391, "gini": 0.6782, "ks": 0.524,
+    "mean_pd": 0.0676, "actual_rate": 0.066,
+    "deciles": [
+      {"decile":1,"n":2995,"mean_pd":0.0103,"actual":0.007},
+      {"decile":2,"n":2995,"mean_pd":0.0128,"actual":0.0063},
+      {"decile":3,"n":2994,"mean_pd":0.0151,"actual":0.009},
+      {"decile":4,"n":2995,"mean_pd":0.0178,"actual":0.0147},
+      {"decile":5,"n":2994,"mean_pd":0.0214,"actual":0.0237},
+      {"decile":6,"n":2995,"mean_pd":0.0272,"actual":0.0317},
+      {"decile":7,"n":2994,"mean_pd":0.0381,"actual":0.0478},
+      {"decile":8,"n":2995,"mean_pd":0.0603,"actual":0.0838},
+      {"decile":9,"n":2994,"mean_pd":0.1032,"actual":0.1119},
+      {"decile":10,"n":2995,"mean_pd":0.3693,"actual":0.3239}
+    ],
+    "bands": [
+      {"band":"good","n":25396,"defaults":823,"rate":0.0324},
+      {"band":"warn","n":3238,"defaults":536,"rate":0.1655},
+      {"band":"bad","n":1312,"defaults":617,"rate":0.4703}
+    ]
+  }
 };
 
 /* A tréning-szkript (explore_and_train.py) 99,5. percentilis felett limitálta ezeket
@@ -480,13 +610,13 @@ const STR = {
     "sum.pd": "Becsült PD", "sum.dec": "Javaslat", "sum.ref": "Referenciacsoport",
     "ref.text": "{age} év, {util} kihasználtság — {count} hitelfelvevő valós aránya",
     "scale.title": "Kockázati skála",
-    "pf.kicker": "Minta-portfólió · {n} hitel",
-    "pf.title": "Modell-javaslat és valós kimenet",
+    "pf.kicker": "Modellvalidáció · teszthalmaz, {n} hitel",
+    "pf.title": "Mennyire megbízható a modell?",
     "lang.btn": "EN", "lang.aria": "Switch to English",
     "disclaimer": "<b>Demo / oktatási célú alkalmazás.</b> Oktatási / demo célú, egyszerűsített modell. Nem éles hitelbírálati döntéshozatalra készült. Nem minősül hitelajánlatnak vagy pénzügyi tanácsadásnak.",
-    "meta.source": MODEL.meta.source_dataset,
+    "meta.source": "Give Me Some Credit (Kaggle, 2011) – nyilvános oktatási adatkészlet",
     "meta.disclaimer": MODEL.meta.disclaimer,
-    "tab.single": "Egyedi kérelem", "tab.portfolio": "Minta-portfólió",
+    "tab.single": "Egyedi kérelem", "tab.portfolio": "Portfólió és validáció",
     "form.title": "Hitelkérelem adatai",
     "preset.label": "Példa:", "preset.low": "Alacsony", "preset.mid": "Közepes", "preset.high": "Magas kockázat",
     "btn.evaluate": "Kiértékelés", "btn.reset": "Törlés", "btn.export": "⬇ Excel export",
@@ -540,24 +670,21 @@ const STR = {
     "seg.none": "Ehhez a szegmenshez nincs elég (≥30) historikus megfigyelés.",
     "heat.corner": "Kor \\ Kihaszn.", "heat.cellTitle": "{n} fő",
 
-    "pf.chart.title": "Döntési sávok és tényleges kimenet",
-    "pf.chart.note": "Oszlop: hitelek száma döntési sávonként. Pont: a sávban ténylegesen nemteljesítők aránya.",
-    "pf.matrix.title": "Modell-javaslat vs. valós kimenet",
-    "pf.loans.title": "Hitelek",
+    "pf.chart.title": "Kalibráció tizedenként",
+    "pf.chart.note": "A teszthalmaz hitelei becsült PD szerint tizedekbe rendezve (1. = legkisebb kockázat). Oszlop: tényleges nemteljesítési arány; rombusz: átlagos becsült PD. Minél közelebb vannak egymáshoz, annál jobban kalibrált a modell.",
+    "pf.matrix.title": "Döntési sávok a teszthalmazon",
+    "pf.loans.title": "Hitelek — böngészhető minta (100, csak a teszthalmazból)",
     "pf.filter.decisionAria": "Szűrés döntésre", "pf.filter.allDecisions": "Minden döntés",
     "pf.filter.outcomeAria": "Szűrés kimenetre", "pf.filter.allOutcomes": "Minden kimenet",
     "pf.filter.flagged": "Csak adatminőségi jelzéssel",
     "pf.note": "Kattints egy sorra, hogy részletesen elemezd az „Egyedi kérelem” fülön. <span class=\"flag\">⚠</span> = a forrásadatban valószínűleg hiányzott a jövedelem (mediánnal, 5 400 USD-vel pótolva), ezért az adósságteher-arány itt abszolút összeg, nem arány.",
-    "pf.kpi.n": "Hitel a mintában", "pf.kpi.avgPd": "Átlagos becsült PD",
-    "pf.kpi.actual": "Tényleges nemteljesítési arány ({n} db)", "pf.kpi.split": "Jóváhagyás / felülvizsg. / elutasítás",
     "pf.m.decision": "Javaslat", "pf.m.loans": "Hitelek", "pf.m.def": "Nemteljesített", "pf.m.ok": "Teljesített", "pf.m.rate": "Valós arány",
-    "pf.m.note": "A {defaults} ténylegesen nemteljesítő hitelből {caught} került felülvizsgálatra vagy elutasításra, {missed} kapott volna jóváhagyást. Kis minta ({n} hitel), az arányok csak tájékoztató jellegűek; a modell teljesítményét a {testRows} soros teszthalmazon mért AUC ({auc}) jellemzi.",
+    "pf.m.note": "A nemteljesítők {caught}-a felülvizsgálatra vagy elutasításra kerülne. A jóváhagyott hitelek valós nemteljesítése {approved}, a teljes teszthalmazé {overall}. A 100 elemű böngészhető lista csak olyan hitelekből áll, amelyeken a modell nem tanult.",
     "pf.col.id": "Ügyfél", "pf.col.age": "Kor", "pf.col.income": "Jövedelem (USD)", "pf.col.util": "Keret-kihaszn.",
     "pf.col.debt": "Adósságteher", "pf.col.l3059": "30–59 n. késés", "pf.col.l90": "90+ n. késés", "pf.col.pd": "Becsült PD",
     "pf.col.decision": "Javaslat", "pf.col.actual": "Valós kimenet",
     "pf.pill.def": "Nemteljesített", "pf.pill.ok": "Teljesített",
     "pf.row.title": "Részletes elemzés", "pf.empty": "Nincs a szűrésnek megfelelő hitel.", "pf.count": "{n} / {total} hitel",
-    "pf.ds.count": "Hitelek száma", "pf.ds.rate": "Valós nemteljesítési arány", "pf.axis.count": "db",
     "flag.tooltip": "A forrásadatban valószínűleg hiányzott a jövedelem (mediánnal pótolva), ezért az adósságteher-arány itt abszolút összeg, nem arány.",
 
     "method.html": "<ul><li><b>Adat:</b> {source}; {rows} sor tisztítás után ({bad} sor kizárva 96/98-as hibakódok miatt).</li><li><b>Modell:</b> logisztikus regresszió 6 változóval, standardizált bemenetekkel; teszt-AUC {auc} ({testRows} soros teszthalmazon).</li><li><b>Kalibráció:</b> a modell kiegyensúlyozott osztálysúlyokkal tanult, ezért a nyers kimenet a valós kockázat többszörösét mutatná. A megjelenített PD prior-korrigált a valós {rate}-os historikus arányra.</li><li><b>Döntési küszöbök:</b> PD &lt; {a} jóváhagyás, {a}–{r} felülvizsgálat, ≥ {r} elutasítás (demo-küszöbök, nem üzleti kalibráció).</li><li><b>Bemeneti limitek:</b> a tanításnál használt 99,5. percentilises limiteket az app is alkalmazza; a tartományon kívüli értékekre figyelmeztetés jelenik meg.</li><li><b>Ismert korlát:</b> az adósságteher-arány hiányzó jövedelem esetén abszolút összeget tartalmaz a forrásadatban, ezért nem elsődleges magyarázó tényező.</li></ul>",
@@ -581,10 +708,10 @@ const STR = {
     "x.pf.noFilter": "nincs", "x.pf.fFlag": "Adatminőségi jelzéssel",
     "x.pf.h": ["Ügyfél", "Kor", "Havi jövedelem (USD)", "Keret-kihasználtság", "Adósságteher-arány", "30–59 napos késés", "90+ napos késés", "Becsült PD", "Javaslat", "Valós kimenet", "Adatminőség"],
     "x.pf.flagText": "Hiányzó jövedelem (pótolt); adósságteher abszolút összeg",
-    "x.sum.title": "Portfólió-összesítő (teljes minta, szűrés nélkül)",
-    "x.sum.n": "Hitelek száma", "x.sum.avg": "Átlagos becsült PD", "x.sum.actual": "Tényleges nemteljesítési arány", "x.sum.flagged": "Adatminőségi jelzéssel",
-    "x.sum.section": "Modell-javaslat vs. valós kimenet",
-    "x.sum.note": "Kis minta: az arányok tájékoztató jellegűek. A modell teljesítményét a teszthalmazon mért AUC jellemzi.",
+    "x.sum.title": "Modellvalidáció (teszthalmaz, a tanításból kihagyott hitelek)",
+    "x.sum.n": "Hitelek száma (teszthalmaz)", "x.sum.avg": "Átlagos becsült PD", "x.sum.actual": "Tényleges nemteljesítési arány",
+    "x.sum.section": "Döntési sávok a teszthalmazon",
+    "x.sum.note": "Csak összesített adatok; a nyers Kaggle-adat nem része az exportnak.",
     "x.s.title": "Hitelkérelem – kockázati kiértékelés",
     "x.s.sub": "Export: {date} · Demo / oktatási célú, nem hitelbírálati döntés",
     "x.s.result": "Eredmény", "x.s.pd": "Becsült PD", "x.s.dec": "Döntési javaslat", "x.s.reason": "Indoklás",
@@ -594,7 +721,82 @@ const STR = {
     "x.s.fH": ["Tényező", "Hatás", "Irány"], "x.s.secondary": " (nem elsődleges)",
     "x.s.up": "növeli a kockázatot", "x.s.down": "csökkenti a kockázatot",
     "x.s.hist": "Historikus összevetés", "x.s.seg": "Szegmens", "x.s.segV": "{age} év, {util} keret-kihasználtság",
-    "x.s.segRate": "Szegmens valós aránya", "x.s.segN": "Szegmens mérete", "x.s.overall": "Teljes minta valós aránya"
+    "x.s.segRate": "Szegmens valós aránya", "x.s.segN": "Szegmens mérete", "x.s.overall": "Teljes minta valós aránya",
+    "pf.kpi.auc": "AUC — rangsoroló képesség (0,5 = véletlen)",
+    "pf.kpi.gini": "Gini — a banki gyakorlatban használt skála",
+    "pf.kpi.ks": "KS — a jó és rossz ügyfelek eloszlásának legnagyobb eltérése",
+    "pf.kpi.mean": "Átlagos becsült PD — tényleges: {actual}",
+    "pf.m.share": "Arány",
+    "pf.dist.title": "A {n} nemteljesítő hitel megoszlása",
+    "pf.cal.x": "Tized",
+    "pf.cal.tip": "{d}. tized · {n} hitel",
+    "pf.cal.lblPred": "becsült {v}",
+    "pf.cal.lblAct": "tényleges {v}",
+    "pf.ds.pred": "Becsült PD",
+    "pf.ds.actual": "Tényleges arány",
+    "f.loan.label": "Hitelösszeg",
+    "f.loan.opt": "· opcionális",
+    "f.loan.hint": "Ha megadod, a jelentés a várható veszteséget is kiszámolja (USD)",
+    "live.note": "Első kiértékelés után az eredmény gépelés közben frissül.",
+    "btn.print": "Jelentés nyomtatása",
+    "sum.score": "Pontszám",
+    "score.text": "jóváhagyás ≥ {a} · elutasítás ≤ {r} pont",
+    "el.kicker": "Várható veszteség · {amount} USD hitelre",
+    "el.pd1": "éves PD (a 2 évesből átszámolva)",
+    "el.lgd": "LGD · Basel F-IRB feltételezés",
+    "el.amount": "éves várható veszteség",
+    "el.premium": "minimális kockázati felár / év",
+    "cf.title": "Mi változtatná meg a döntést?",
+    "cf.note": "A számítás a keret-kihasználtságra szorítkozik: az életkor és a korábbi késések nem változtathatók, a jövedelem hatása a modellben kicsi, az adósságteher-arány pedig adatminőségi okokból nem elsődleges tényező.",
+    "cf.warn": "Ha a keret-kihasználtság {u} helyett legfeljebb {n} lenne, a PD {a} alá csökkenne, és a kérelem jóváhagyható lenne.",
+    "cf.warn.none": "A jóváhagyási sáv a kihasználtság csökkentésével önmagában nem érhető el — a késedelmi előzmények túl erősen hatnak.",
+    "cf.bad.both": "A felülvizsgálati sávhoz legfeljebb {n30}, a jóváhagyáshoz legfeljebb {n10} keret-kihasználtság kellene ({u} helyett).",
+    "cf.bad.review": "A felülvizsgálati sávhoz legfeljebb {n30} keret-kihasználtság kellene ({u} helyett); jóváhagyás ezzel önmagában nem érhető el.",
+    "cf.bad.none": "A kihasználtság csökkentése önmagában nem elég a sávváltáshoz — a késedelmi előzmények dominálnak.",
+    "cf.good": "A kérelem jóváhagyható. A döntés akkor változna felülvizsgálatra, ha a keret-kihasználtság {n} fölé nőne.",
+    "cf.good.none": "A kérelem jóváhagyható, és a keret-kihasználtság növekedése önmagában sem vinné a felülvizsgálati sávba.",
+    "err.loan": "Érvényes összeget adj meg (0–1 000 000 000 USD), vagy hagyd üresen.",
+    "memo.kicker": "Hitelbírálati memo",
+    "memo.date": "Dátum",
+    "memo.ref": "Hivatkozás",
+    "memo.model": "Modell",
+    "memo.modelV": "Logisztikus regresszió · AUC {auc}",
+    "memo.pd2": "Becsült PD (2 év)",
+    "memo.inputs": "Kérelem adatai",
+    "memo.loan": "Kért hitelösszeg",
+    "memo.el": "Várható veszteség",
+    "memo.el.pd1": "Éves PD (2 évesből átszámolva)",
+    "memo.el.lgd": "LGD (Basel F-IRB feltételezés)",
+    "memo.el.ead": "EAD (kért összeg)",
+    "memo.el.amount": "Éves várható veszteség",
+    "memo.el.premium": "Minimális kockázati felár",
+    "memo.el.note": "A felár csak a várható veszteséget fedezi; tőkeköltséget és működési költséget nem tartalmaz.",
+    "memo.el.none": "Hitelösszeg nélkül nem számolható.",
+    "memo.factors": "Döntést befolyásoló tényezők",
+    "memo.next": "Javasolt következő lépés",
+    "memo.next.good": "Jóváhagyás standard feltételekkel; a szokásos jövedelem- és személyazonosság-ellenőrzés elvégzése.",
+    "memo.next.warn": "Jövedelemigazolás és a fennálló hitelkeretek kimutatásának bekérése; a kihasználtság csökkentése esetén újrabírálat.",
+    "memo.next.bad": "Elutasítás; új kérelem a kihasználtság csökkentése és a késedelmek rendezése után javasolt.",
+    "memo.decision": "Bírálói döntés",
+    "memo.opts": "☐ Jóváhagyva   ☐ Feltétellel   ☐ Elutasítva",
+    "memo.reviewer": "Bíráló",
+    "memo.sign": "Aláírás, dátum",
+    "memo.page": "1 / 1",
+    "memo.method": "<b>Módszertan.</b> {source}, {rows} sor · logisztikus regresszió, 6 változó · teszt-AUC {auc}, Gini {gini} · prior-korrekció a {rate}-os valós arányra · pontskála: 600 pont 50:1 esélynél, 20 pontonként duplázódó esély.",
+    "memo.disc": "<b>Oktatási / demo célú dokumentum.</b> Nem minősül hitelbírálati döntésnek, hitelajánlatnak vagy pénzügyi tanácsadásnak.",
+    "x.s.score": "Pontszám",
+    "x.s.cf": "Mi változtatná meg a döntést?",
+    "x.s.el": "Várható veszteség",
+    "x.s.loan": "Kért hitelösszeg (EAD)",
+    "x.s.pd1": "Éves PD",
+    "x.s.lgd": "LGD (feltételezés)",
+    "x.s.elAmount": "Éves várható veszteség",
+    "x.s.premium": "Minimális kockázati felár / év",
+    "x.sum.auc": "AUC",
+    "x.sum.gini": "Gini",
+    "x.sum.ks": "KS",
+    "x.sum.decSection": "Kalibráció tizedenként",
+    "x.sum.decH": ["Tized", "Hitelek", "Átlagos becsült PD", "Tényleges arány"]
   },
   en: {
     "app.title": "Credit Risk Analyzer",
@@ -607,13 +809,13 @@ const STR = {
     "sum.pd": "Estimated PD", "sum.dec": "Recommendation", "sum.ref": "Peer group",
     "ref.text": "Age {age}, {util} utilization — actual rate among {count} borrowers",
     "scale.title": "Risk scale",
-    "pf.kicker": "Sample portfolio · {n} loans",
-    "pf.title": "Model recommendation vs. actual outcome",
+    "pf.kicker": "Model validation · test set, {n} loans",
+    "pf.title": "How reliable is the model?",
     "lang.btn": "HU", "lang.aria": "Váltás magyar nyelvre",
     "disclaimer": "<b>Demo / educational application.</b> A simplified model built for learning purposes, not for real credit decisions. It is not a loan offer or financial advice.",
     "meta.source": "Give Me Some Credit (Kaggle, 2011) – public educational dataset",
     "meta.disclaimer": "Educational / demo model, simplified. Not intended for real credit decisions.",
-    "tab.single": "Single application", "tab.portfolio": "Sample portfolio",
+    "tab.single": "Single application", "tab.portfolio": "Portfolio & validation",
     "form.title": "Application details",
     "preset.label": "Example:", "preset.low": "Low", "preset.mid": "Medium", "preset.high": "High risk",
     "btn.evaluate": "Evaluate", "btn.reset": "Clear", "btn.export": "⬇ Excel export",
@@ -667,24 +869,21 @@ const STR = {
     "seg.none": "Not enough (≥30) historical observations for this segment.",
     "heat.corner": "Age \\ Util.", "heat.cellTitle": "{n} borrowers",
 
-    "pf.chart.title": "Decision bands and actual outcomes",
-    "pf.chart.note": "Bars: number of loans per decision band. Dots: share of loans in the band that actually defaulted.",
-    "pf.matrix.title": "Model recommendation vs. actual outcome",
-    "pf.loans.title": "Loans",
+    "pf.chart.title": "Calibration by decile",
+    "pf.chart.note": "Test-set loans sorted into deciles by estimated PD (1 = lowest risk). Bars: actual default rate; diamonds: average estimated PD. The closer they are, the better calibrated the model.",
+    "pf.matrix.title": "Decision bands on the test set",
+    "pf.loans.title": "Loans — browsable sample (100, test set only)",
     "pf.filter.decisionAria": "Filter by recommendation", "pf.filter.allDecisions": "All recommendations",
     "pf.filter.outcomeAria": "Filter by outcome", "pf.filter.allOutcomes": "All outcomes",
     "pf.filter.flagged": "Data-quality flags only",
     "pf.note": "Click a row to analyze it in detail on the “Single application” tab. <span class=\"flag\">⚠</span> = income was probably missing in the source data (imputed with the median, 5,400 USD), so the debt ratio here is an absolute amount, not a ratio.",
-    "pf.kpi.n": "Loans in sample", "pf.kpi.avgPd": "Average estimated PD",
-    "pf.kpi.actual": "Actual default rate ({n} loans)", "pf.kpi.split": "Approve / review / decline",
     "pf.m.decision": "Recommendation", "pf.m.loans": "Loans", "pf.m.def": "Defaulted", "pf.m.ok": "Repaid", "pf.m.rate": "Actual rate",
-    "pf.m.note": "Of the {defaults} loans that actually defaulted, {caught} were sent to review or declined and {missed} would have been approved. Small sample ({n} loans), so the rates are indicative only; model performance is measured by the AUC ({auc}) on the {testRows}-row test set.",
+    "pf.m.note": "{caught} of defaulting loans would be sent to review or declined. Approved loans default at {approved}, versus {overall} across the whole test set. The 100-loan browsable list contains only loans the model never trained on.",
     "pf.col.id": "Client", "pf.col.age": "Age", "pf.col.income": "Income (USD)", "pf.col.util": "Utilization",
     "pf.col.debt": "Debt ratio", "pf.col.l3059": "30–59d late", "pf.col.l90": "90+d late", "pf.col.pd": "Est. PD",
     "pf.col.decision": "Recommendation", "pf.col.actual": "Actual outcome",
     "pf.pill.def": "Defaulted", "pf.pill.ok": "Repaid",
     "pf.row.title": "Analyze in detail", "pf.empty": "No loans match the filters.", "pf.count": "{n} / {total} loans",
-    "pf.ds.count": "Number of loans", "pf.ds.rate": "Actual default rate", "pf.axis.count": "loans",
     "flag.tooltip": "Income was probably missing in the source data (imputed with the median), so the debt ratio here is an absolute amount, not a ratio.",
 
     "method.html": "<ul><li><b>Data:</b> {source}; {rows} rows after cleaning ({bad} rows excluded due to 96/98 error codes).</li><li><b>Model:</b> logistic regression with 6 standardized features; test AUC {auc} (on a {testRows}-row test set).</li><li><b>Calibration:</b> the model was trained with balanced class weights, so its raw output would overstate risk several times. The displayed PD is prior-corrected to the actual {rate} historical default rate.</li><li><b>Decision thresholds:</b> PD &lt; {a} approve, {a}–{r} manual review, ≥ {r} decline (demo thresholds, not a business calibration).</li><li><b>Input caps:</b> the app applies the 99.5th-percentile caps used in training and warns when an input is outside that range.</li><li><b>Known limitation:</b> where income is missing, the source data stores an absolute amount in the debt ratio, so it is not used as a primary explanation.</li></ul>",
@@ -708,10 +907,10 @@ const STR = {
     "x.pf.noFilter": "none", "x.pf.fFlag": "With data-quality flag",
     "x.pf.h": ["Client", "Age", "Monthly income (USD)", "Credit utilization", "Debt-to-income ratio", "30–59 days late", "90+ days late", "Estimated PD", "Recommendation", "Actual outcome", "Data quality"],
     "x.pf.flagText": "Missing income (imputed); debt ratio is an absolute amount",
-    "x.sum.title": "Portfolio summary (full sample, unfiltered)",
-    "x.sum.n": "Number of loans", "x.sum.avg": "Average estimated PD", "x.sum.actual": "Actual default rate", "x.sum.flagged": "With data-quality flag",
-    "x.sum.section": "Model recommendation vs. actual outcome",
-    "x.sum.note": "Small sample: rates are indicative only. Model performance is measured by the test-set AUC.",
+    "x.sum.title": "Model validation (test set, loans held out from training)",
+    "x.sum.n": "Number of loans (test set)", "x.sum.avg": "Average estimated PD", "x.sum.actual": "Actual default rate",
+    "x.sum.section": "Decision bands on the test set",
+    "x.sum.note": "Aggregates only; the raw Kaggle data is not part of the export.",
     "x.s.title": "Credit application – risk assessment",
     "x.s.sub": "Exported: {date} · Demo / educational use, not a credit decision",
     "x.s.result": "Result", "x.s.pd": "Estimated PD", "x.s.dec": "Recommendation", "x.s.reason": "Rationale",
@@ -721,7 +920,82 @@ const STR = {
     "x.s.fH": ["Factor", "Effect", "Direction"], "x.s.secondary": " (secondary)",
     "x.s.up": "increases risk", "x.s.down": "reduces risk",
     "x.s.hist": "Historical comparison", "x.s.seg": "Segment", "x.s.segV": "age {age}, {util} utilization",
-    "x.s.segRate": "Segment actual rate", "x.s.segN": "Segment size", "x.s.overall": "Full-sample actual rate"
+    "x.s.segRate": "Segment actual rate", "x.s.segN": "Segment size", "x.s.overall": "Full-sample actual rate",
+    "pf.kpi.auc": "AUC — ranking power (0.5 = random)",
+    "pf.kpi.gini": "Gini — the scale used in banking practice",
+    "pf.kpi.ks": "KS — largest gap between good and bad borrower distributions",
+    "pf.kpi.mean": "Average estimated PD — actual: {actual}",
+    "pf.m.share": "Share",
+    "pf.dist.title": "How the {n} defaulted loans were classified",
+    "pf.cal.x": "Decile",
+    "pf.cal.tip": "Decile {d} · {n} loans",
+    "pf.cal.lblPred": "estimated {v}",
+    "pf.cal.lblAct": "actual {v}",
+    "pf.ds.pred": "Estimated PD",
+    "pf.ds.actual": "Actual rate",
+    "f.loan.label": "Loan amount",
+    "f.loan.opt": "· optional",
+    "f.loan.hint": "If provided, the report also computes the expected loss (USD)",
+    "live.note": "After the first evaluation, results update as you type.",
+    "btn.print": "Print report",
+    "sum.score": "Score",
+    "score.text": "approve ≥ {a} · decline ≤ {r} points",
+    "el.kicker": "Expected loss · on a {amount} USD loan",
+    "el.pd1": "1-year PD (converted from 2-year)",
+    "el.lgd": "LGD · Basel F-IRB assumption",
+    "el.amount": "annual expected loss",
+    "el.premium": "minimum risk premium / year",
+    "cf.title": "What would change the decision?",
+    "cf.note": "The calculation is limited to credit utilization: age and past delinquencies cannot be changed, income has a small effect in the model, and the debt-to-income ratio is not a primary factor for data-quality reasons.",
+    "cf.warn": "If credit utilization were at most {n} instead of {u}, the PD would fall below {a} and the application could be approved.",
+    "cf.warn.none": "Lowering utilization alone cannot reach the approval band — the delinquency history weighs too heavily.",
+    "cf.bad.both": "Manual review would need utilization of at most {n30}, approval at most {n10} (instead of {u}).",
+    "cf.bad.review": "Manual review would need utilization of at most {n30} (instead of {u}); approval cannot be reached this way alone.",
+    "cf.bad.none": "Lowering utilization alone is not enough to change the band — the delinquency history dominates.",
+    "cf.good": "The application can be approved. The decision would change to manual review if utilization rose above {n}.",
+    "cf.good.none": "The application can be approved, and higher utilization alone would not move it into manual review.",
+    "err.loan": "Enter a valid amount (0–1,000,000,000 USD) or leave it empty.",
+    "memo.kicker": "Credit memo",
+    "memo.date": "Date",
+    "memo.ref": "Reference",
+    "memo.model": "Model",
+    "memo.modelV": "Logistic regression · AUC {auc}",
+    "memo.pd2": "Estimated PD (2 years)",
+    "memo.inputs": "Application details",
+    "memo.loan": "Requested amount",
+    "memo.el": "Expected loss",
+    "memo.el.pd1": "1-year PD (from 2-year)",
+    "memo.el.lgd": "LGD (Basel F-IRB assumption)",
+    "memo.el.ead": "EAD (requested amount)",
+    "memo.el.amount": "Annual expected loss",
+    "memo.el.premium": "Minimum risk premium",
+    "memo.el.note": "The premium covers expected loss only; it excludes the cost of capital and operating costs.",
+    "memo.el.none": "Not available without a loan amount.",
+    "memo.factors": "Factors behind the decision",
+    "memo.next": "Recommended next step",
+    "memo.next.good": "Approve on standard terms after the usual income and identity checks.",
+    "memo.next.warn": "Request proof of income and a statement of existing credit lines; reassess if utilization is reduced.",
+    "memo.next.bad": "Decline; a new application is advisable after utilization is reduced and delinquencies are settled.",
+    "memo.decision": "Reviewer decision",
+    "memo.opts": "☐ Approved   ☐ Conditional   ☐ Declined",
+    "memo.reviewer": "Reviewer",
+    "memo.sign": "Signature, date",
+    "memo.page": "1 / 1",
+    "memo.method": "<b>Methodology.</b> {source}, {rows} rows · logistic regression, 6 features · test AUC {auc}, Gini {gini} · prior-corrected to the actual {rate} rate · score scale: 600 points at 50:1 odds, odds double every 20 points.",
+    "memo.disc": "<b>Educational / demo document.</b> Not a credit decision, loan offer or financial advice.",
+    "x.s.score": "Score",
+    "x.s.cf": "What would change the decision?",
+    "x.s.el": "Expected loss",
+    "x.s.loan": "Requested amount (EAD)",
+    "x.s.pd1": "1-year PD",
+    "x.s.lgd": "LGD (assumption)",
+    "x.s.elAmount": "Annual expected loss",
+    "x.s.premium": "Minimum risk premium / year",
+    "x.sum.auc": "AUC",
+    "x.sum.gini": "Gini",
+    "x.sum.ks": "KS",
+    "x.sum.decSection": "Calibration by decile",
+    "x.sum.decH": ["Decile", "Loans", "Average estimated PD", "Actual rate"]
   }
 };
 const LANGS = ["hu", "en"];
@@ -754,9 +1028,9 @@ const unitSuffix = u => { const s = t("unit." + u); return s === "%" ? "%" : s ?
 const SECONDARY_FEATURES = new Set(["DebtRatio"]);
 
 const PRESETS = {
-  low:  { age: 58, MonthlyIncome: 7500, RevolvingUtilizationOfUnsecuredLines: 8,  DebtRatio: 25, "NumberOfTime30-59DaysPastDueNotWorse": 0, NumberOfTimes90DaysLate: 0 },
-  mid:  { age: 34, MonthlyIncome: 4200, RevolvingUtilizationOfUnsecuredLines: 72, DebtRatio: 45, "NumberOfTime30-59DaysPastDueNotWorse": 1, NumberOfTimes90DaysLate: 0 },
-  high: { age: 27, MonthlyIncome: 2600, RevolvingUtilizationOfUnsecuredLines: 105, DebtRatio: 60, "NumberOfTime30-59DaysPastDueNotWorse": 2, NumberOfTimes90DaysLate: 1 }
+  low:  { age: 58, MonthlyIncome: 7500, RevolvingUtilizationOfUnsecuredLines: 8,  DebtRatio: 25, "NumberOfTime30-59DaysPastDueNotWorse": 0, NumberOfTimes90DaysLate: 0, loan: 15000 },
+  mid:  { age: 34, MonthlyIncome: 4200, RevolvingUtilizationOfUnsecuredLines: 72, DebtRatio: 45, "NumberOfTime30-59DaysPastDueNotWorse": 1, NumberOfTimes90DaysLate: 0, loan: 20000 },
+  high: { age: 27, MonthlyIncome: 2600, RevolvingUtilizationOfUnsecuredLines: 105, DebtRatio: 60, "NumberOfTime30-59DaysPastDueNotWorse": 2, NumberOfTimes90DaysLate: 1, loan: 8000 }
 };
 
 /* ---------- Segédfüggvények ---------- */
@@ -825,6 +1099,50 @@ function decide(pd) {
   return { cls, get label() { return t(`dec.${cls}.label`); }, get text() { return t(`dec.${cls}.text`); } };
 }
 
+/* ---------- Pontszám, várható veszteség, kontrafaktuális magyarázat ---------- */
+// Pontskála (scorecard): 600 pont 50:1 jó:rossz esélynél, 20 pontonként duplázódó esély (PDO = 20)
+const PDO = 20, SCORE_FACTOR = PDO / Math.log(2), SCORE_OFFSET = 600 - SCORE_FACTOR * Math.log(50);
+function scoreOf(pd) {
+  const p = Math.min(Math.max(pd, 1e-12), 1 - 1e-12);
+  return SCORE_OFFSET + SCORE_FACTOR * Math.log((1 - p) / p);
+}
+// Várható veszteség: a modell 2 éves PD-t becsül -> éves PD = 1 - sqrt(1 - PD2);
+// LGD = 45% (Basel alapmódszer, fedezetlen hitel), EAD = a megadott hitelösszeg
+const LGD = 0.45;
+function expectedLoss(pd2, ead) {
+  const pd1 = 1 - Math.sqrt(1 - pd2);
+  return { pd1, lgd: LGD, ead, el: pd1 * LGD * ead, premium: pd1 * LGD };
+}
+// Kontrafaktuális: mekkora keret-kihasználtság vinné át a PD-t a döntési határon.
+// A logit a kihasználtságban lineáris, ezért zárt képlettel pontos (a limitált értékből számol).
+const UTIL = "RevolvingUtilizationOfUnsecuredLines";
+function counterfactual(input, pd) {
+  const i = MODEL.features.indexOf(UTIL);
+  const w = MODEL.coefficients[i] / MODEL.scaler_scale[i];       // logit-változás / kihasználtság-egység
+  const L = Math.log(pd / (1 - pd));
+  const x = input.model[UTIL];
+  const needPct = p => (x + (Math.log(p / (1 - p)) - L) / w) * 100;
+  const capPct = TRAIN_CAPS[UTIL] * 100;
+  const P = v => nf(v, { maximumFractionDigits: 0 }) + "%";
+  const u = formatUser(UTIL, input.user[UTIL]);
+  const vars = { u, a: pct(THRESHOLDS.approve, 0), r: pct(THRESHOLDS.reject, 0) };
+  const cls = decide(pd).cls;
+  // a határ alá: lefelé kerekítünk („legfeljebb”), fölé: felfelé („fölé nőne”); kis tűrés a pontos határ miatt
+  const below = p => Math.floor(needPct(p - 1e-4));
+  if (cls === "warn") {
+    const n = below(THRESHOLDS.approve);
+    return n >= 0 ? { key: "cf.warn", n10: n, text: t("cf.warn", { ...vars, n: P(n) }) } : { key: "cf.warn.none", text: t("cf.warn.none") };
+  }
+  if (cls === "bad") {
+    const n30 = below(THRESHOLDS.reject), n10 = below(THRESHOLDS.approve);
+    if (n30 < 0) return { key: "cf.bad.none", text: t("cf.bad.none") };
+    return n10 >= 0 ? { key: "cf.bad.both", n30, n10, text: t("cf.bad.both", { ...vars, n30: P(n30), n10: P(n10) }) }
+                    : { key: "cf.bad.review", n30, text: t("cf.bad.review", { ...vars, n30: P(n30) }) };
+  }
+  const n = Math.ceil(needPct(THRESHOLDS.approve));
+  return n <= capPct ? { key: "cf.good", n, text: t("cf.good", { ...vars, n: P(n) }) } : { key: "cf.good.none", text: t("cf.good.none") };
+}
+
 /* ---------- Űrlap felépítése és validáció ---------- */
 function buildForm() {
   $("fields").innerHTML = FIELDS.map(f => `
@@ -854,17 +1172,19 @@ function setMsg(key, type, text) {
   el.querySelector(".msg").textContent = text || "";
 }
 
-function readForm() {
+// quiet = élő újraszámolás: hibát nem jelez ki (félig begépelt érték), csak nem számol
+function readForm(quiet = false) {
   let ok = true;
   const user = {}, model = {};
+  const fail = (key, text) => { if (!quiet) setMsg(key, "err", text); ok = false; };
   for (const f of FIELDS) {
     const p = parseNum($("in-" + f.key).value);
-    if (p.empty) { setMsg(f.key, "err", t("err.required")); ok = false; continue; }
-    if (p.invalid) { setMsg(f.key, "err", t("err.notNumber")); ok = false; continue; }
+    if (p.empty) { fail(f.key, t("err.required")); continue; }
+    if (p.invalid) { fail(f.key, t("err.notNumber")); continue; }
     let v = p.value;
-    if (v < 0) { setMsg(f.key, "err", t("err.negative")); ok = false; continue; }
-    if (f.int && !Number.isInteger(v)) { setMsg(f.key, "err", t("err.integer")); ok = false; continue; }
-    if (v < f.min || v > f.max) { setMsg(f.key, "err", t("err.range", { min: nf(f.min), max: nf(f.max), unit: unitSuffix(f.unit) })); ok = false; continue; }
+    if (v < 0) { fail(f.key, t("err.negative")); continue; }
+    if (f.int && !Number.isInteger(v)) { fail(f.key, t("err.integer")); continue; }
+    if (v < f.min || v > f.max) { fail(f.key, t("err.range", { min: nf(f.min), max: nf(f.max), unit: unitSuffix(f.unit) })); continue; }
 
     user[f.key] = v;
     let m = f.toModel(v);
@@ -882,7 +1202,13 @@ function readForm() {
     setMsg(f.key, warn ? "warn" : null, warn);
     model[f.key] = m;
   }
-  return ok ? { user, model } : null;
+  // Opcionális hitelösszeg (nem modellváltozó; csak a várható veszteséghez)
+  let loan = null;
+  const lp = parseNum($("in-loan").value);
+  if (lp.empty) setMsg("loan", null, "");
+  else if (lp.invalid || lp.value < 0 || lp.value > 1e9) fail("loan", t("err.loan"));
+  else { loan = lp.value; setMsg("loan", null, ""); }
+  return ok ? { user, model, loan } : null;
 }
 
 /* ---------- Megjelenítés ---------- */
@@ -920,6 +1246,20 @@ function render(input, animate = false) {
   b.className = "badge " + d.cls;
   b.textContent = d.label;
   $("decisionText").textContent = d.text;
+  const sc = scoreOf(pd);
+  $("scoreValue").textContent = nf(Math.round(sc));
+  $("scoreText").textContent = t("score.text", { a: nf(Math.ceil(scoreOf(THRESHOLDS.approve))), r: nf(Math.floor(scoreOf(THRESHOLDS.reject))) });
+  const el = input.loan ? expectedLoss(pd, input.loan) : null;
+  $("elWrap").classList.toggle("hidden", !el);
+  if (el) {
+    $("elKicker").textContent = t("el.kicker", { amount: nf(el.ead) });
+    $("elPd1").textContent = pct(el.pd1);
+    $("elLgd").textContent = "× " + pct(el.lgd, 0);
+    $("elAmount").textContent = nf(Math.round(el.el)) + " USD";
+    $("elPremium").textContent = pct(el.premium, 2);
+  }
+  const cf = counterfactual(input, pd);
+  $("cfMain").textContent = cf.text;
   const SCALE_MAX = 0.5;
   const m = $("marker"), target = Math.min(pd / SCALE_MAX, 1) * 100 + "%";
   if (animate && !REDUCED.matches) {
@@ -945,7 +1285,7 @@ function render(input, animate = false) {
   // Szegmens
   const ab = ageBand(input.model.age), ub = utilBand(input.model.RevolvingUtilizationOfUnsecuredLines);
   const seg = MODEL.segments.find(s => s.age_band === ab && s.util_band === ub);
-  Object.assign(lastResult, { decision: d, seg, ab, ub });
+  Object.assign(lastResult, { decision: d, seg, ab, ub, score: sc, el, cf });
   const overall = MODEL.meta.overall_default_rate;
   $("refValue").textContent = seg ? pct(seg.mean) : "n/a";
   $("refText").textContent = seg ? t("ref.text", { age: AGE_LABEL[ab], util: ub, count: nf(seg.count) }) : t("seg.none");
@@ -959,6 +1299,69 @@ function render(input, animate = false) {
     : esc(t("seg.none"));
   drawHeat(ab, ub);
   if (animate) reveal($("results"));
+}
+
+/* ---------- Nyomtatható hitelmemo (A4) ---------- */
+function buildMemo() {
+  if (!lastResult) return false;
+  const { input, pd, contrib, decision, seg, score: sc, el, cf } = lastResult;
+  const now = new Date();
+  const pad = n => String(n).padStart(2, "0");
+  const ref = `HK-${now.getFullYear()}${pad(now.getMonth() + 1)}${pad(now.getDate())}-${pad(now.getHours())}${pad(now.getMinutes())}`;
+  const date = now.toLocaleDateString(LOCALE[LANG], { year: "numeric", month: "long", day: "numeric" });
+  const V = MODEL.validation, m = MODEL.meta;
+  const primary = contrib.filter(c => !SECONDARY_FEATURES.has(c.feature)).sort((a, b) => Math.abs(b.value) - Math.abs(a.value)).slice(0, 4);
+  const strength = c => Math.abs(c.value) > 0.5 ? "strong" : Math.abs(c.value) > 0.15 ? "moderate" : "slight";
+  const zones = [[0, THRESHOLDS.approve, "#9DB3A5"], [THRESHOLDS.approve, THRESHOLDS.reject, "#B08D57"], [THRESHOLDS.reject, 0.5, "#8E3B35"]];
+  const kv = rows => `<div class="m-kv">${rows.map(([k, v]) => `<span>${esc(k)}</span><span>${esc(v)}</span>`).join("")}</div>`;
+  const inputs = FIELDS.map(f => [t(`f.${f.key}.label`), formatUser(f.key, input.user[f.key])]);
+  if (input.loan) inputs.push([t("memo.loan"), nf(input.loan) + " USD"]);
+  const elBlock = el ? kv([
+    [t("memo.el.pd1"), pct(el.pd1)], [t("memo.el.lgd"), pct(el.lgd, 0)], [t("memo.el.ead"), nf(el.ead) + " USD"],
+    [t("memo.el.amount"), nf(Math.round(el.el)) + " USD"], [t("memo.el.premium"), pct(el.premium, 2)]
+  ]) + `<div class="m-note" style="margin-top:4px">${esc(t("memo.el.note"))}</div>` : `<div class="m-note">${esc(t("memo.el.none"))}</div>`;
+  const zoneLabel = (a, b, i) => i === 0 ? "&lt; " + pct(b, 0) : i === 1 ? pct(a, 0) + "–" + pct(b, 0) : "≥ " + pct(a, 0);
+  $("printMemo").innerHTML = `
+    <div class="m-top">
+      <div class="m-brand"><div class="m-logo">%</div><div><div class="m-name">${esc(t("app.title"))}</div><div class="m-k">${esc(t("memo.kicker"))}</div></div></div>
+      <div class="m-meta"><span>${esc(t("memo.date"))}</span><b>${esc(date)}</b><span>${esc(t("memo.ref"))}</span><b>${ref}</b>
+        <span>${esc(t("memo.model"))}</span><b>${esc(t("memo.modelV", { auc: nf(m.test_auc, { minimumFractionDigits: 3 }) }))}</b></div>
+    </div>
+    <div style="margin-top:14px"><span class="m-k brass">${esc(t("report.kicker", { date }))}</span><h1>${esc(t("report.title." + decision.cls))}</h1></div>
+    <div class="m-sum">
+      <div><span class="m-k">${esc(t("memo.pd2"))}</span><span class="m-big">${pct(pd)}</span></div>
+      <div><span class="m-k">${esc(t("sum.score"))}</span><span class="m-big">${nf(Math.round(sc))}</span></div>
+      <div><span class="m-k">${esc(t("sum.dec"))}</span><span class="m-dec ${decision.cls}">${esc(decision.label)}</span></div>
+      <div><span class="m-k">${esc(t("sum.ref"))}</span><span class="m-big">${seg ? pct(seg.mean) : "n/a"}</span></div>
+    </div>
+    <div class="m-scale">${zones.map(([a, b, c]) => `<div class="z" style="left:${a / 0.5 * 100}%;width:calc(${(b - a) / 0.5 * 100}% - 3px);background:${c}"></div>`).join("")}
+      <div class="mk" style="left:${Math.min(pd / 0.5, 1) * 100}%"></div></div>
+    <div class="m-zones">${zones.map(([a, b], i) => `<span style="width:${(b - a) / 0.5 * 100}%">${esc(t("dec.short." + DECISION_ORDER[i]))} ${zoneLabel(a, b, i)}</span>`).join("")}</div>
+    <div class="m-cols">
+      <div class="m-sec"><span class="m-k">${esc(t("memo.inputs"))}</span>${kv(inputs)}</div>
+      <div class="m-sec"><span class="m-k">${esc(t("memo.el"))}</span>${elBlock}</div>
+    </div>
+    <div class="m-sec"><span class="m-k">${esc(t("memo.factors"))}</span>
+      <div class="m-f">${primary.map(c => `<span class="l">${esc(t("s." + c.feature))}</span><span>${esc(formatUser(c.feature, input.user[c.feature]))}</span><b>${esc(t("factor." + strength(c)) + " " + t(c.value > 0 ? "factor.up" : "factor.down"))} ${c.value > 0 ? "▲" : "▼"}</b>`).join("")}</div>
+    </div>
+    <div class="m-cf"><span class="m-k brass">${esc(t("cf.title"))}</span><p>${esc(cf.text)}</p></div>
+    <div class="m-sec"><span class="m-k">${esc(t("memo.next"))}</span><div>${esc(t("memo.next." + decision.cls))}</div></div>
+    <div class="m-sign">
+      <div><span class="m-k">${esc(t("memo.decision"))}</span><span class="line">${esc(t("memo.opts"))}</span></div>
+      <div><span class="m-k">${esc(t("memo.reviewer"))}</span><span class="line"></span></div>
+      <div><span class="m-k">${esc(t("memo.sign"))}</span><span class="line"></span></div>
+    </div>
+    <div class="m-foot">
+      <span>${t("memo.method", { source: esc(t("meta.source")), rows: nf(m.trained_rows + m.test_rows), auc: nf(m.test_auc, { minimumFractionDigits: 3 }),
+        gini: nf(V.gini, { minimumFractionDigits: 3 }), rate: pct(m.overall_default_rate) })}</span>
+      <div style="display:flex;justify-content:space-between;gap:12px"><span>${t("memo.disc")}</span><span>${esc(t("memo.page"))}</span></div>
+    </div>`;
+  return true;
+}
+function printMemo() {
+  if (!buildMemo()) return;
+  document.documentElement.classList.add("print-memo");
+  window.print();
 }
 
 function formatUser(key, v) {
@@ -1026,29 +1429,29 @@ function drawScale() {
 }
 
 /* ---------- Minta-portfólió ---------- */
-// sample_portfolio.json tömörítve (100 valós, tisztított sor, a tréning-szkript kimenete):
+// sample_portfolio.json tömörítve (100 valós, tisztított sor a TESZTHALMAZBÓL — a modell egyiken sem tanult):
 // [util, age, late30_59, DebtRatio, MonthlyIncome, late90, SeriousDlqin2yrs]
 const PORTFOLIO_RAW = [
-  [0.004416483,74,0,0.012550988,3186,0,0],[0.203485804,48,0,0.155701846,24000,0,0],[0.024665022,52,0,0.000967773,10332,0,0],[0.264342416,45,0,0.491576496,7300,0,0],[0.120487853,71,0,0.305092665,6420,0,0],
-  [0.640035996,33,1,0.171994597,2220,0,0],[0.004957775,80,0,0.003747658,1600,0,0],[0.957264957,41,1,0.159694817,3800,0,1],[0.413435975,52,0,0.679334118,5946,0,0],[0.051564428,48,0,0.383894333,4693,0,0],
-  [0.014740195,67,0,1394,5400,0,0],[0.582834331,23,0,8,0,0,0],[0.111725885,43,0,0.75684854,17667,0,0],[0.9999999,81,0,0.009141986,10500,0,0],[0.061927198,82,0,0.021550766,4500,0,0],
-  [0.613576566,32,2,0.057191233,10630,0,0],[0.001958634,56,2,0.549690062,5000,0,0],[1.06448683,70,0,0.059512195,1024,1,1],[0.746467234,32,0,0.522575579,2546,0,0],[0.9999999,66,1,2862,5400,1,0],
-  [0.041664886,64,0,28,5400,0,0],[0.069678606,85,0,0.293141372,5000,0,0],[0.294260128,59,0,0.195167741,12250,0,0],[0.442967181,66,0,0.542234073,10500,0,0],[0.016634903,65,0,0.006400488,3280,0,0],
-  [0.407310995,51,0,1.264612596,6620,0,1],[0.026990267,72,0,0.140521551,7400,0,0],[0.474780648,40,0,2047,5400,0,0],[0.006764573,82,0,0.368712947,5228,0,0],[0.08595902,61,0,3798,5400,0,0],
-  [0.377238383,52,0,0.264315989,11088,0,1],[0.000492951,63,0,1408,5400,0,0],[0.914443422,59,0,2428,5400,0,0],[0.170399422,54,0,2.762490392,1300,0,0],[0.030793889,51,0,1296,5400,0,0],
-  [0.667359667,64,0,0.510844485,4333,0,0],[0.105170284,60,0,1732,5400,0,0],[0.824338124,51,0,0.511072133,9121,0,0],[0.005642116,64,0,274,5400,0,0],[0.381237525,47,0,0.116033755,3791,0,0],
-  [0.9999999,49,0,0.024958403,600,0,1],[0.09229909,47,0,482,5400,0,0],[0.00280939,81,0,400,5400,0,0],[0.07807727,60,0,0.566105156,3917,0,0],[0.918336427,40,0,0.444085525,6500,0,0],
-  [1.3682071539,44,1,0.226618511,18550,0,0],[0,36,0,0,1000,0,0],[0.1849963,53,0,0.844990548,1586,0,0],[0.090951373,66,0,0.187581242,10000,0,0],[0,62,0,0.38568038,7583,0,0],
-  [0.219480544,54,0,3342,5400,0,0],[0.071673176,59,0,0.245891376,19166,0,0],[0,72,0,0.515573384,4237,0,0],[0.283838876,37,0,0.51870894,3500,0,0],[0.465270254,43,0,0.283903676,7100,0,0],
-  [0.361416496,31,0,0.408337519,1990,0,0],[0.033168123,47,0,0.207709429,9883,0,0],[0.00583101,88,0,0.001945924,9763,0,0],[0.013108198,63,0,0.048162653,12000,0,0],[0.845158399,50,0,0.267676046,7000,0,0],
-  [0.330766398,65,1,0.36424547,6566,0,0],[0.018161051,47,0,0.438057836,2800,0,0],[0.002620709,69,0,0.032473098,10500,0,0],[0.100980827,55,0,3484,5400,0,0],[0.647697643,60,0,0.229250819,13120,0,0],
-  [0.16337034,39,0,0.395017794,5900,0,0],[0,48,0,5043,5400,0,0],[0.004365653,44,1,0.752588361,2800,0,0],[0.25889775,33,0,0.537441339,4900,0,0],[0.233764867,29,0,1909,5400,0,0],
-  [0.889912407,76,1,0.437845098,6700,0,0],[0.024125691,57,0,0.004273973,9124,0,0],[0.022070903,57,0,0.101911945,5700,0,0],[0.111348144,76,0,820,5400,0,0],[0.168962548,52,0,0.302201193,9721,0,0],
-  [0.01995445,70,0,0.044355572,5500,0,0],[0.529105966,64,0,0.841408024,5283,0,0],[0.141371726,26,1,0.262993468,3520,0,0],[0.33758071,41,0,0.690654673,2000,0,0],[0.008143465,61,1,0.115809206,4800,0,0],
-  [0.128983227,49,0,0.6755345,8231,0,0],[0.045179522,50,2,0.343305909,4010,0,1],[0.423404865,45,0,0.801399533,3000,0,0],[0.096404709,47,0,0.01749514,3600,0,0],[0.338594133,40,0,2572,5400,0,0],
-  [0.183509599,47,0,0.727376281,7900,0,0],[0.267731967,63,1,0.743892739,8800,0,0],[0.099862228,58,1,0.342831434,6667,0,0],[0.299029839,30,0,0.252399651,4583,0,0],[0.015651796,47,0,0.289869123,4125,0,0],
-  [0.397757562,69,0,4977,5400,2,0],[0,62,0,0,5400,0,0],[0.750499002,22,0,0.009159034,1200,0,0],[0.440998474,58,0,0.020281789,31250,0,0],[0,56,0,0.001392273,5745,0,0],
-  [0.923131866,49,0,0.301224898,12000,0,0],[0,51,0,1.724191867,1917,0,0],[0.089841064,66,0,0.415570934,5779,0,0],[0.219536198,40,0,0.06572247,6283,0,0],[0.9999999,30,0,200,5400,1,1]
+  [0.383701078,40,0,0.053883104,31250,0,0],[0.70651236,34,0,0.336475293,3500,0,0],[0.548684818,36,0,0.226446837,2971,0,0],[0.036308096,65,0,0.74989899,2474,0,0],[0.694596058,47,0,0.546363409,4000,0,0],
+  [0.868310169,51,0,0.11699766,16666,0,0],[0.018701251,57,0,0.173751113,12350,0,0],[0.161701082,52,0,0.452377381,13333,0,0],[0.050854006,76,0,0.307180286,7060,0,0],[0.03131727,40,0,0.532405455,7112,2,0],
+  [0.039608427,56,0,0.248196557,14000,0,0],[0.301059629,61,0,0.24775045,5000,0,0],[0.113750214,66,0,0.134396838,14166,0,0],[0.057186748,52,0,0.198207515,2900,0,0],[0.053319885,43,1,0.207120253,6319,0,0],
+  [0.443005459,46,0,1.3912016,5500,0,0],[0.459988052,48,1,0.286823235,15200,1,0],[1.21012152,36,1,0.314171457,4000,0,1],[0.000310334,46,0,0.215531608,9000,0,0],[0.150746574,76,1,0.540272986,6666,0,0],
+  [0.012023523,57,0,0.118988101,10000,0,0],[0.058914888,66,0,0.249494108,8400,0,0],[0.845423092,62,0,0.412342044,8150,0,0],[0.078667734,42,0,0.074314282,7400,0,0],[0.072109776,51,0,2.230923026,3000,0,0],
+  [0.343393987,30,0,1702,5400,0,0],[0.050169521,50,0,35,5400,0,0],[0.111667152,68,0,0.342042122,3750,0,0],[0.812413429,37,2,0.372853446,4250,0,0],[0,38,0,0.09031828,6000,0,0],
+  [0.43889507,51,0,0.132484155,16250,0,0],[0.111940509,53,1,4053,5400,0,0],[0.012738078,73,0,50,5400,0,0],[0.320882657,51,1,0.583138954,3000,0,0],[0,46,0,1.618552579,2500,0,0],
+  [0.367770338,58,0,0.579409918,12743,0,0],[0.158221705,47,1,3938,5400,2,0],[0.481799842,48,0,0.364756415,8846,1,0],[0.058467029,57,0,0.118019995,4100,0,0],[0.009119818,89,0,0.003249188,4000,0,0],
+  [0.093158243,63,0,1520,5400,0,0],[0,70,2,0.536057692,9983,0,0],[0.026090209,44,0,0.274123175,11917,0,0],[0.9999999,33,0,0.113636364,3211,0,0],[0.481752301,44,0,3878,5400,0,0],
+  [0,61,0,6188.355,5400,0,0],[0.9999999,25,0,28,5400,0,0],[0.986820179,72,0,1.49009009,554,0,0],[0.132470269,42,0,1797,5400,0,0],[0.51625,28,1,0.123432711,3588,0,0],
+  [0,76,0,0.00311975,4166,0,0],[0.497559439,61,1,0.112324186,10166,0,0],[0.000138887,90,0,0.220694477,4290,0,0],[0.449475501,45,1,1668,0,2,0],[0.164780053,54,0,0.249947928,4800,0,0],
+  [0.305189219,51,0,0.396541787,8674,0,0],[0.277124286,68,0,0.311737652,5000,0,0],[0.953046953,31,2,0.102033781,2900,0,0],[0.746407316,63,0,0.033728054,31250,0,0],[0.032186238,48,0,0.084987123,6600,0,0],
+  [0.448852868,34,3,6071,5400,0,0],[0.572250377,29,0,0.207512875,3300,2,0],[0.281348051,43,0,0.094798553,8016,0,0],[0,34,0,1308,5400,0,0],[0.074355797,36,0,149.4230769,25,0,0],
+  [0.036773535,62,0,0.138820205,2830,0,0],[0.004055664,66,0,0.330445356,6578,1,0],[0.9999999,26,0,0,5400,0,0],[0.377378092,34,2,0.733040374,3640,1,0],[0.009866338,102,0,0.002423508,3300,0,0],
+  [0.487322131,32,0,0.570691878,4653,0,0],[0.9999999,63,0,675,5400,1,0],[0.021304094,54,0,0.008189122,12943,0,0],[0.01118715,65,0,0.287851554,18915,0,0],[0.12306935,64,0,60,5400,0,0],
+  [0.300284716,51,0,0.222579349,14933,0,0],[0.26544112,57,0,0.085176934,19300,0,0],[0.02019899,45,0,0.200620476,2900,0,0],[0.135168536,67,0,0.619017025,6225,0,0],[0.042096867,55,0,0.369299802,9582,0,0],
+  [1.3682071539,63,0,0.262876131,5416,0,0],[0.667503837,39,0,0.146450092,7633,1,0],[0.102254372,69,0,1.453563715,925,0,0],[0.721714966,66,0,0.13652594,4760,0,0],[1.308364544,48,2,0.035383666,4860,1,1],
+  [0.405220903,42,1,538,5400,0,0],[0.111484137,30,0,0.150795655,3958,0,0],[0.380694643,48,0,0.247613853,11000,0,0],[0.692869779,41,0,0.103052926,7500,0,0],[0.279772023,38,0,0.522024367,3200,0,0],
+  [0.032362165,68,0,1.271891244,2500,0,0],[0.205874028,42,0,0.82592818,6571,0,0],[0.018658931,65,0,0.001041623,24000,0,0],[0.359368195,52,0,0.247432052,11000,0,0],[0.311180489,56,0,0.134459576,5800,0,0],
+  [0.146894191,32,0,0.398255129,4240,0,0],[0.084175667,39,0,0.05265789,6000,0,0],[0.007246721,74,0,1.591754651,1988,0,1],[0.230342628,52,0,0.111591073,4166,0,0],[0.05957738,56,3,0.667954497,4658,0,1]
 ];
 const INCOME_MEDIAN = 5400; // a tréning-szkript ezzel pótolta a hiányzó jövedelmet
 
@@ -1109,21 +1512,25 @@ function pfSummary(rows) {
 }
 
 function renderPortfolio() {
-  const s = pfSummary(PORTFOLIO);
+  const V = MODEL.validation;
+  const n3 = v => nf(v, { minimumFractionDigits: 3, maximumFractionDigits: 3 });
   $("pfKpis").innerHTML = `
-    <div class="stat"><div class="v">${s.n}</div><div class="l">${esc(t("pf.kpi.n"))}</div></div>
-    <div class="stat"><div class="v">${pct(s.avgPd)}</div><div class="l">${esc(t("pf.kpi.avgPd"))}</div></div>
-    <div class="stat"><div class="v">${pct(s.actualRate)}</div><div class="l">${esc(t("pf.kpi.actual", { n: s.defaults }))}</div></div>
-    <div class="stat"><div class="v">${s.by.good.n} / ${s.by.warn.n} / ${s.by.bad.n}</div><div class="l">${esc(t("pf.kpi.split"))}</div></div>`;
+    <div class="stat"><div class="v">${n3(V.auc)}</div><div class="l">${esc(t("pf.kpi.auc"))}</div></div>
+    <div class="stat"><div class="v">${n3(V.gini)}</div><div class="l">${esc(t("pf.kpi.gini"))}</div></div>
+    <div class="stat"><div class="v">${n3(V.ks)}</div><div class="l">${esc(t("pf.kpi.ks"))}</div></div>
+    <div class="stat"><div class="v">${pct(V.mean_pd, 2)}</div><div class="l">${esc(t("pf.kpi.mean", { actual: pct(V.actual_rate, 2) }))}</div></div>`;
 
-  $("pfMatrix").innerHTML = `<tr>${["decision", "loans", "def", "ok", "rate"].map(k => `<th>${esc(t("pf.m." + k))}</th>`).join("")}</tr>` +
-    DECISION_ORDER.map(k => `<tr><td><span class="pill ${k}">${esc(decName(k))}</span></td><td>${s.by[k].n}</td><td>${s.by[k].def}</td><td>${s.by[k].ok}</td><td>${s.by[k].rate === null ? "–" : pct(s.by[k].rate)}</td></tr>`).join("");
+  const B = Object.fromEntries(V.bands.map(b => [b.band, b]));
+  $("pfMatrix").innerHTML = `<tr>${["decision", "loans", "share", "def", "rate"].map(k => `<th>${esc(t("pf.m." + k))}</th>`).join("")}</tr>` +
+    DECISION_ORDER.map(k => `<tr><td><span class="pill ${k}">${esc(decName(k))}</span></td><td>${nf(B[k].n)}</td><td>${pct(B[k].n / V.n)}</td><td>${nf(B[k].defaults)}</td><td><b>${pct(B[k].rate)}</b></td></tr>`).join("");
+  $("pfDistTitle").textContent = t("pf.dist.title", { n: nf(V.defaults) });
+  const share = k => B[k].defaults / V.defaults;
+  $("pfDist").innerHTML = DECISION_ORDER.map(k => `<div style="width:${(share(k) * 100).toFixed(2)}%;background:var(--zone-${k})" title="${esc(decName(k))}: ${nf(B[k].defaults)} (${pct(share(k), 0)})"></div>`).join("");
+  $("pfDistL").innerHTML = DECISION_ORDER.map(k => `<span style="width:${(share(k) * 100).toFixed(2)}%"><b>${pct(share(k), 0)}</b> ${esc(decName(k).toLowerCase())}</span>`).join("");
   $("pfMatrixNote").textContent = t("pf.m.note", {
-    defaults: s.defaults, caught: s.by.warn.def + s.by.bad.def, missed: s.by.good.def, n: s.n,
-    testRows: nf(MODEL.meta.test_rows), auc: nf(MODEL.meta.test_auc)
+    caught: pct((B.warn.defaults + B.bad.defaults) / V.defaults, 0), approved: pct(B.good.rate), overall: pct(V.actual_rate)
   });
-
-  drawPfChart(s);
+  drawPfChart();
   renderPfTable();
 }
 
@@ -1139,35 +1546,61 @@ function renderPfTable() {
   $("pfCount").textContent = t("pf.count", { n: rows.length, total: PORTFOLIO.length });
 }
 
-function drawPfChart(s) {
+// Kalibráció tizedenként: oszlop = tényleges arány, rombusz = átlagos becsült PD (egy tengely, %)
+function drawPfChart() {
   if (typeof Chart === "undefined") {
     $("pfChart").parentElement.innerHTML = `<div class="note">${esc(t("chart.na.pf"))}</div>`;
     return;
   }
-  const muted = cssVar("--muted"), border = cssVar("--border"), text = cssVar("--text");
+  const V = MODEL.validation;
+  const muted = cssVar("--muted"), border = cssVar("--border"), text = cssVar("--text"), panel = cssVar("--panel");
+  const act = cssVar("--cal-actual"), pred = cssVar("--cal-pred");
+  const p1 = v => nf(v, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + "%";
+  // közvetlen felirat a legkockázatosabb tizedhez (a jelmagyarázat mellett), a panel színével szegélyezve
+  const lastLabels = {
+    id: "lastLabels",
+    afterDatasetsDraw(ch) {
+      const i = V.deciles.length - 1, ctx = ch.ctx;
+      const bar = ch.getDatasetMeta(0).data[i], dot = ch.getDatasetMeta(1).data[i];
+      if (!bar || !dot) return;
+      ctx.save();
+      ctx.font = `600 11.5px ${cssVar("--sans")}`; ctx.textAlign = "right"; ctx.textBaseline = "middle";
+      ctx.lineWidth = 4; ctx.lineJoin = "round"; ctx.strokeStyle = panel; ctx.fillStyle = text;
+      const x = Math.min(bar.x, dot.x) - 18;
+      for (const [label, y] of [[t("pf.cal.lblPred", { v: p1(V.deciles[i].mean_pd * 100) }), dot.y],
+                                [t("pf.cal.lblAct", { v: p1(V.deciles[i].actual * 100) }), Math.max(bar.y + 6, dot.y + 16)]]) {
+        ctx.strokeText(label, x, y); ctx.fillText(label, x, y);
+      }
+      ctx.restore();
+    }
+  };
   if (pfChart) pfChart.destroy();
   pfChart = new Chart($("pfChart"), {
     data: {
-      labels: DECISION_ORDER.map(decName),
+      labels: V.deciles.map(d => d.decile + "."),
       datasets: [
-        { type: "bar", label: t("pf.ds.count"), data: DECISION_ORDER.map(k => s.by[k].n),
-          backgroundColor: DECISION_ORDER.map(k => cssVar("--" + k)), borderRadius: 6, yAxisID: "y", order: 2 },
-        { type: "line", label: t("pf.ds.rate"), data: DECISION_ORDER.map(k => s.by[k].rate === null ? null : +(s.by[k].rate * 100).toFixed(1)),
-          borderColor: text, backgroundColor: text, pointRadius: 5, showLine: false, yAxisID: "y1", order: 1 }
+        { type: "bar", label: t("pf.ds.actual"), data: V.deciles.map(d => +(d.actual * 100).toFixed(2)),
+          backgroundColor: act, borderRadius: { topLeft: 4, topRight: 4 }, borderSkipped: "bottom", maxBarThickness: 26, order: 2 },
+        { type: "line", label: t("pf.ds.pred"), data: V.deciles.map(d => +(d.mean_pd * 100).toFixed(2)),
+          showLine: false, pointStyle: "rectRot", pointRadius: 7, pointHoverRadius: 9,
+          backgroundColor: pred, borderColor: panel, borderWidth: 2, order: 1 }
       ]
     },
     options: {
       responsive: true, maintainAspectRatio: false, animation: REDUCED.matches ? false : { duration: 900, easing: "easeOutQuart" },
+      interaction: { mode: "index", intersect: false },
       plugins: {
-        legend: { labels: { color: muted, boxWidth: 12 } },
-        tooltip: { callbacks: { label: ctx => ctx.dataset.yAxisID === "y1" ? ` ${ctx.dataset.label}: ${nf(ctx.raw)}%` : ` ${ctx.dataset.label}: ${ctx.raw}` } }
+        legend: { labels: { color: muted, boxWidth: 12, usePointStyle: true } },
+        tooltip: { callbacks: {
+          title: items => t("pf.cal.tip", { d: V.deciles[items[0].dataIndex].decile, n: nf(V.deciles[items[0].dataIndex].n) }),
+          label: ctx => ` ${ctx.dataset.label}: ${p1(ctx.raw)}` } }
       },
       scales: {
-        x: { ticks: { color: muted }, grid: { display: false } },
-        y: { beginAtZero: true, ticks: { color: muted, precision: 0 }, grid: { color: border }, title: { display: true, text: t("pf.axis.count"), color: muted } },
-        y1: { beginAtZero: true, position: "right", ticks: { color: muted, callback: v => v + "%" }, grid: { display: false } }
+        x: { ticks: { color: muted }, grid: { display: false }, title: { display: true, text: t("pf.cal.x"), color: muted } },
+        y: { beginAtZero: true, suggestedMax: 40, ticks: { color: muted, callback: v => v + "%" }, grid: { color: border } }
       }
-    }
+    },
+    plugins: [lastLabels]
   });
 }
 
@@ -1179,6 +1612,7 @@ function openInSingle(id) {
     DebtRatio: Math.round(r.model.DebtRatio * 10000) / 100,
     [L3059]: r.model[L3059], [L90]: r.model[L90] };
   for (const f of FIELDS) $("in-" + f.key).value = fmtInput(toField[f.key]);
+  $("in-loan").value = ""; setMsg("loan", null, "");   // a mintában nincs hitelösszeg
   showTab("single");
   $("form").requestSubmit();
   window.scrollTo({ top: 0, behavior: "smooth" });
@@ -1282,25 +1716,32 @@ function exportPortfolio() {
   ], [9, 6, 14, 13, 14, 10, 10, 11, 15, 15, 44]);
   if (rows.length) ws1["!autofilter"] = { ref: XLSX.utils.encode_range({ s: { r: 3, c: 0 }, e: { r: 3 + rows.length, c: head.length - 1 } }) };
 
-  const s = pfSummary(PORTFOLIO);
+  const V = MODEL.validation;
+  const B = Object.fromEntries(V.bands.map(b => [b.band, b]));
   const L = k => ({ v: t(k), s: "label" });
   const ws2 = makeSheet([
     [{ v: t("x.sum.title"), s: "title" }],
     [],
-    [L("x.sum.n"), { v: s.n, s: "cell" }],
-    [L("x.sum.avg"), { v: s.avgPd, z: "0.0%", s: "cell" }],
-    [L("x.sum.actual"), { v: s.actualRate, z: "0.0%", s: "cell" }],
-    [L("x.sum.flagged"), { v: s.flagged, s: "cell" }],
+    [L("x.sum.n"), { v: V.n, z: "#,##0", s: "cell" }],
+    [L("x.sum.auc"), { v: V.auc, z: "0.000", s: "cell" }],
+    [L("x.sum.gini"), { v: V.gini, z: "0.000", s: "cell" }],
+    [L("x.sum.ks"), { v: V.ks, z: "0.000", s: "cell" }],
+    [L("x.sum.avg"), { v: V.mean_pd, z: "0.00%", s: "cell" }],
+    [L("x.sum.actual"), { v: V.actual_rate, z: "0.00%", s: "cell" }],
     [],
     [{ v: t("x.sum.section"), s: "section" }],
-    ["decision", "loans", "def", "ok", "rate"].map(k => ({ v: t("pf.m." + k), s: "header" })),
+    ["decision", "loans", "share", "def", "rate"].map(k => ({ v: t("pf.m." + k), s: "header" })),
     ...DECISION_ORDER.map(k => [
-      { v: decName(k), s: k }, { v: s.by[k].n, s: "cell" }, { v: s.by[k].def, s: "cell" }, { v: s.by[k].ok, s: "cell" },
-      s.by[k].rate === null ? { v: "–", s: "cell" } : { v: s.by[k].rate, z: "0.0%", s: "cell" }
+      { v: decName(k), s: k }, { v: B[k].n, z: "#,##0", s: "cell" }, { v: B[k].n / V.n, z: "0.0%", s: "cell" },
+      { v: B[k].defaults, z: "#,##0", s: "cell" }, { v: B[k].rate, z: "0.0%", s: "cell" }
     ]),
     [],
+    [{ v: t("x.sum.decSection"), s: "section" }],
+    t("x.sum.decH").map(h => ({ v: h, s: "header" })),
+    ...V.deciles.map(d => [{ v: d.decile, s: "cell" }, { v: d.n, z: "#,##0", s: "cell" }, { v: d.mean_pd, z: "0.00%", s: "cell" }, { v: d.actual, z: "0.00%", s: "cell" }]),
+    [],
     [{ v: t("x.sum.note"), s: "sub" }]
-  ], [32, 14, 14, 12, 12]);
+  ], [34, 14, 18, 16, 14]);
 
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws1, t("x.sheet.pf"));
@@ -1311,7 +1752,7 @@ function exportPortfolio() {
 
 function exportSingle() {
   if (!xlsxReady() || !lastResult) return;
-  const { input, pd, contrib, decision, seg, ab, ub } = lastResult;
+  const { input, pd, contrib, decision, seg, ab, ub, score: sc, el, cf } = lastResult;
   const inputRows = FIELDS.map(f => {
     const userV = input.user[f.key], modelV = input.model[f.key];
     const isPct = f.unit === "pct";
@@ -1336,6 +1777,15 @@ function exportSingle() {
     [L("x.s.pd"), { v: pd, z: "0.0%", s: decision.cls }],
     [L("x.s.dec"), { v: decision.label, s: decision.cls }],
     [L("x.s.reason"), { v: decision.text, s: "wrap" }],
+    [L("x.s.score"), { v: Math.round(sc), s: "cell" }],
+    [L("x.s.cf"), { v: cf.text, s: "wrap" }],
+    ...(el ? [[],
+      [{ v: t("x.s.el"), s: "section" }],
+      [L("x.s.loan"), { v: el.ead, z: "#,##0", s: "cell" }],
+      [L("x.s.pd1"), { v: el.pd1, z: "0.00%", s: "cell" }],
+      [L("x.s.lgd"), { v: el.lgd, z: "0%", s: "cell" }],
+      [L("x.s.elAmount"), { v: Math.round(el.el), z: "#,##0", s: "cell" }],
+      [L("x.s.premium"), { v: el.premium, z: "0.00%", s: "cell" }]] : []),
     [],
     [{ v: t("x.s.inputs"), s: "section" }],
     H("x.s.inH"),
@@ -1397,7 +1847,7 @@ function applyStaticTexts() {
   updateThemeBtn();
   updateFormTexts();
   drawScale();
-  $("pfKicker").textContent = t("pf.kicker", { n: PORTFOLIO.length });
+  $("pfKicker").textContent = t("pf.kicker", { n: nf(MODEL.validation.n) });
   const m = MODEL.meta;
   $("footer").textContent = t("footer", { source: t("meta.source"), auc: nf(m.test_auc) });
   $("methodBody").innerHTML = t("method.html", {
@@ -1413,8 +1863,8 @@ function setLang(lang, persist = true) {
   // A mezőkben lévő számokat átírjuk az új nyelv formátumára (pl. "0,35" -> "0.35"),
   // hogy a váltás után is ugyanazt az értéket jelentsék.
   if (prev !== lang) {
-    for (const f of FIELDS) {
-      const el = $("in-" + f.key);
+    for (const key of [...FIELDS.map(f => f.key), "loan"]) {
+      const el = $("in-" + key);
       const p = parseNum(el.value, prev);
       if (p.value !== undefined) el.value = fmtInput(p.value, lang);
     }
@@ -1437,6 +1887,16 @@ function initialLang() {
   if (LANGS.includes(q)) return q;
   try { const s = localStorage.getItem("hk-lang"); if (LANGS.includes(s)) return s; } catch (e) {}
   return /^hu\b/i.test(navigator.language || "") ? "hu" : "en";
+}
+
+/* ---------- Élő újraszámolás ---------- */
+let liveTimer = null;
+function liveUpdate() {
+  if (!lastResult) return false;
+  const input = readForm(true);
+  if (!input) return false;
+  render(input, false);
+  return true;
 }
 
 /* ---------- Indítás ---------- */
@@ -1472,14 +1932,29 @@ function init() {
   document.querySelectorAll("[data-preset]").forEach(btn => btn.addEventListener("click", () => {
     const p = PRESETS[btn.dataset.preset];
     for (const f of FIELDS) $("in-" + f.key).value = fmtInput(p[f.key]);
+    $("in-loan").value = fmtInput(p.loan);
     $("form").requestSubmit();
   }));
   $("resetBtn").addEventListener("click", () => {
     for (const f of FIELDS) { $("in-" + f.key).value = ""; setMsg(f.key, null, ""); }
+    $("in-loan").value = ""; setMsg("loan", null, "");
     $("results").classList.add("hidden");
     $("placeholder").classList.remove("hidden");
     lastResult = null;
   });
+
+  // Élő újraszámolás: az első kiértékelés után gépelés közben frissül (hibát nem jelez, csak érvényes adatra számol)
+  $("form").addEventListener("input", () => {
+    clearTimeout(liveTimer);
+    liveTimer = setTimeout(liveUpdate, 160);
+  });
+
+  // Nyomtatható hitelmemo (a gomb, vagy Ctrl+P egy kiértékelés után)
+  $("printBtn").addEventListener("click", printMemo);
+  addEventListener("beforeprint", () => {
+    if (lastResult && !$("tab-single").classList.contains("hidden") && buildMemo()) document.documentElement.classList.add("print-memo");
+  });
+  addEventListener("afterprint", () => document.documentElement.classList.remove("print-memo"));
 
   // Excel export
   $("singleExportBtn").addEventListener("click", exportSingle);

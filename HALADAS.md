@@ -98,3 +98,15 @@ Opcionális v1.1: `income_missing` változó és `train_caps` export a tréning-
 - Egyszerű indítás szerverrel: `Inditas.cmd` / `Tesztek_futtatasa.cmd`.
 - Regresszió: 96/96 offline (`file://`) és HTTP-n is (TESZT_NAPLO 12. pont).
 - Új alkalmazásikon: az Instrument Serif „%” jele sárgarézben éjkék alapon (a PD maga egy százalék); a keretes „M” túlságosan a Gmailre emlékeztetett. A fejléc logója is erre cserélve, megnyitáskor kirajzolódik, majd kitöltődik.
+
+**Új funkciók és valódi validáció — KÉSZ (2026-09-29):**
+- Egyedi kérelem:
+  - pontszám;
+  - „Mi változtatná meg a döntést?” (kontrafaktuális);
+  - várható veszteség (opcionális hitelösszeg);
+  - élő újraszámolás gépelés közben;
+  - „Jelentés nyomtatása” (egyoldalas A4 hitelmemo).
+- Portfólió és validáció fül:
+  - AUC / Gini / KS, kalibráció tizedenként és döntési sávok a teljes, 29 946 soros teszthalmazon;
+  - a 100 elemű böngészhető minta már csak a teszthalmazból jön (a korábbi minta ~80%-a tanítóadat volt, ez a CASE_STUDY F8 találata).
+- Regresszió: 115/115 teszt (TESZT_NAPLO 13. pont).
