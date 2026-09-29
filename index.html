@@ -58,6 +58,7 @@ body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 var(
 .mast-row { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
 .brand { display: flex; align-items: center; gap: 16px; }
 .brand svg { flex: none; }
+.brand svg .mark { fill: #C7A46B; stroke: #C7A46B; stroke-width: .5; }
 h1 { font-family: var(--serif); font-size: 30px; font-weight: 400; letter-spacing: 0; margin: 0; line-height: 1.1; }
 .brand .sub { font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: var(--mast-kicker); margin-top: 2px; }
 .head-actions { display: flex; gap: 8px; }
@@ -121,9 +122,10 @@ h1 { font-family: var(--serif); font-size: 30px; font-weight: 400; letter-spacin
 @keyframes fade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
 @keyframes grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@keyframes ink { to { fill-opacity: 1; } }
 @media (prefers-reduced-motion: no-preference) {
   /* oldalbetöltés: a logó kirajzolódik, a fejléc halkan beúszik */
-  .brand svg path { stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw 1.6s var(--ease) .05s forwards; }
+  .brand svg .mark { fill-opacity: 0; stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw 1.4s var(--ease) .05s forwards, ink .8s ease .95s forwards; }
   .brand > div { animation: rise .9s var(--ease) .2s both; }
   .tabs, .head-actions { animation: fade .9s ease .35s both; }
   .disclaimer > div { animation: fade .9s ease .45s both; }
@@ -258,7 +260,7 @@ footer { margin-top: 24px; color: var(--muted); font-size: 12px; text-align: cen
   <div class="mast-inner">
     <div class="mast-row">
       <div class="brand">
-        <svg width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true"><path pathLength="1" d="M1 1H39V39H1Z" stroke="#B08D57" stroke-width="1.5"/><path pathLength="1" d="M10 28V14l10 8 10-8v14" stroke="#B08D57" stroke-width="1.5"/></svg>
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true"><rect x=".75" y=".75" width="38.5" height="38.5" rx="8" fill="#16263B" stroke="#B08D57" stroke-opacity=".45" stroke-width="1.5"/><path class="mark" pathLength="1" d="M15.81 19.38Q14.71 19.38 13.88 18.68Q13.04 17.98 12.58 16.8Q12.12 15.63 12.12 14.17Q12.12 12.72 12.58 11.54Q13.04 10.37 13.88 9.68Q14.71 9 15.81 9Q16.91 9 17.73 9.68Q18.54 10.37 19.02 11.54Q19.49 12.72 19.49 14.17Q19.49 15.63 19.02 16.8Q18.54 17.98 17.73 18.68Q16.91 19.38 15.81 19.38ZM13.52 30.7Q13.04 30.7 13.28 30.29L25.74 9.54Q25.86 9.3 26.15 9.3H26.48Q26.96 9.3 26.72 9.71L14.26 30.46Q14.14 30.7 13.85 30.7ZM15.81 18.78Q16.73 18.78 17.29 17.76Q17.86 16.73 17.86 14.17Q17.86 11.62 17.29 10.61Q16.73 9.59 15.81 9.59Q14.89 9.59 14.32 10.61Q13.76 11.62 13.76 14.17Q13.76 16.73 14.32 17.76Q14.89 18.78 15.81 18.78ZM24.19 31Q23.09 31 22.26 30.3Q21.43 29.6 20.97 28.43Q20.51 27.25 20.51 25.8Q20.51 24.34 20.97 23.17Q21.43 21.99 22.26 21.31Q23.09 20.62 24.19 20.62Q25.29 20.62 26.11 21.31Q26.93 21.99 27.4 23.17Q27.88 24.34 27.88 25.8Q27.88 27.25 27.4 28.43Q26.93 29.6 26.11 30.3Q25.29 31 24.19 31ZM24.19 30.41Q25.11 30.41 25.68 29.38Q26.24 28.35 26.24 25.8Q26.24 23.24 25.68 22.23Q25.11 21.22 24.19 21.22Q23.27 21.22 22.71 22.23Q22.14 23.24 22.14 25.8Q22.14 28.35 22.71 29.38Q23.27 30.41 24.19 30.41Z"/></svg>
         <div>
           <h1 data-i18n="app.title">Hitelkockázat-elemző</h1>
           <div class="sub" data-i18n="app.kicker"></div>

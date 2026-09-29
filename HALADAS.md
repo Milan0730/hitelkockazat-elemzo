@@ -97,3 +97,4 @@ Opcionális v1.1: `income_missing` változó és `train_caps` export a tréning-
 - Minden függőség helyben (`vendor/`), licencekkel; az élő oldal telepíthető alkalmazásként (manifest + ikonok).
 - Egyszerű indítás szerverrel: `Inditas.cmd` / `Tesztek_futtatasa.cmd`.
 - Regresszió: 96/96 offline (`file://`) és HTTP-n is (TESZT_NAPLO 12. pont).
+- Új alkalmazásikon: az Instrument Serif „%” jele sárgarézben éjkék alapon (a PD maga egy százalék); a keretes „M” túlságosan a Gmailre emlékeztetett. A fejléc logója is erre cserélve, megnyitáskor kirajzolódik, majd kitöltődik.
