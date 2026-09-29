@@ -77,3 +77,34 @@ Böngészőben tesztelve, összeomlás nélkül:
   - scaler (átlag, szórás), szegmensek, meta, minta-portfólió: **bitre azonos**
   - együtthatók: max. eltérés 1,1·10⁻¹⁵, intercept 4,4·10⁻¹⁶ (lebegőpontos zaj)
   - Test AUC: 0,8391 (azonos)
+
+## 10. Új vizuális design („privátbanki jelentés”): regressziós ellenőrzés (M4, 2026-09-29)
+
+Nem hibajavítás, hanem a teljes felület átstílusozása: új színpaletta világos és sötét módban, Cormorant Garamond / Manrope betűtípus, új fejléc, háromoszlopos összefoglaló (PD · javaslat · referenciacsoport), zónafeliratos kockázati skála, egységjelölés a beviteli mezőkben.
+
+- **Kockázat**: a tesztcsomag ID-kre, osztályokra (`err`/`warn`, `good`/`warn`/`bad`, `me`), ARIA-fülekre és i18n kulcsokra épül; egy átnevezés csendben tesztbukást vagy — rosszabb — hibásan zöld tesztet okozhatna.
+- **Döntés**: a számítási logika érintetlen; a markup csak burkolóelemeket kapott, minden tesztelt ID és osztály megmaradt. Az új szövegek (8 új kulcs) mindkét nyelven szerepelnek.
+- **Ellenőrzés** (headless Chromium, a CDN-könyvtárak helyi másolatával):
+  - automatizált tesztek: **96/96**, konzolhiba nincs;
+  - 375 px: nincs vízszintes túlcsúszás egyik fülön sem;
+  - képernyőképek: világos/sötét × HU/EN, egyedi és portfólió nézet.
+- **Talált és javított apróságok**:
+  - mobilon a skála zónafeliratai egymásra csúsztak → mobilon tördelődnek;
+  - az életkor mező súgója („év”) duplikálta az új egységjelölést → értelmes súgó („Betöltött életkor (18–110)”).
+
+## 11. Betűtípus-csere (Instrument) és finom mozgás: regressziós ellenőrzés (M4, 2026-09-29)
+
+Nem hibajavítás: Cormorant Garamond / Manrope helyett **Instrument Serif / Instrument Sans**, valamint egységes, visszafogott animációs rendszer (egyetlen lassuló görbe, 6 px-es beúszás, 40–90 ms-os lépcsőzés; oldalbetöltéskor a logó kirajzolódik, a fejléc, az űrlap és a mezők egymás után jelennek meg; kiértékeléskor a jelentés blokkjai, a tényezők, a hőtérkép cellái és a skálajelölő animál).
+
+- **Kockázat 1 — tesztek és időzítés**: a tesztek a `#pdValue` szövegét szinkron olvassák a kiértékelés után. Egy felszámláló PD-animáció (0 → 15,0%) a tesztek alatt köztes értéket mutatott volna.
+  - **Döntés**: a PD szövege azonnal a végleges érték, csak az elhelyezkedése/átlátszósága animál. Ez a „finomabb mozgás” kérésnek is jobban megfelel.
+- **Kockázat 2 — animáció ragad**: ha egy animáció nem fut le (háttérfül, lassú gép), az elem láthatatlan maradhat.
+  - **Döntés**: minden animáció CSS-ben, `both` kitöltéssel; a vezérlő osztály (`is-revealing`) 2,2 s után lekerül, a végállapot azonos az animáció nélküli állapottal.
+- **Kockázat 3 — hozzáférhetőség**: minden mozgás csak `prefers-reduced-motion: no-preference` mellett fut; csökkentett mozgásnál a Chart.js animáció is ki van kapcsolva.
+- **Kockázat 4 — műfélkövér**: az Instrument Serifnek egyetlen súlya van; a korábbi 500/600-as címsúlyokat a böngésző szintetikus félkövérrel rajzolta volna → minden serif elem 400-as súlyra állítva.
+- **Kockázat 5 — nemkívánt újrajátszás**: téma- vagy nyelvváltáskor az eredmény újrarenderel. Az animáció csak a „Kiértékelés”/minta-profil/portfólió-sor megnyitásakor fut (`render(input, true)`), téma/nyelv váltáskor nem.
+- **Ellenőrzés** (headless Chromium, valódi Instrument betűkkel a GitHub-tárolóból):
+  - automatizált tesztek: **96/96**, konzolhiba nincs;
+  - 375 px: nincs vízszintes túlcsúszás;
+  - képkockák betöltés közben (150 / 450 / 900 ms) és kiértékelés közben (200 / 550 ms);
+  - végállapot-ellenőrzés világos és sötét módban, mindkét fülön: minden látható elem `opacity: 1`, nincs maradék eltolás, nincs bennragadt `is-revealing` osztály, a jelölő 30%-on áll.

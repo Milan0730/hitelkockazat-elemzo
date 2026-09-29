@@ -81,3 +81,13 @@ _(Korábbi terv, archív:)_
 1. Külső tesztelés 3–5 fővel.
 2. AI-agent teszt-riport a `TESZT_NAPLO.md` + a külső teszt eredményei alapján, 2 perces demo-script, CV/LinkedIn frissítés.
 Opcionális v1.1: `income_missing` változó és `train_caps` export a tréning-szkriptben, Platt-kalibráció.
+
+**Új design — KÉSZ (2026-09-29):**
+- Design-feltárás 7 irányban (Claude Design canvas), a választott: **E · Privátbanki jelentés** (éjkék + sárgaréz, serif címsorok).
+- `index.html` átstílusozva: új fejléc és fülek, kártyás űrlap egységjelöléssel, jelentésszerű eredmény (összefoglaló, skála zónákkal, tényezők, historikus összevetés), portfólió KPI-sáv; világos/sötét, HU/EN.
+- Regresszió: 96/96 teszt, mobil 375 px túlcsúszás nélkül (TESZT_NAPLO 10. pont).
+
+**Betűtípus és mozgás — KÉSZ (2026-09-29):**
+- Betűtípus: **Instrument Serif + Instrument Sans** (négy pár közül választva a canvason: Cormorant/Manrope, Instrument, Newsreader/Public Sans, Geist).
+- Mozgás: finom, egységes rendszer; oldalbetöltéskor is (logó kirajzolódás, fejléc, űrlap, mezők lépcsőzve), kiértékeléskor (jelentésblokkok, címsor alatti vonal, skálajelölő, tényezők, hőtérkép), fülváltáskor (portfólió KPI-k). Csökkentett mozgás beállítás tiszteletben tartva.
+- Regresszió: 96/96 teszt, mobil 375 px rendben (TESZT_NAPLO 11. pont).

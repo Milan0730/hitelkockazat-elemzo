@@ -4,192 +4,288 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Hitelkockázat-elemző</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Instrument+Sans:wght@400;500;600;700&display=swap">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 <style>
 :root {
-  --bg: #f4f6fa; --panel: #ffffff; --panel-2: #eef1f6; --border: #dde2ea;
-  --text: #1a2230; --muted: #5d6878; --accent: #2f6fed; --accent-soft: rgba(47,111,237,.12);
-  --good: #1f9d63; --warn: #d98a00; --bad: #d64545;
-  --good-soft: rgba(31,157,99,.12); --warn-soft: rgba(217,138,0,.14); --bad-soft: rgba(214,69,69,.12);
-  --shadow: 0 1px 3px rgba(20,30,50,.06), 0 6px 20px rgba(20,30,50,.05);
+  --bg: #F5F1E9; --panel: #FFFFFF; --panel-2: #FBF9F5; --border: #D8CFBF; --border-2: #E6DECF;
+  --text: #14202E; --muted: #4A5563; --muted-2: #5A6573;
+  --accent: #B08D57; --accent-text: #7A5C2E; --accent-soft: rgba(176,141,87,.14);
+  --mast: #0E1B2C; --mast-text: #F5F1E9; --mast-muted: #A9B3C1; --mast-line: #3A4A60; --mast-kicker: #C9B48E;
+  --band: #E9E2D4; --band-text: #3B4552;
+  --primary: #0E1B2C; --primary-text: #F5F1E9;
+  --good: #2F5E47; --warn: #7A4A12; --bad: #8E3B35;
+  --good-soft: rgba(47,94,71,.10); --warn-soft: rgba(176,141,87,.16); --bad-soft: rgba(142,59,53,.10);
+  --zone-good: #9DB3A5; --zone-warn: #B08D57; --zone-bad: #8E3B35;
+  --heat-rgb: 14,27,44; --heat-hi: #F5F1E9; --heat-lo: #14202E; --heat-ring: #B08D57;
+  --ease: cubic-bezier(.16, 1, .3, 1);
+  --serif: "Instrument Serif", Georgia, "Times New Roman", serif;
+  --sans: "Instrument Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
 }
 :root[data-theme="dark"] {
-  --bg: #0f141c; --panel: #171e29; --panel-2: #1e2734; --border: #2a3444;
-  --text: #e6ebf2; --muted: #95a1b3; --accent: #5b8ff9; --accent-soft: rgba(91,143,249,.16);
-  --good: #3cc488; --warn: #f0a93b; --bad: #f06a6a;
-  --good-soft: rgba(60,196,136,.14); --warn-soft: rgba(240,169,59,.15); --bad-soft: rgba(240,106,106,.14);
-  --shadow: 0 1px 3px rgba(0,0,0,.3), 0 6px 20px rgba(0,0,0,.25);
+  --bg: #0B1422; --panel: #121D2E; --panel-2: #0F1928; --border: #2A3850; --border-2: #22304A;
+  --text: #ECE6DA; --muted: #A7B0BD; --muted-2: #8E98A7;
+  --accent: #C7A46B; --accent-text: #D4B580; --accent-soft: rgba(199,164,107,.16);
+  --mast: #070D18; --mast-line: #2A3850;
+  --band: #16233A; --band-text: #C9CFD8;
+  --primary: #C7A46B; --primary-text: #0B1422;
+  --good: #8FD1AE; --warn: #E3A858; --bad: #EE9A8E;
+  --good-soft: rgba(143,209,174,.12); --warn-soft: rgba(227,168,88,.14); --bad-soft: rgba(238,154,142,.12);
+  --zone-good: #5E8F73; --zone-warn: #C7A46B; --zone-bad: #B0544B;
+  --heat-rgb: 199,164,107; --heat-hi: #0B1422; --heat-lo: #ECE6DA; --heat-ring: #ECE6DA;
 }
 * { box-sizing: border-box; }
-body {
-  margin: 0; background: var(--bg); color: var(--text);
-  font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
-  transition: background .25s, color .25s;
-}
-.wrap { max-width: 1180px; margin: 0 auto; padding: 20px 16px 48px; }
-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
-h1 { font-size: 22px; margin: 0; letter-spacing: -.01em; }
-.sub { color: var(--muted); font-size: 13px; margin-top: 2px; }
-.btn {
-  border: 1px solid var(--border); background: var(--panel); color: var(--text);
-  padding: 8px 14px; border-radius: 8px; cursor: pointer; font: inherit; font-size: 14px;
-  transition: background .15s, border-color .15s, transform .1s;
-}
-.btn:hover { border-color: var(--accent); }
-.btn:active { transform: translateY(1px); }
-.btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
-.btn.small { padding: 5px 10px; font-size: 13px; }
-.disclaimer {
-  background: var(--warn-soft); border: 1px solid var(--warn); color: var(--text);
-  border-radius: 10px; padding: 10px 14px; font-size: 13px; margin-bottom: 18px;
-}
-.grid { display: grid; grid-template-columns: 380px 1fr; gap: 18px; align-items: start; }
-@media (max-width: 900px) { .grid { grid-template-columns: 1fr; } }
-.panel { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 18px; box-shadow: var(--shadow); }
-.panel h2 { font-size: 16px; margin: 0 0 12px; }
-.presets { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
-.presets span { font-size: 13px; color: var(--muted); align-self: center; margin-right: 2px; }
-.field { margin-bottom: 12px; }
-.field label { display: block; font-weight: 600; font-size: 14px; margin-bottom: 3px; }
-.field .hint { color: var(--muted); font-size: 12px; margin-bottom: 5px; }
-.field input {
-  width: 100%; padding: 9px 11px; border-radius: 8px; border: 1px solid var(--border);
-  background: var(--panel-2); color: var(--text); font: inherit;
-}
-.field input:focus { outline: 2px solid var(--accent-soft); border-color: var(--accent); }
-.field.err input { border-color: var(--bad); }
-.field .msg { font-size: 12px; margin-top: 4px; min-height: 0; }
-.field.err .msg { color: var(--bad); }
-.field.warn .msg { color: var(--warn); }
-.actions { display: flex; gap: 8px; margin-top: 6px; }
-.placeholder { color: var(--muted); text-align: center; padding: 60px 20px; }
-.results { display: grid; gap: 18px; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 var(--sans); transition: background .25s, color .25s; }
 .hidden { display: none !important; }
+.kicker { font-size: 11px; letter-spacing: .2em; font-weight: 600; text-transform: uppercase; color: var(--muted); }
+.kicker.brass { color: var(--accent-text); }
 
-.verdict { display: grid; grid-template-columns: auto 1fr; gap: 18px; align-items: center; }
-@media (max-width: 560px) { .verdict { grid-template-columns: 1fr; } }
-.pd-big { font-size: 46px; font-weight: 700; letter-spacing: -.02em; line-height: 1; }
-.pd-label { color: var(--muted); font-size: 13px; }
-.badge { display: inline-block; padding: 6px 12px; border-radius: 999px; font-weight: 700; font-size: 14px; margin-bottom: 6px; }
-.badge.good { background: var(--good-soft); color: var(--good); }
-.badge.warn { background: var(--warn-soft); color: var(--warn); }
-.badge.bad { background: var(--bad-soft); color: var(--bad); }
-.scale { position: relative; height: 12px; border-radius: 6px; margin: 22px 0 6px; display: flex; overflow: hidden; }
-.scale div { height: 100%; }
-.scale-wrap { position: relative; }
-.marker { position: absolute; top: 14px; width: 3px; height: 22px; background: var(--text); border-radius: 2px; transform: translateX(-50%); transition: left .5s cubic-bezier(.2,.8,.2,1); }
-.scale-ticks { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted); }
-.fade-in { animation: fadeIn .35s ease-out; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+/* Masthead */
+.masthead { background: var(--mast); color: var(--mast-text); }
+.mast-inner { max-width: 1312px; margin: 0 auto; padding: 24px 32px 0; display: flex; flex-direction: column; gap: 20px; }
+.mast-row { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+.brand { display: flex; align-items: center; gap: 16px; }
+.brand svg { flex: none; }
+h1 { font-family: var(--serif); font-size: 30px; font-weight: 400; letter-spacing: 0; margin: 0; line-height: 1.1; }
+.brand .sub { font-size: 11px; letter-spacing: .22em; text-transform: uppercase; color: var(--mast-kicker); margin-top: 2px; }
+.head-actions { display: flex; gap: 8px; }
+.mast-btn { font: 600 13px var(--sans); background: transparent; color: var(--mast-text); border: 1px solid var(--mast-line); padding: 10px 16px; min-height: 44px; cursor: pointer; transition: border-color .15s; }
+.mast-btn:hover { border-color: #B08D57; }
+.tabs { display: flex; gap: 32px; }
+.tab { border: 0; background: transparent; color: var(--mast-muted); font: 600 14px var(--sans); letter-spacing: .04em; padding: 0 0 14px; border-bottom: 2px solid transparent; cursor: pointer; min-height: 44px; }
+.tab:hover { color: var(--mast-text); }
+.tab[aria-selected="true"] { color: var(--mast-text); border-bottom-color: #B08D57; }
+.disclaimer { background: var(--band); color: var(--band-text); font-size: 12.5px; }
+.disclaimer > div { max-width: 1312px; margin: 0 auto; padding: 10px 32px; }
 
-.factors { list-style: none; padding: 0; margin: 0 0 10px; }
-.factors li { padding: 7px 0; border-bottom: 1px dashed var(--border); display: flex; gap: 10px; align-items: baseline; }
-.factors li:last-child { border-bottom: 0; }
-.arrow { font-weight: 700; width: 18px; flex: none; }
-.arrow.up { color: var(--bad); }
-.arrow.down { color: var(--good); }
-.chart-box { position: relative; height: 230px; }
-.note { color: var(--muted); font-size: 12px; margin-top: 8px; }
+.wrap { max-width: 1312px; margin: 0 auto; padding: 40px 32px 56px; }
 
-.seg-compare { display: flex; gap: 14px; flex-wrap: wrap; margin-bottom: 14px; }
-.stat { background: var(--panel-2); border-radius: 10px; padding: 10px 14px; flex: 1 1 140px; }
-.stat .v { font-size: 22px; font-weight: 700; }
-.stat .l { font-size: 12px; color: var(--muted); }
-.heat { width: 100%; border-collapse: separate; border-spacing: 3px; font-size: 13px; }
-.heat th { font-weight: 600; color: var(--muted); font-size: 12px; padding: 4px; }
-.heat td { text-align: center; padding: 8px 4px; border-radius: 6px; font-variant-numeric: tabular-nums; }
-.heat td.me { outline: 2px solid var(--text); outline-offset: -2px; font-weight: 700; }
-.heat-wrap { overflow-x: auto; }
+/* Buttons */
+.btn { font: 600 13px var(--sans); border: 1px solid var(--border); background: transparent; color: var(--text); padding: 10px 14px; min-height: 44px; cursor: pointer; transition: border-color .15s, background .15s; }
+.btn:hover { border-color: var(--text); }
+.btn:active { transform: translateY(1px); }
+.btn.primary { background: var(--primary); border-color: var(--primary); color: var(--primary-text); font-weight: 700; letter-spacing: .12em; text-transform: uppercase; font-size: 13px; }
+.btn.outline { border-color: var(--text); letter-spacing: .12em; text-transform: uppercase; font-size: 12px; font-weight: 700; }
+.btn.link { border: 0; text-decoration: underline; text-underline-offset: 3px; }
+.btn.small { padding: 8px 12px; min-height: 40px; }
 
-.tabs { display: flex; gap: 4px; background: var(--panel-2); border: 1px solid var(--border); border-radius: 10px; padding: 4px; margin-bottom: 18px; width: fit-content; max-width: 100%; }
-.tab { border: 0; background: transparent; color: var(--muted); padding: 8px 16px; border-radius: 7px; cursor: pointer; font: inherit; font-weight: 600; font-size: 14px; transition: background .15s, color .15s; }
-.tab[aria-selected="true"] { background: var(--panel); color: var(--text); box-shadow: var(--shadow); }
-.panel-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+/* Panels */
+.panel { background: var(--panel); border-top: 3px solid var(--accent); padding: 26px 28px; }
+.panel.navy { border-top-color: var(--text); }
+.panel h2 { font-family: var(--serif); font-size: 28px; font-weight: 400; margin: 0 0 14px; line-height: 1.15; }
+.panel-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
 .panel-head h2 { margin: 0; }
 
-.kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 18px; }
-@media (max-width: 760px) { .kpis { grid-template-columns: repeat(2, 1fr); } }
-.pf-top { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-bottom: 18px; }
-@media (max-width: 900px) { .pf-top { grid-template-columns: 1fr; } }
+/* Single application */
+.grid { display: grid; grid-template-columns: 400px minmax(0,1fr); gap: 44px; align-items: start; }
 .grid > *, .pf-top > *, .kpis > * { min-width: 0; }
-.matrix-wrap { overflow-x: auto; }
-@media (max-width: 480px) {
-  .matrix th, .matrix td { padding: 7px 5px; font-size: 13px; }
-  .panel { padding: 14px; }
-  .stat .v { font-size: 19px; }
-}
-.matrix { width: 100%; border-collapse: collapse; font-size: 14px; }
-.matrix th, .matrix td { padding: 8px 10px; border-bottom: 1px solid var(--border); text-align: right; font-variant-numeric: tabular-nums; }
-.matrix th:first-child, .matrix td:first-child { text-align: left; }
-.matrix th { color: var(--muted); font-weight: 600; font-size: 12px; }
+.form-head { display: flex; flex-direction: column; gap: 4px; margin-bottom: 18px; }
+.form-head h2 { margin: 0; font-size: 30px; }
+.presets { display: flex; align-items: center; margin-bottom: 20px; flex-wrap: wrap; }
+.presets span { font-size: 12px; color: var(--muted); margin-right: 10px; }
+.presets .btn { flex: 1 1 0; margin-left: -1px; font-size: 12.5px; padding: 9px 6px; min-height: 42px; }
+.presets .btn:first-of-type { margin-left: 0; }
+.field { margin-bottom: 16px; }
+.field label { display: block; font-size: 11px; letter-spacing: .14em; font-weight: 700; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+.field .hint { color: var(--muted-2); font-size: 12px; margin-bottom: 6px; line-height: 1.4; }
+.inwrap { display: flex; align-items: center; gap: 10px; border: 1px solid var(--border); background: var(--panel-2); padding: 0 14px; height: 48px; transition: border-color .15s; }
+.inwrap:focus-within { border-color: var(--accent); outline: 2px solid var(--accent-soft); }
+.inwrap input { flex: 1 1 auto; min-width: 0; border: 0; background: transparent; color: var(--text); font: 600 17px var(--sans); padding: 0; outline: none; }
+.inwrap .unit { font-size: 13px; color: var(--muted-2); white-space: nowrap; }
+.field.err .inwrap { border: 2px solid var(--bad); padding: 0 13px; }
+.field.warn .inwrap { border-color: var(--warn); }
+.field .msg { font-size: 12.5px; margin-top: 5px; line-height: 1.4; }
+.field .msg:empty { display: none; }
+.field.err .msg { color: var(--bad); font-weight: 600; }
+.field.warn .msg { color: var(--warn); }
+.actions { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+.actions .btn.primary { padding: 16px; min-height: 52px; }
 
-.filters { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin-bottom: 12px; }
-.filters select, .filters input[type=search] {
-  padding: 7px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--panel-2); color: var(--text); font: inherit; font-size: 14px;
+.placeholder { color: var(--muted); text-align: center; padding: 72px 28px; font-size: 15px; border-top-color: var(--border); }
+.results { display: flex; flex-direction: column; gap: 34px; }
+/* Mozgás: egyetlen lassuló görbe, rövid (6 px) utak, finom lépcsőzés.
+   Csak akkor fut, ha a rendszer nem kér csökkentett mozgást. */
+@keyframes rise { from { opacity: 0; transform: translate3d(0, 6px, 0); } to { opacity: 1; transform: none; } }
+@keyframes fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+@keyframes grow { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+@media (prefers-reduced-motion: no-preference) {
+  /* oldalbetöltés: a logó kirajzolódik, a fejléc halkan beúszik */
+  .brand svg path { stroke-dasharray: 1; stroke-dashoffset: 1; animation: draw 1.6s var(--ease) .05s forwards; }
+  .brand > div { animation: rise .9s var(--ease) .2s both; }
+  .tabs, .head-actions { animation: fade .9s ease .35s both; }
+  .disclaimer > div { animation: fade .9s ease .45s both; }
+  /* fül megjelenése (betöltéskor és fülváltáskor) */
+  .first-load { --t0: 260ms; }
+  #tab-single.is-revealing .grid > * { animation: rise .8s var(--ease) both; animation-delay: calc(var(--t0, 0ms) + var(--i, 0) * 90ms); }
+  #tab-single.is-revealing #fields > .field { animation: rise .7s var(--ease) both; animation-delay: calc(var(--t0, 0ms) + 160ms + var(--i, 0) * 40ms); }
+  #tab-portfolio.is-revealing > :not(.kpis), #tab-portfolio.is-revealing .kpis > * { animation: rise .8s var(--ease) both; animation-delay: calc(var(--t0, 0ms) + var(--i, 0) * 70ms); }
+  /* kiértékelés: blokkok lépcsőzve, a vonal kinyúlik, a jelölő a helyére csúszik */
+  #results.is-revealing > section { animation: rise .8s var(--ease) both; animation-delay: calc(var(--i, 0) * 70ms); }
+  #results.is-revealing .report-head::after { animation: grow 1.1s var(--ease) .05s both; }
+  #results.is-revealing .factors li { animation: rise .7s var(--ease) both; animation-delay: calc(320ms + var(--i, 0) * 50ms); }
+  #results.is-revealing .heat td { animation: fade .7s ease both; animation-delay: calc(420ms + var(--d, 0ms)); }
+  .marker { transition: left 1s var(--ease) .15s; }
+  .tab { transition: color .25s ease, border-color .35s var(--ease); }
 }
-.filters label.chk { display: flex; gap: 6px; align-items: center; font-size: 14px; color: var(--muted); cursor: pointer; }
+
+.report-head { position: relative; display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; padding-bottom: 16px; }
+.report-head::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: var(--accent); transform-origin: left; }
+.report-head h2 { font-family: var(--serif); font-weight: 400; font-size: 48px; letter-spacing: -.01em; line-height: 1.05; margin: 4px 0 0; }
+.summary { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); }
+.summary > div { display: flex; flex-direction: column; gap: 8px; padding: 0 26px; border-left: 1px solid var(--border); }
+.summary > div:first-child { padding-left: 0; border-left: 0; }
+.pd-big { font-family: var(--serif); font-size: 88px; font-weight: 400; line-height: .95; letter-spacing: -.02em; }
+.pd-label, .sum-note { font-size: 13px; color: var(--muted); line-height: 1.5; }
+.badge { font-family: var(--serif); font-size: 34px; font-weight: 400; line-height: 1.1; }
+.badge.good { color: var(--good); } .badge.warn { color: var(--warn); } .badge.bad { color: var(--bad); }
+.ref-value { font-family: var(--serif); font-size: 34px; font-weight: 400; line-height: 1.1; }
+
+.scale-block { display: flex; flex-direction: column; gap: 10px; }
+.scale-wrap { position: relative; padding-top: 8px; }
+.scale { display: flex; height: 4px; }
+.scale div { height: 100%; }
+.scale div + div { box-shadow: inset 3px 0 0 var(--bg); }
+.marker { position: absolute; top: 2px; width: 14px; height: 14px; margin-left: -7px; background: var(--text); border: 2px solid var(--bg); transform: rotate(45deg); }
+.scale-ticks { display: flex; justify-content: space-between; font-size: 11px; color: var(--muted-2); }
+.scale-zones { display: flex; font-size: 12.5px; }
+
+.factors { list-style: none; padding: 0; margin: 0 0 10px; border-top: 1px solid var(--text); }
+.factors li { padding: 13px 0; border-bottom: 1px solid var(--border-2); display: flex; gap: 12px; align-items: baseline; line-height: 1.5; }
+.factors li b { font-family: var(--serif); font-size: 20px; font-weight: 400; }
+.arrow { font-weight: 700; width: 16px; flex: none; font-size: 13px; }
+.arrow.up { color: var(--bad); }
+.arrow.down { color: var(--good); }
+.chart-box { position: relative; height: 230px; margin-top: 14px; }
+.note { color: var(--muted); font-size: 12.5px; margin-top: 10px; line-height: 1.5; }
+
+.seg-compare { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); margin-bottom: 16px; }
+.stat { padding: 0 20px; border-left: 1px solid var(--border); display: flex; flex-direction: column; gap: 2px; }
+.seg-compare .stat:first-child, .kpis .stat:first-child { border-left: 0; padding-left: 0; }
+.stat .v { font-family: var(--serif); font-size: 34px; font-weight: 400; line-height: 1.1; }
+.stat .l { font-size: 12.5px; color: var(--muted); }
+.heat-wrap { overflow-x: auto; }
+.heat { width: 100%; border-collapse: separate; border-spacing: 3px; font-size: 13px; }
+.heat th { font-weight: 700; color: var(--muted); font-size: 11px; letter-spacing: .08em; padding: 4px; }
+.heat td { text-align: center; padding: 9px 4px; font-variant-numeric: tabular-nums; }
+.heat td.me { outline: 2px solid var(--heat-ring); outline-offset: -2px; font-weight: 700; }
+
+/* Portfolio */
+.pf-head { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; border-bottom: 1px solid var(--accent); padding-bottom: 16px; margin-bottom: 30px; }
+.pf-head h2 { font-family: var(--serif); font-weight: 400; font-size: 48px; letter-spacing: -.01em; line-height: 1.05; margin: 4px 0 0; }
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); margin-bottom: 34px; }
+.kpis .stat .v { font-size: 54px; font-weight: 400; line-height: 1; letter-spacing: -.01em; }
+.pf-top { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-bottom: 34px; }
+.matrix-wrap { overflow-x: auto; }
+.matrix { width: 100%; border-collapse: collapse; font-size: 14px; }
+.matrix th, .matrix td { padding: 12px 8px; border-bottom: 1px solid var(--border-2); text-align: right; font-variant-numeric: tabular-nums; }
+.matrix th { border-bottom-color: var(--text); color: var(--muted); font-weight: 700; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; }
+.matrix th:first-child, .matrix td:first-child { text-align: left; padding-left: 0; }
+.filters { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
+.filters select { font: 600 13px var(--sans); color: var(--text); background: var(--panel-2); border: 1px solid var(--border); padding: 10px 12px; min-height: 44px; }
+.filters label.chk { display: flex; gap: 8px; align-items: center; font-size: 13px; color: var(--muted); cursor: pointer; min-height: 44px; }
 .filters .count { margin-left: auto; color: var(--muted); font-size: 13px; }
-.table-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 10px; }
-table.pf { width: 100%; border-collapse: collapse; font-size: 13.5px; white-space: nowrap; }
-table.pf th { position: sticky; top: 0; background: var(--panel-2); text-align: right; padding: 9px 10px; font-weight: 600; font-size: 12px; color: var(--muted); cursor: pointer; user-select: none; border-bottom: 1px solid var(--border); }
+.table-wrap { overflow-x: auto; border: 1px solid var(--border); background: var(--panel); }
+table.pf { width: 100%; border-collapse: collapse; font-size: 14px; white-space: nowrap; }
+table.pf th { position: sticky; top: 0; background: var(--panel); text-align: right; padding: 12px; font-weight: 700; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); cursor: pointer; user-select: none; border-bottom: 1px solid var(--text); }
 table.pf th:hover { color: var(--text); }
 table.pf th[aria-sort="ascending"]::after { content: " ▲"; }
 table.pf th[aria-sort="descending"]::after { content: " ▼"; }
-table.pf th.nosort { cursor: default; }
-table.pf td { padding: 8px 10px; text-align: right; border-bottom: 1px solid var(--border); font-variant-numeric: tabular-nums; }
+table.pf td { padding: 11px 12px; text-align: right; border-bottom: 1px solid var(--border-2); font-variant-numeric: tabular-nums; }
 table.pf th:first-child, table.pf td:first-child { text-align: left; }
 table.pf tbody tr:hover { background: var(--accent-soft); }
 table.pf tbody tr:last-child td { border-bottom: 0; }
-.pill { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+.pill { display: inline-block; padding: 3px 10px; font-size: 12px; font-weight: 700; letter-spacing: .02em; }
 .pill.good { background: var(--good-soft); color: var(--good); }
 .pill.warn { background: var(--warn-soft); color: var(--warn); }
 .pill.bad { background: var(--bad-soft); color: var(--bad); }
-.pill.neutral { background: var(--panel-2); color: var(--muted); }
+.pill.neutral { background: transparent; color: var(--muted); padding-left: 0; }
 .flag { color: var(--warn); cursor: help; font-weight: 700; }
 .empty-row td { text-align: center !important; color: var(--muted); padding: 30px !important; }
 
-details.method { margin-top: 18px; }
-details.method summary { cursor: pointer; font-weight: 600; }
-details.method p, details.method li { font-size: 13px; color: var(--muted); }
+details.method { margin-top: 40px; background: var(--panel); border-top: 3px solid var(--text); padding: 20px 28px; }
+details.method summary { cursor: pointer; font-size: 12px; letter-spacing: .16em; font-weight: 700; text-transform: uppercase; color: var(--muted); }
+details.method p, details.method li { font-size: 13.5px; color: var(--muted); line-height: 1.6; }
 footer { margin-top: 24px; color: var(--muted); font-size: 12px; text-align: center; }
-header .head-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+@media (max-width: 1100px) {
+  .grid { grid-template-columns: 1fr; }
+  .pf-top { grid-template-columns: 1fr; }
+}
+@media (max-width: 760px) {
+  .mast-inner { padding: 16px 16px 0; gap: 14px; }
+  .disclaimer > div { padding: 10px 16px; }
+  .wrap { padding: 24px 16px 40px; }
+  h1 { font-size: 22px; }
+  .brand svg { width: 30px; height: 30px; }
+  .tabs { gap: 22px; }
+  .panel { padding: 20px 18px; }
+  .report-head h2, .pf-head h2 { font-size: 32px; }
+  .summary { grid-template-columns: 1fr 1fr; row-gap: 22px; }
+  .summary > div:nth-child(3) { grid-column: 1 / -1; padding-left: 0; border-left: 0; border-top: 1px solid var(--border); padding-top: 16px; }
+  .pd-big { font-size: 58px; }
+  .badge, .ref-value { font-size: 26px; }
+  .kpis { grid-template-columns: 1fr 1fr; row-gap: 20px; }
+  .kpis .stat:nth-child(3) { border-left: 0; padding-left: 0; }
+  .kpis .stat .v { font-size: 38px; }
+  .seg-compare { grid-template-columns: 1fr; row-gap: 12px; }
+  .seg-compare .stat { border-left: 0; padding-left: 0; }
+  .scale-zones { font-size: 11.5px; flex-wrap: wrap; gap: 4px 16px; }
+  .scale-zones span { width: auto !important; }
+  .filters .count { margin-left: 0; width: 100%; }
+}
+@media (max-width: 420px) {
+  .summary > div { padding: 0 14px; }
+  .matrix th, .matrix td { padding: 9px 5px; font-size: 13px; }
+  .head-actions .mast-btn { padding: 10px 12px; }
+}
 </style>
 </head>
 <body>
+<header class="masthead">
+  <div class="mast-inner">
+    <div class="mast-row">
+      <div class="brand">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none" aria-hidden="true"><path pathLength="1" d="M1 1H39V39H1Z" stroke="#B08D57" stroke-width="1.5"/><path pathLength="1" d="M10 28V14l10 8 10-8v14" stroke="#B08D57" stroke-width="1.5"/></svg>
+        <div>
+          <h1 data-i18n="app.title">Hitelkockázat-elemző</h1>
+          <div class="sub" data-i18n="app.kicker"></div>
+        </div>
+      </div>
+      <div class="head-actions">
+        <button class="mast-btn" id="langBtn" type="button"></button>
+        <button class="mast-btn" id="themeBtn" type="button"></button>
+      </div>
+    </div>
+    <nav class="tabs" role="tablist">
+      <button class="tab" role="tab" id="tabbtn-single" aria-controls="tab-single" aria-selected="true" type="button" data-i18n="tab.single"></button>
+      <button class="tab" role="tab" id="tabbtn-portfolio" aria-controls="tab-portfolio" aria-selected="false" type="button" data-i18n="tab.portfolio"></button>
+    </nav>
+  </div>
+</header>
+<div class="disclaimer"><div id="disclaimer" data-i18n-html="disclaimer"></div></div>
+
 <div class="wrap">
-  <header>
-    <div>
-      <h1 data-i18n="app.title">Hitelkockázat-elemző</h1>
-      <div class="sub" data-i18n="app.sub"></div>
-    </div>
-    <div class="head-actions">
-      <button class="btn" id="langBtn" type="button"></button>
-      <button class="btn" id="themeBtn" type="button"></button>
-    </div>
-  </header>
-
-  <div class="disclaimer" id="disclaimer" data-i18n-html="disclaimer"></div>
-
-  <nav class="tabs" role="tablist">
-    <button class="tab" role="tab" id="tabbtn-single" aria-controls="tab-single" aria-selected="true" type="button" data-i18n="tab.single"></button>
-    <button class="tab" role="tab" id="tabbtn-portfolio" aria-controls="tab-portfolio" aria-selected="false" type="button" data-i18n="tab.portfolio"></button>
-  </nav>
-
-  <section id="tab-single" role="tabpanel">
+  <section id="tab-single" role="tabpanel" aria-labelledby="tabbtn-single">
   <div class="grid">
     <form class="panel" id="form" novalidate>
-      <h2 data-i18n="form.title"></h2>
+      <div class="form-head">
+        <span class="kicker brass" data-i18n="form.kicker"></span>
+        <h2 data-i18n="form.title"></h2>
+      </div>
       <div class="presets">
         <span data-i18n="preset.label"></span>
-        <button class="btn small" type="button" data-preset="low" data-i18n="preset.low"></button>
-        <button class="btn small" type="button" data-preset="mid" data-i18n="preset.mid"></button>
-        <button class="btn small" type="button" data-preset="high" data-i18n="preset.high"></button>
+        <button class="btn" type="button" data-preset="low" data-i18n="preset.low"></button>
+        <button class="btn" type="button" data-preset="mid" data-i18n="preset.mid"></button>
+        <button class="btn" type="button" data-preset="high" data-i18n="preset.high"></button>
       </div>
       <div id="fields"></div>
       <div class="actions">
         <button class="btn primary" type="submit" data-i18n="btn.evaluate"></button>
-        <button class="btn" type="button" id="resetBtn" data-i18n="btn.reset"></button>
+        <button class="btn link" type="button" id="resetBtn" data-i18n="btn.reset"></button>
       </div>
     </form>
 
@@ -197,26 +293,42 @@ header .head-actions { display: flex; gap: 8px; flex-wrap: wrap; }
       <div class="panel placeholder" id="placeholder" data-i18n-html="placeholder"></div>
 
       <div class="results hidden" id="results">
-        <section class="panel fade-in" id="verdictPanel">
-          <div class="panel-head">
-            <h2 data-i18n="verdict.title"></h2>
-            <button class="btn small" type="button" id="singleExportBtn" data-i18n="btn.export"></button>
-          </div>
-          <div class="verdict">
+        <section class="fade-in" id="verdictPanel">
+          <div class="report-head">
             <div>
-              <div class="pd-big" id="pdValue">–</div>
-              <div class="pd-label" data-i18n="pd.label"></div>
+              <span class="kicker brass" id="reportKicker"></span>
+              <h2 id="reportTitle"></h2>
             </div>
-            <div>
-              <span class="badge" id="decisionBadge">–</span>
-              <div id="decisionText"></div>
-            </div>
+            <button class="btn outline" type="button" id="singleExportBtn" data-i18n="btn.export"></button>
           </div>
+        </section>
+
+        <section class="summary fade-in" aria-live="polite">
+          <div>
+            <span class="kicker" data-i18n="sum.pd"></span>
+            <div class="pd-big" id="pdValue">–</div>
+            <div class="pd-label" data-i18n="pd.label"></div>
+          </div>
+          <div>
+            <span class="kicker" data-i18n="sum.dec"></span>
+            <span class="badge" id="decisionBadge">–</span>
+            <div class="sum-note" id="decisionText"></div>
+          </div>
+          <div>
+            <span class="kicker" data-i18n="sum.ref"></span>
+            <span class="ref-value" id="refValue">–</span>
+            <div class="sum-note" id="refText"></div>
+          </div>
+        </section>
+
+        <section class="scale-block fade-in">
+          <span class="kicker" data-i18n="scale.title"></span>
           <div class="scale-wrap">
             <div class="scale" id="scale"></div>
             <div class="marker" id="marker"></div>
           </div>
           <div class="scale-ticks" id="scaleTicks"></div>
+          <div class="scale-zones" id="scaleZones"></div>
         </section>
 
         <section class="panel fade-in">
@@ -226,10 +338,10 @@ header .head-actions { display: flex; gap: 8px; flex-wrap: wrap; }
           <div class="note" id="contribNote"></div>
         </section>
 
-        <section class="panel fade-in">
+        <section class="panel navy fade-in">
           <h2 data-i18n="hist.title"></h2>
           <div class="seg-compare" id="segStats"></div>
-          <div id="segText" style="margin-bottom:10px"></div>
+          <div id="segText" style="margin-bottom:12px"></div>
           <div class="heat-wrap"><table class="heat" id="heat"></table></div>
           <div class="note" data-i18n="heat.note"></div>
         </section>
@@ -238,7 +350,14 @@ header .head-actions { display: flex; gap: 8px; flex-wrap: wrap; }
   </div>
   </section>
 
-  <section id="tab-portfolio" role="tabpanel" class="hidden">
+  <section id="tab-portfolio" role="tabpanel" aria-labelledby="tabbtn-portfolio" class="hidden">
+    <div class="pf-head">
+      <div>
+        <span class="kicker brass" id="pfKicker"></span>
+        <h2 data-i18n="pf.title"></h2>
+      </div>
+      <button class="btn primary" type="button" id="pfExportBtn" data-i18n="btn.export"></button>
+    </div>
     <div class="kpis" id="pfKpis"></div>
     <div class="pf-top">
       <div class="panel">
@@ -246,16 +365,15 @@ header .head-actions { display: flex; gap: 8px; flex-wrap: wrap; }
         <div class="chart-box"><canvas id="pfChart"></canvas></div>
         <div class="note" data-i18n="pf.chart.note"></div>
       </div>
-      <div class="panel">
+      <div class="panel navy">
         <h2 data-i18n="pf.matrix.title"></h2>
         <div class="matrix-wrap"><table class="matrix" id="pfMatrix"></table></div>
         <div class="note" id="pfMatrixNote"></div>
       </div>
     </div>
-    <div class="panel">
+    <section>
       <div class="panel-head">
-        <h2 data-i18n="pf.loans.title"></h2>
-        <button class="btn primary" type="button" id="pfExportBtn" data-i18n="btn.export"></button>
+        <h3 class="kicker" style="margin:0" data-i18n="pf.loans.title"></h3>
       </div>
       <div class="filters">
         <select id="pfDecision" data-i18n-aria="pf.filter.decisionAria">
@@ -279,10 +397,10 @@ header .head-actions { display: flex; gap: 8px; flex-wrap: wrap; }
         </table>
       </div>
       <div class="note" data-i18n-html="pf.note"></div>
-    </div>
+    </section>
   </section>
 
-  <details class="method panel">
+  <details class="method">
     <summary data-i18n="method.summary"></summary>
     <div id="methodBody"></div>
   </details>
@@ -343,7 +461,16 @@ const STR = {
   hu: {
     "app.title": "Hitelkockázat-elemző",
     "app.sub": "Nemteljesítési valószínűség (PD) becslése valós, nyilvános adaton tanított logisztikus regresszióval",
-    "theme.toDark": "🌙 Sötét mód", "theme.toLight": "☀️ Világos mód", "theme.aria": "Téma váltása",
+    "theme.toDark": "Sötét mód", "theme.toLight": "Világos mód", "theme.aria": "Téma váltása",
+    "app.kicker": "Ügyfélkockázati jelentés",
+    "form.kicker": "Ügyfélprofil",
+    "report.kicker": "Kockázati összefoglaló · {date}",
+    "report.title.good": "Alacsony kockázatú kérelem", "report.title.warn": "Közepes kockázatú kérelem", "report.title.bad": "Magas kockázatú kérelem",
+    "sum.pd": "Becsült PD", "sum.dec": "Javaslat", "sum.ref": "Referenciacsoport",
+    "ref.text": "{age} év, {util} kihasználtság — {count} hitelfelvevő valós aránya",
+    "scale.title": "Kockázati skála",
+    "pf.kicker": "Minta-portfólió · {n} hitel",
+    "pf.title": "Modell-javaslat és valós kimenet",
     "lang.btn": "EN", "lang.aria": "Switch to English",
     "disclaimer": "<b>Demo / oktatási célú alkalmazás.</b> Oktatási / demo célú, egyszerűsített modell. Nem éles hitelbírálati döntéshozatalra készült. Nem minősül hitelajánlatnak vagy pénzügyi tanácsadásnak.",
     "meta.source": MODEL.meta.source_dataset,
@@ -361,7 +488,7 @@ const STR = {
     "method.summary": "Módszertan és adatforrás",
     "footer": "Adatforrás: {source} · Test AUC: {auc}",
 
-    "f.age.label": "Életkor", "f.age.hint": "év",
+    "f.age.label": "Életkor", "f.age.hint": "Betöltött életkor (18–110)",
     "f.MonthlyIncome.label": "Havi nettó jövedelem", "f.MonthlyIncome.hint": "USD / hó (az adathalmaz amerikai hitelfelvevőkből áll)",
     "f.RevolvingUtilizationOfUnsecuredLines.label": "Hitelkeret-kihasználtság", "f.RevolvingUtilizationOfUnsecuredLines.hint": "Hitelkártya- és folyószámlahitel-egyenleg a keret %-ában (pl. 35)",
     "f.DebtRatio.label": "Adósságteher-arány", "f.DebtRatio.hint": "Havi adósságszolgálat + megélhetési kiadások a havi jövedelem %-ában",
@@ -461,7 +588,16 @@ const STR = {
   en: {
     "app.title": "Credit Risk Analyzer",
     "app.sub": "Probability of default (PD) estimated by a logistic regression trained on real public credit data",
-    "theme.toDark": "🌙 Dark mode", "theme.toLight": "☀️ Light mode", "theme.aria": "Toggle theme",
+    "theme.toDark": "Dark mode", "theme.toLight": "Light mode", "theme.aria": "Toggle theme",
+    "app.kicker": "Client risk report",
+    "form.kicker": "Client profile",
+    "report.kicker": "Risk summary · {date}",
+    "report.title.good": "Low-risk application", "report.title.warn": "Medium-risk application", "report.title.bad": "High-risk application",
+    "sum.pd": "Estimated PD", "sum.dec": "Recommendation", "sum.ref": "Peer group",
+    "ref.text": "Age {age}, {util} utilization — actual rate among {count} borrowers",
+    "scale.title": "Risk scale",
+    "pf.kicker": "Sample portfolio · {n} loans",
+    "pf.title": "Model recommendation vs. actual outcome",
     "lang.btn": "HU", "lang.aria": "Váltás magyar nyelvre",
     "disclaimer": "<b>Demo / educational application.</b> A simplified model built for learning purposes, not for real credit decisions. It is not a loan offer or financial advice.",
     "meta.source": "Give Me Some Credit (Kaggle, 2011) – public educational dataset",
@@ -479,7 +615,7 @@ const STR = {
     "method.summary": "Methodology and data source",
     "footer": "Data source: {source} · Test AUC: {auc}",
 
-    "f.age.label": "Age", "f.age.hint": "years",
+    "f.age.label": "Age", "f.age.hint": "Age in full years (18–110)",
     "f.MonthlyIncome.label": "Monthly net income", "f.MonthlyIncome.hint": "USD per month (the dataset covers US borrowers)",
     "f.RevolvingUtilizationOfUnsecuredLines.label": "Credit utilization", "f.RevolvingUtilizationOfUnsecuredLines.hint": "Credit card and overdraft balance as % of the limit (e.g. 35)",
     "f.DebtRatio.label": "Debt-to-income ratio", "f.DebtRatio.hint": "Monthly debt payments + living costs as % of monthly income",
@@ -683,9 +819,12 @@ function buildForm() {
   $("fields").innerHTML = FIELDS.map(f => `
     <div class="field" id="f-${f.key}">
       <label for="in-${f.key}"></label>
-      <div class="hint"></div>
-      <input id="in-${f.key}" name="${f.key}" inputmode="decimal" autocomplete="off">
-      <div class="msg"></div>
+      <div class="hint" id="h-${f.key}"></div>
+      <div class="inwrap">
+        <input id="in-${f.key}" name="${f.key}" inputmode="decimal" autocomplete="off" aria-describedby="h-${f.key} m-${f.key}">
+        <span class="unit" aria-hidden="true"></span>
+      </div>
+      <div class="msg" id="m-${f.key}" aria-live="polite"></div>
     </div>`).join("");
 }
 function updateFormTexts() {
@@ -693,6 +832,7 @@ function updateFormTexts() {
     const el = $("f-" + f.key);
     el.querySelector("label").textContent = t(`f.${f.key}.label`);
     el.querySelector(".hint").textContent = t(`f.${f.key}.hint`);
+    el.querySelector(".unit").textContent = unitSuffix(f.unit).trim();
   }
 }
 
@@ -738,7 +878,21 @@ function readForm() {
 let chart = null;
 let lastResult = null;
 
-function render(input) {
+/* ---------- Mozgás ---------- */
+const REDUCED = matchMedia("(prefers-reduced-motion: reduce)");
+// --i sorszám a lépcsőzéshez (a késleltetést a CSS számolja)
+function stagger(nodes) { [...nodes].forEach((el, i) => el.style.setProperty("--i", i)); }
+// Újraindítja egy konténer megjelenési animációját; utána a class lekerül, a végállapot azonos
+function reveal(el, ms = 2200) {
+  if (!el) return;
+  el.classList.remove("is-revealing");
+  void el.offsetWidth;
+  el.classList.add("is-revealing");
+  clearTimeout(el._rv);
+  el._rv = setTimeout(() => el.classList.remove("is-revealing"), ms);
+}
+
+function render(input, animate = false) {
   const { pd, contrib } = score(input.model);
   const d = decide(pd);
   lastResult = { input, pd, contrib };
@@ -747,22 +901,29 @@ function render(input) {
   $("results").classList.remove("hidden");
 
   // Döntés
+  $("reportKicker").textContent = t("report.kicker", { date: new Date().toLocaleDateString(LOCALE[LANG], { year: "numeric", month: "long", day: "numeric" }) });
+  $("reportTitle").textContent = t("report.title." + d.cls);
   $("pdValue").textContent = pct(pd);
-  $("pdValue").style.color = cssVar("--" + d.cls);
+  $("pdValue").style.color = "";
   const b = $("decisionBadge");
   b.className = "badge " + d.cls;
   b.textContent = d.label;
   $("decisionText").textContent = d.text;
   const SCALE_MAX = 0.5;
-  $("marker").style.left = Math.min(pd / SCALE_MAX, 1) * 100 + "%";
+  const m = $("marker"), target = Math.min(pd / SCALE_MAX, 1) * 100 + "%";
+  if (animate && !REDUCED.matches) {
+    // a jelölő a skála elejéről csúszik a helyére
+    m.style.transition = "none"; m.style.left = "0%"; void m.offsetWidth; m.style.transition = "";
+  }
+  m.style.left = target;
 
   // Magyarázat: elsődleges tényezők (DebtRatio nélkül), hatás szerint rendezve
   const primary = contrib.filter(c => !SECONDARY_FEATURES.has(c.feature))
                          .sort((a, b) => Math.abs(b.value) - Math.abs(a.value));
-  $("factorList").innerHTML = primary.slice(0, 4).map(c => {
+  $("factorList").innerHTML = primary.slice(0, 4).map((c, i) => {
     const up = c.value > 0;
     const strength = Math.abs(c.value) > 0.5 ? "strong" : Math.abs(c.value) > 0.15 ? "moderate" : "slight";
-    return `<li><span class="arrow ${up ? "up" : "down"}">${up ? "▲" : "▼"}</span>
+    return `<li style="--i:${i}"><span class="arrow ${up ? "up" : "down"}">${up ? "▲" : "▼"}</span>
       <span>${t("factor.html", { label: esc(t("s." + c.feature)), value: esc(formatUser(c.feature, input.user[c.feature])),
         strength: t("factor." + strength), dir: t(up ? "factor.up" : "factor.down") })}</span></li>`;
   }).join("");
@@ -775,6 +936,8 @@ function render(input) {
   const seg = MODEL.segments.find(s => s.age_band === ab && s.util_band === ub);
   Object.assign(lastResult, { decision: d, seg, ab, ub });
   const overall = MODEL.meta.overall_default_rate;
+  $("refValue").textContent = seg ? pct(seg.mean) : "n/a";
+  $("refText").textContent = seg ? t("ref.text", { age: AGE_LABEL[ab], util: ub, count: nf(seg.count) }) : t("seg.none");
   $("segStats").innerHTML = `
     <div class="stat"><div class="v">${pct(pd)}</div><div class="l">${esc(t("seg.model"))}</div></div>
     <div class="stat"><div class="v">${seg ? pct(seg.mean) : "n/a"}</div><div class="l">${esc(t("seg.similar"))}</div></div>
@@ -784,6 +947,7 @@ function render(input) {
                       mult: nf(seg.mean / overall, { maximumFractionDigits: 1 }) })
     : esc(t("seg.none"));
   drawHeat(ab, ub);
+  if (animate) reveal($("results"));
 }
 
 function formatUser(key, v) {
@@ -807,7 +971,7 @@ function drawChart(items) {
     type: "bar", data,
     options: {
       indexAxis: "y", responsive: true, maintainAspectRatio: false,
-      animation: { duration: 500 },
+      animation: REDUCED.matches ? false : { duration: 900, easing: "easeOutQuart" },
       plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => `${t("chart.tooltip")}: ${ctx.raw > 0 ? "+" : ""}${nf(ctx.raw)}` } } },
       scales: {
         x: { ticks: { color: muted }, grid: { color: border } },
@@ -821,17 +985,17 @@ function drawHeat(myAge, myUtil) {
   const ages = ["<30", "30-39", "40-49", "50-59", "60+"];
   const utils = ["0-10%", "10-30%", "30-60%", "60-100%", "100%+"];
   const max = Math.max(...MODEL.segments.map(s => s.mean));
-  const dark = document.documentElement.dataset.theme === "dark";
+  const rgb = cssVar("--heat-rgb"), hi = cssVar("--heat-hi"), lo = cssVar("--heat-lo");
   let html = `<tr><th>${esc(t("heat.corner"))}</th>${utils.map(u => `<th>${u}</th>`).join("")}</tr>`;
-  for (const a of ages) {
+  for (const [r, a] of ages.entries()) {
     html += `<tr><th>${AGE_LABEL[a]}</th>`;
-    for (const u of utils) {
+    for (const [c, u] of utils.entries()) {
       const s = MODEL.segments.find(x => x.age_band === a && x.util_band === u);
       if (!s) { html += `<td>–</td>`; continue; }
-      const tt = s.mean / max;
-      const bg = `rgba(${dark ? "240,106,106" : "214,69,69"},${(0.08 + tt * 0.72).toFixed(2)})`;
+      const alpha = 0.06 + (s.mean / max) * 0.88;
+      const bg = `rgba(${rgb},${alpha.toFixed(2)})`;
       const me = a === myAge && u === myUtil ? " me" : "";
-      html += `<td class="${me.trim()}" style="background:${bg}" title="${esc(t("heat.cellTitle", { n: nf(s.count) }))}">${pct(s.mean)}</td>`;
+      html += `<td class="${me.trim()}" style="--d:${(r + c) * 28}ms;background:${bg};color:${alpha > 0.52 ? hi : lo}" title="${esc(t("heat.cellTitle", { n: nf(s.count) }))}">${pct(s.mean)}</td>`;
     }
     html += `</tr>`;
   }
@@ -841,12 +1005,13 @@ function drawHeat(myAge, myUtil) {
 function drawScale() {
   const max = 0.5;
   const zones = [
-    [0, THRESHOLDS.approve, "--good"],
-    [THRESHOLDS.approve, THRESHOLDS.reject, "--warn"],
-    [THRESHOLDS.reject, max, "--bad"]
+    [0, THRESHOLDS.approve, "--zone-good", "good", "< " + pct(THRESHOLDS.approve, 0)],
+    [THRESHOLDS.approve, THRESHOLDS.reject, "--zone-warn", "warn", pct(THRESHOLDS.approve, 0) + "–" + pct(THRESHOLDS.reject, 0)],
+    [THRESHOLDS.reject, max, "--zone-bad", "bad", "≥ " + pct(THRESHOLDS.reject, 0)]
   ];
   $("scale").innerHTML = zones.map(([a, b, c]) => `<div style="width:${(b - a) / max * 100}%;background:var(${c})"></div>`).join("");
   $("scaleTicks").innerHTML = ["0%", "10%", "20%", "30%", "40%", "50%+"].map(x => `<span>${x}</span>`).join("");
+  $("scaleZones").innerHTML = zones.map(([a, b, , k, range]) => `<span style="width:${(b - a) / max * 100}%"><b>${esc(t("dec.short." + k))}</b> · ${esc(range)}</span>`).join("");
 }
 
 /* ---------- Minta-portfólió ---------- */
@@ -981,7 +1146,7 @@ function drawPfChart(s) {
       ]
     },
     options: {
-      responsive: true, maintainAspectRatio: false, animation: { duration: 500 },
+      responsive: true, maintainAspectRatio: false, animation: REDUCED.matches ? false : { duration: 900, easing: "easeOutQuart" },
       plugins: {
         legend: { labels: { color: muted, boxWidth: 12 } },
         tooltip: { callbacks: { label: ctx => ctx.dataset.yAxisID === "y1" ? ` ${ctx.dataset.label}: ${nf(ctx.raw)}%` : ` ${ctx.dataset.label}: ${ctx.raw}` } }
@@ -1189,7 +1354,8 @@ function showTab(name) {
     $("tabbtn-" + x).setAttribute("aria-selected", String(x === name));
   }
   // A Chart.js rejtett canvasra 0 méretben rajzolna, ezért megjelenéskor rajzolunk
-  if (name === "portfolio") renderPortfolio();
+  if (name === "portfolio") { renderPortfolio(); stagger($("pfKpis").children); }
+  reveal($("tab-" + name));
   try { localStorage.setItem("hk-tab", name); } catch (e) {}
 }
 
@@ -1219,6 +1385,8 @@ function applyStaticTexts() {
   $("langBtn").setAttribute("lang", LANG === "hu" ? "en" : "hu");
   updateThemeBtn();
   updateFormTexts();
+  drawScale();
+  $("pfKicker").textContent = t("pf.kicker", { n: PORTFOLIO.length });
   const m = MODEL.meta;
   $("footer").textContent = t("footer", { source: t("meta.source"), auc: nf(m.test_auc) });
   $("methodBody").innerHTML = t("method.html", {
@@ -1262,7 +1430,14 @@ function initialLang() {
 
 /* ---------- Indítás ---------- */
 function init() {
+  document.documentElement.classList.add("first-load");
+  setTimeout(() => document.documentElement.classList.remove("first-load"), 2500);
   buildForm();
+  stagger($("fields").children);
+  stagger(document.querySelectorAll("#tab-single .grid > *"));
+  stagger($("results").children);
+  stagger(document.querySelectorAll("#tab-portfolio > :not(.kpis)"));
+  if (typeof Chart !== "undefined") Chart.defaults.font.family = '"Instrument Sans", system-ui, sans-serif';
   drawScale();
   LANG = initialLang();
   applyStaticTexts();
@@ -1277,7 +1452,7 @@ function init() {
     e.preventDefault();
     try {
       const input = readForm();
-      if (input) render(input);
+      if (input) render(input, true);
     } catch (err) {
       console.error(err);
       alert(t("err.unexpected"));
