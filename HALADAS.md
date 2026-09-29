@@ -91,3 +91,9 @@ Opcionális v1.1: `income_missing` változó és `train_caps` export a tréning-
 - Betűtípus: **Instrument Serif + Instrument Sans** (négy pár közül választva a canvason: Cormorant/Manrope, Instrument, Newsreader/Public Sans, Geist).
 - Mozgás: finom, egységes rendszer; oldalbetöltéskor is (logó kirajzolódás, fejléc, űrlap, mezők lépcsőzve), kiértékeléskor (jelentésblokkok, címsor alatti vonal, skálajelölő, tényezők, hőtérkép), fülváltáskor (portfólió KPI-k). Csökkentett mozgás beállítás tiszteletben tartva.
 - Regresszió: 96/96 teszt, mobil 375 px rendben (TESZT_NAPLO 11. pont).
+
+**Asztali alkalmazás — KÉSZ (2026-09-29):**
+- `Telepites.cmd`: parancsikon az Asztalon és a Start menüben, saját ikonnal; saját ablakban nyílik (Edge alkalmazás mód), internet és szerver nélkül. `Eltavolitas.cmd` törli a parancsikonokat.
+- Minden függőség helyben (`vendor/`), licencekkel; az élő oldal telepíthető alkalmazásként (manifest + ikonok).
+- Egyszerű indítás szerverrel: `Inditas.cmd` / `Tesztek_futtatasa.cmd`.
+- Regresszió: 96/96 offline (`file://`) és HTTP-n is (TESZT_NAPLO 12. pont).

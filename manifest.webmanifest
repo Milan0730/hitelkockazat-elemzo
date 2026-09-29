@@ -1,0 +1,16 @@
+{
+  "name": "Hitelkockázat-elemző",
+  "short_name": "Hitelkockázat",
+  "description": "PD-becslés, magyarázat és minta-portfólió — oktatási célú hitelkockázati modell.",
+  "lang": "hu",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#F5F1E9",
+  "theme_color": "#0E1B2C",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

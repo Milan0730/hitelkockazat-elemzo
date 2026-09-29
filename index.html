@@ -4,11 +4,20 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Hitelkockázat-elemző</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Instrument+Sans:wght@400;500;600;700&display=swap">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+<!-- Minden függőség helyben (vendor/), így az app internet nélkül, asztali alkalmazásként is fut -->
+<link rel="stylesheet" href="vendor/fonts/fonts.css">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="theme-color" content="#0E1B2C">
+<script>
+  // A manifest csak http(s) alatt értelmezett; file:// (asztali indítás) alatt kihagyjuk, hogy ne legyen konzolhiba
+  if (location.protocol !== "file:") {
+    document.head.insertAdjacentHTML("beforeend", '<link rel="manifest" href="manifest.webmanifest">');
+  }
+</script>
+<script src="vendor/chart.umd.min.js"></script>
+<script src="vendor/xlsx.bundle.js"></script>
 <style>
 :root {
   --bg: #F5F1E9; --panel: #FFFFFF; --panel-2: #FBF9F5; --border: #D8CFBF; --border-2: #E6DECF;

@@ -1,0 +1,9 @@
+/* Instrument Serif / Instrument Sans — SIL Open Font License 1.1 (vendor/licenses).
+   Helyben tárolva, hogy az app internet nélkül is ugyanígy nézzen ki.
+   Latin + Latin Extended-A (magyar ő, ű) részhalmaz. */
+@font-face { font-family: "Instrument Sans"; font-style: normal; font-weight: 400; font-display: swap; src: url("InstrumentSans-400.woff") format("woff"); }
+@font-face { font-family: "Instrument Sans"; font-style: normal; font-weight: 500; font-display: swap; src: url("InstrumentSans-500.woff") format("woff"); }
+@font-face { font-family: "Instrument Sans"; font-style: normal; font-weight: 600; font-display: swap; src: url("InstrumentSans-600.woff") format("woff"); }
+@font-face { font-family: "Instrument Sans"; font-style: normal; font-weight: 700; font-display: swap; src: url("InstrumentSans-700.woff") format("woff"); }
+@font-face { font-family: "Instrument Serif"; font-style: normal; font-weight: 400; font-display: swap; src: url("InstrumentSerif-400.woff") format("woff"); }
+@font-face { font-family: "Instrument Serif"; font-style: italic; font-weight: 400; font-display: swap; src: url("InstrumentSerif-400-italic.woff") format("woff"); }

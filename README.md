@@ -47,7 +47,9 @@ This project is also a case study in **systematic AI-agent testing**: it was bui
 
 ## Run locally
 
-**Windows, easiest:** double-click **`Inditas.cmd`**. It starts a tiny local server (built-in PowerShell, no Python/Node needed) and opens the app in your browser. **`Tesztek_futtatasa.cmd`** does the same but opens the automated test suite. Close the console window to stop the server. If port 8080 is busy, the next free port is used.
+**Windows desktop app (recommended):** double-click **`Telepites.cmd`** once. It creates a *Hitelkockázat-elemző* shortcut with its own icon on the Desktop and in the Start menu. The shortcut opens the app in Microsoft Edge's app mode (Chrome as fallback): its own window, no address bar or browser UI, and **no internet or server needed**. All dependencies (Chart.js, xlsx-js-style, the Instrument fonts) ship in `vendor/`. Nothing is installed system-wide; `Eltavolitas.cmd` removes the two shortcuts.
+
+**Local server:** double-click **`Inditas.cmd`** (app) or **`Tesztek_futtatasa.cmd`** (automated test suite). It starts a tiny built-in PowerShell server and opens the browser. Close the console window to stop it. If port 8080 is busy, the next free port is used.
 
 Manually:
 
@@ -57,7 +59,9 @@ powershell -ExecutionPolicy Bypass -File serve.ps1 -Open -Test    # automated te
 # or, anywhere: python -m http.server 8080  → http://localhost:8080/?selftest
 ```
 
-`index.html` also opens directly from disk; only the test suite needs HTTP. Internet access is needed for the web fonts and the Chart.js / xlsx-js-style CDNs.
+`index.html` also works opened straight from disk, including `?selftest`. On the live site, Edge and Chrome offer to install it as an app (web manifest + icons).
+
+Third-party licenses: [`vendor/licenses/`](vendor/licenses/) (Chart.js: MIT, xlsx-js-style: Apache-2.0, Instrument Serif / Sans: SIL OFL 1.1).
 
 ## Reproduce the model
 

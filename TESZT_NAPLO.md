@@ -108,3 +108,19 @@ Nem hibajavítás: Cormorant Garamond / Manrope helyett **Instrument Serif / Ins
   - 375 px: nincs vízszintes túlcsúszás;
   - képkockák betöltés közben (150 / 450 / 900 ms) és kiértékelés közben (200 / 550 ms);
   - végállapot-ellenőrzés világos és sötét módban, mindkét fülön: minden látható elem `opacity: 1`, nincs maradék eltolás, nincs bennragadt `is-revealing` osztály, a jelölő 30%-on áll.
+
+## 12. Asztali alkalmazás és offline működés (M4, 2026-09-29)
+
+Cél: az app parancsikonnal, saját ablakban, weboldal és internet nélkül is fusson.
+
+- **Megoldás**: Microsoft Edge „alkalmazás mód” (`--app=file:///…/index.html`) parancsikonnal (Asztal + Start menü, saját ikon). Egy Electron-csomag 100+ MB és külön frissítést igényelne, ez viszont csak két `.lnk` fájl, és nem ír a rendszerbe.
+- **Függőségek helyben**: Chart.js 4.4.1 és xlsx-js-style 1.2.0 (bájtra azonos a korábbi CDN-verzióval), az Instrument betűk WOFF-ban, Latin + Latin Extended-A részhalmazzal (ő, ű), licencekkel (`vendor/licenses/`). Az `index.html` már semmilyen külső címet nem tölt.
+- **Talált hibák a telepítő írása közben**:
+  - Ha a `ProgramFiles(x86)` környezeti változó üres (pl. 32 bites Windows), a `Join-Path` kivételt dobott → az üres helyek kimaradnak.
+  - `$args` a PowerShell foglalt automatikus változója → átnevezve `$appArgs`-ra.
+  - A manifest `file://` alatt konzolhibát okozna (CORS) → csak http(s) alatt kerül be.
+- **Ellenőrzés**:
+  - Chromium `--app` módban, `file://`-ból, **minden hálózati kérés tiltva**: 0 hálózati kérés; a betűk betöltődnek, a Chart.js és az XLSX elérhető, a kiértékelés és a diagram működik, az Excel-export letölt; a teljes tesztcsomag **96/96**, konzolhiba nincs.
+  - HTTP-n (tesztharness) is 96/96.
+  - `install.ps1`: PowerShell 7.4 szintaxis-ellenőrzés; dry-run böngésző nélkül (érthető hibaüzenet) és álböngészővel (helyes útvonalak). A Windows-útvonal → `file:///` URL átalakítás ékezetes, szóközös útvonallal is helyes.
+  - **Nem ellenőrizhető itt**: a `.lnk` tényleges létrehozása (WScript.Shell COM csak Windows alatt létezik) → első futtatás a saját gépen.
