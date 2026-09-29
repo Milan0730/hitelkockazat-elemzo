@@ -47,15 +47,17 @@ This project is also a case study in **systematic AI-agent testing**: it was bui
 
 ## Run locally
 
-Open `index.html` directly in a browser (internet access is needed for the Chart.js and xlsx-js-style CDNs).
+**Windows, easiest:** double-click **`Inditas.cmd`**. It starts a tiny local server (built-in PowerShell, no Python/Node needed) and opens the app in your browser. **`Tesztek_futtatasa.cmd`** does the same but opens the automated test suite. Close the console window to stop the server. If port 8080 is busy, the next free port is used.
 
-To run the automated tests, serve the folder over HTTP:
+Manually:
 
 ```powershell
-powershell -ExecutionPolicy Bypass -File serve.ps1   # or: python -m http.server 8080
+powershell -ExecutionPolicy Bypass -File serve.ps1 -Open          # app
+powershell -ExecutionPolicy Bypass -File serve.ps1 -Open -Test    # automated tests (?selftest)
+# or, anywhere: python -m http.server 8080  → http://localhost:8080/?selftest
 ```
 
-Then open `http://localhost:8080/?selftest`.
+`index.html` also opens directly from disk; only the test suite needs HTTP. Internet access is needed for the web fonts and the Chart.js / xlsx-js-style CDNs.
 
 ## Reproduce the model
 
